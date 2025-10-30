@@ -50,6 +50,8 @@ android {
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.play.services.maps)
+    implementation("com.google.maps.android:maps-compose:6.12.1")
+    implementation("com.google.maps.android:maps-compose-utils:6.12.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
