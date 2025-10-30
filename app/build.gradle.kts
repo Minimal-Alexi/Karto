@@ -2,7 +2,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.secrets.gradle.plugin)
 }
+
+secrets {
+
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "local.properties"
+}
+
 
 android {
     namespace = "com.example.mapapp"
@@ -40,9 +48,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat)
+    implementation(libs.play.services.maps)
     implementation("com.google.maps.android:maps-compose:6.12.1")
     implementation("com.google.maps.android:maps-compose-utils:6.12.1")
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
