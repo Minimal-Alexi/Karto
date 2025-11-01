@@ -16,7 +16,7 @@ import com.example.mapapp.ui.screens.SavedScreen
 import com.example.mapapp.ui.screens.SettingsScreen
 
 @Composable
-fun NavGraph(innerPadding: PaddingValues) {
+fun NavGraph() {
     val navController = rememberNavController()
 
     Scaffold(

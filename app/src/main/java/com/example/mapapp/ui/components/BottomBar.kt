@@ -33,7 +33,7 @@ fun BottomBar(navController: NavController) {
                     }
                 },
                 label = { Text(screen.replaceFirstChar { it.uppercase() }) },
-                icon = { Icon(painter = painterResource(id = iconRes), contentDescription = null) }
+                icon = { Icon(painter = painterResource(id = iconRes), contentDescription = screen.replaceFirstChar { it.uppercase() }) }
             )
         }
     }
