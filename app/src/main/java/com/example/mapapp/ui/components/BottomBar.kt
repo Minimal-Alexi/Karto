@@ -23,7 +23,15 @@ fun BottomBar(navController: NavController) {
         items.forEach { (screen, iconRes) ->
             NavigationBarItem(
                 selected = currentRoute == screen,
-                onClick = { navController.navigate(screen) },
+                onClick = {
+                    navController.navigate(screen) {
+                        launchSingleTop = true
+                        restoreState = true
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                    }
+                },
                 label = { Text(screen.replaceFirstChar { it.uppercase() }) },
                 icon = { Icon(painter = painterResource(id = iconRes), contentDescription = null) }
             )
