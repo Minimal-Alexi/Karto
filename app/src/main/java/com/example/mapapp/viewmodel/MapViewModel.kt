@@ -1,11 +1,10 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
-import android.location.Location
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mapapp.model.location.DefaultLocationClient
-import com.example.mapapp.model.location.LocationClient
+import com.example.mapapp.data.location.DefaultLocationClient
+import com.example.mapapp.data.location.LocationClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
