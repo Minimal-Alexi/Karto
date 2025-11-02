@@ -39,7 +39,6 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             locationClient.getLocationUpdates(10000L)
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude,location.longitude)
-                    getNearbyPlaces()
                 }
         }
     }
