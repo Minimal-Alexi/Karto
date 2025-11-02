@@ -1,18 +1,23 @@
 package com.example.mapapp.data.model
 
+
 data class RoutesRequest (
-    val origin: Location,
-    val destination: Location,
-    val travelMode: String = "WALK",
+    val origin: RouteLocation,
+    val destination: RouteLocation,
+    val travelMode: String = "DRIVE",
 )
 
-data class Location(
-    val latLng: LatLng,
+data class RouteLocation(
+    val location: LatLngLiteral,
 )
 
-data class LatLng(
+data class LatLngLiteral(
+    val latLng: RouteLatLng,
+)
+
+data class RouteLatLng(
     val latitude: Double,
-    val longitude: Double,
+    val longitude: Double
 )
 
 data class RoutesResponse(

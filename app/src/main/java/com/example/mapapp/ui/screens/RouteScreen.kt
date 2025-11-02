@@ -14,5 +14,6 @@ fun RouteScreen() {
         contentAlignment = Alignment.Center
     ) {
         Text(text = "Hello Route Screen!", fontSize = 20.sp)
+        MapScreen()
     }
 }

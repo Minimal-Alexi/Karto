@@ -3,6 +3,7 @@ package com.example.mapapp.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,8 +14,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.viewmodel.MapViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng as GmsLatLng
+import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
@@ -41,6 +45,16 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
     val espoo = LatLng(60.2055, 24.6559)
 
     val polylinePoints = listOf(helsinki, espoo)
+
+    val polyline = mapViewModel.routePolyline.collectAsState()
+
+
+    val origin = com.example.mapapp.data.model.RouteLatLng(37.7749, -122.4194)
+    val destination = com.example.mapapp.data.model.RouteLatLng(34.0522, -118.2437)
+
+    LaunchedEffect(Unit) {
+        mapViewModel.fetchRoute("AIzaSyARe2YPIWAPvM3S3lhZwhWeBVKhizK2q3s", origin, destination)
+    }
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -71,6 +85,26 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 color = Color.Blue,
                 width = 10f
             )
+
+            polyline.value?.let { encoded ->
+                val path = PolyUtil.decode(encoded)
+                Polyline(
+                    points = path,
+                    color = Color.Blue,
+                    width = 8f
+                )
+            }
+
+            Marker(
+                state = MarkerState(GmsLatLng(origin.latitude, origin.longitude)),
+                title = "Origin"
+            )
+
+            Marker(
+                state = MarkerState(GmsLatLng(destination.latitude, destination.longitude)),
+                title = "Destination"
+            )
+
         }
     }
 }
