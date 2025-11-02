@@ -11,7 +11,7 @@ interface RoutesApiService {
     @POST("directions/v2:computeRoutes")
     suspend fun computeRoutes(
         @Body request: RoutesRequest,
-        @Header("X-Goog-Api-Key") apiKey: String,
-        @Header("X-Goog-FieldMask") fieldMask: String
+        @Header("X-Goog-Api-Key") apiKey: String = "",
+        @Header("X-Goog-FieldMask") fieldMask: String = "",
     ): RoutesResponse
 }

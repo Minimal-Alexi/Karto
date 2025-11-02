@@ -1,7 +1,6 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.model.LatLngLiteral
@@ -44,14 +43,14 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    fun fetchRoute(apiKey: String, origin: RouteLatLng, destination: RouteLatLng) {
+    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng) {
         viewModelScope.launch {
             try {
                 val request = RoutesRequest(
                     origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
                     destination = RouteLocation(location = LatLngLiteral(latLng = destination))
                 )
-                val response = RoutesApi.service.computeRoutes(request, apiKey, "routes.polyline.encodedPolyline")
+                val response = RoutesApi.service.computeRoutes(request, fieldMask = "routes.polyline.encodedPolyline")
                 val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
                 _routePolyline.value = polyline
             } catch (e: Exception) {

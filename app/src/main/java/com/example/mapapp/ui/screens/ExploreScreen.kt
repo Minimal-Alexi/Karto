@@ -53,7 +53,7 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
     val destination = com.example.mapapp.data.model.RouteLatLng(34.0522, -118.2437)
 
     LaunchedEffect(Unit) {
-        mapViewModel.fetchRoute("AIzaSyARe2YPIWAPvM3S3lhZwhWeBVKhizK2q3s", origin, destination)
+        mapViewModel.fetchRoute(origin, destination)
     }
 
 
