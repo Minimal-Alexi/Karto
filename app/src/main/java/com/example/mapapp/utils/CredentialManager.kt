@@ -11,7 +11,5 @@ class CredentialManager : Application() {
             .getApplicationInfo(packageName, PackageManager.GET_META_DATA)
         val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
         SecretsHolder.init(apiKey)
-        Log.d("MyApplication", "Loaded API key: $apiKey")
-
     }
 }
