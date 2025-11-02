@@ -9,7 +9,7 @@ import retrofit2.http.POST
 interface PlacesApiService {
     @Headers("Content-Type: application/json")
     @POST("/v1/places:searchNearby")
-    suspend fun computeRoutes(
+    suspend fun getNearbyPlaces(
         @Body request: PlacesRequest,
         @Header("X-Goog-Api-Key") apiKey: String,
         @Header("X-Goog-FieldMask") fieldMask: String
