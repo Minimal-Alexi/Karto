@@ -11,7 +11,7 @@ import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.PlacesRequest
 import com.example.mapapp.data.network.PlacesApi
-import com.example.mapapp.utils.CredentialManager
+import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
@@ -39,9 +39,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             locationClient.getLocationUpdates(10000L)
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude,location.longitude)
+                    getNearbyPlaces()
                 }
         }
-        getNearbyPlaces()
     }
     fun getNearbyPlaces(){
         viewModelScope.launch {
@@ -57,9 +57,15 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                             )
                         )
                     )
-                    val response = PlacesApi.service.getNearbyPlaces(placeRequest,"TEMP" /*TODO*/,"places.displayName")
-                    _nearbyPlaces.value = response.places
-                    Log.d(null,_nearbyPlaces.value.toString())
+                    val apiKey = SecretsHolder.apiKey
+                    if(apiKey!= null){
+                        val response = PlacesApi.service.getNearbyPlaces(placeRequest,apiKey,"places.displayName")
+                        _nearbyPlaces.value = response.places
+                        Log.d(null,"PLACES: " + _nearbyPlaces.value.toString())
+                    }
+                    else{
+                        Log.w(null,"No API key provided, how is this even working?")
+                    }
                 }
             }catch(e:Exception){
                 e.printStackTrace()
