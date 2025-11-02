@@ -9,12 +9,12 @@ import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Center
 import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
+import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.model.Place
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -59,7 +59,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     )
                     val apiKey = SecretsHolder.apiKey
                     if(apiKey!= null){
-                        val response = PlacesApi.service.getNearbyPlaces(placeRequest,apiKey,"places.displayName")
+                        val response = PlacesApi.service.getNearbyPlaces(placeRequest,apiKey,"places.displayName,places.location")
                         _nearbyPlaces.value = response.places
                         Log.d(null,"PLACES: " + _nearbyPlaces.value.toString())
                     }
