@@ -1,4 +1,4 @@
-package com.example.mapapp.model.location
+package com.example.mapapp.utils
 
 import android.Manifest
 import android.content.Context
