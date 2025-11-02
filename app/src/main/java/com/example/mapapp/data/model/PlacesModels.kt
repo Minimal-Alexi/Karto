@@ -1,5 +1,7 @@
 package com.example.mapapp.data.model
 
+import com.google.android.gms.maps.model.LatLng
+
 data class PlacesRequest(
     val maxResultCount:Int = 10,
     val locationRestriction: LocationRestriction
@@ -11,7 +13,7 @@ data class PlacesResponse(
 
 data class Place(
     val displayName:DisplayName,
-    val location:LatLng
+    val location: LatLng
 )
 
 data class DisplayName(
