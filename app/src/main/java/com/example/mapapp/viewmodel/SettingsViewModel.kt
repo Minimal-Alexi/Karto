@@ -24,28 +24,15 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private val _uiState = MutableStateFlow(SettingsUIState())
     val uiState: StateFlow<SettingsUIState> = _uiState
 
-    fun updateFirstName(name: String) {
+
+    fun updateName(firstName: String, lastName : String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(firstName = name)
+            _uiState.value = _uiState.value.copy(firstName = firstName, lastName = lastName)
 
             val currentUser = repository.getUser().first()
 
-            if (currentUser !== null) {
-                repository.upsertUser(currentUser.copy(firstName = name))
-            } else {
-                createNew()
-            }
-        }
-    }
-
-    fun updateLastName(name: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(lastName = name)
-
-            val currentUser = repository.getUser().first()
-
-            if (currentUser !== null) {
-                repository.upsertUser(currentUser.copy(lastName = name))
+            if (currentUser != null) {
+                repository.upsertUser(currentUser.copy(firstName = firstName, lastName = lastName))
             } else {
                 createNew()
             }
