@@ -1,6 +1,10 @@
 package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -20,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.mapapp.ui.components.SavedRouteCard
 import com.example.mapapp.viewmodel.SettingsViewModel
 import com.example.mapapp.viewmodel.ThemeViewModel
 
@@ -32,9 +38,11 @@ fun SettingsScreen() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp, 0.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
             Profile()
             Settings()
             RouteHistory()
@@ -61,13 +69,15 @@ fun Profile() {
     OutlinedTextField(
         value = firstName,
         onValueChange = { firstName = it }, singleLine = true,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("First Name") }
     )
 
     OutlinedTextField(
         value = lastName,
         onValueChange = { lastName = it }, singleLine = true,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text("Last Name") }
     )
 
     Button(
@@ -100,25 +110,33 @@ fun DarkModeSwitch() {
     val themeVM = viewModel<ThemeViewModel>()
     val isDarkTheme by themeVM.isDarkTheme.collectAsState()
 
-    var checked = isDarkTheme
-
     Switch(
-        checked = checked,
-        onCheckedChange = {
-            checked = it
-            themeVM.setTheme(checked)
+        checked = isDarkTheme,
+        onCheckedChange = { isChecked ->
+            themeVM.setTheme(isChecked)
         }
     )
 }
 
-
 @Composable
 fun RouteHistory() {
-    Row(horizontalArrangement = Arrangement.Center) {
-        Text("History", style = MaterialTheme.typography.titleLarge)
+    val routes = listOf("route 1", "route 2", "route 3") // this will fetch last 3 from user later
+
+    Row {
+        Text(
+            "History", style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(4.dp)
+        )
         Spacer(modifier = Modifier.weight(1f))
-        TextButton(onClick = {}) {
+        TextButton(onClick = {}, modifier = Modifier.padding(0.dp)) {
             Text("View All")
         }
+    }
+
+    Column {
+        SavedRouteCard(routes[0])
+        SavedRouteCard(routes[1])
+        SavedRouteCard(routes[2])
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
