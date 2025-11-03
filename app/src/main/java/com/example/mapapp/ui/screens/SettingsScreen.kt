@@ -2,6 +2,7 @@ package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.viewmodel.SettingsViewModel
+import com.example.mapapp.viewmodel.ThemeViewModel
 
 @Composable
 fun SettingsScreen() {
@@ -24,12 +26,10 @@ fun SettingsScreen() {
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var darkThemePreferred by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
         firstName = uiState.firstName ?: ""
         lastName = uiState.lastName ?: ""
-        darkThemePreferred = uiState.darkThemePreferred
     }
 
     Box(
@@ -38,11 +38,32 @@ fun SettingsScreen() {
     ) {
         Column {
             Text(text = firstName, fontSize = 20.sp)
-            Text(text = lastName, fontSize = 20.sp)
-
-            Button(onClick = { vm.updateFirstName("test ${System.currentTimeMillis()}") }) {
-            Text("first name update")
+            Button(onClick = { vm.updateFirstName("First${System.currentTimeMillis()}") }) {
+                Text("first name update")
             }
+
+            Text(text = lastName, fontSize = 20.sp)
+            Button(onClick = { vm.updateLastName("Last${System.currentTimeMillis()}") }) {
+                Text("last name update")
+            }
+
+            DarkModeSwitch()
         }
     }
+}
+
+@Composable
+fun DarkModeSwitch() {
+    val themeVM = viewModel<ThemeViewModel>()
+    val isDarkTheme by themeVM.isDarkTheme.collectAsState()
+
+    var checked = isDarkTheme
+
+    Switch(
+        checked = checked,
+        onCheckedChange = {
+            checked = it
+            themeVM.setTheme(checked)
+        }
+    )
 }
