@@ -13,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.navigation.NavGraph
 import com.example.mapapp.ui.theme.MapAppTheme
+import com.google.android.libraries.places.api.Places
 import com.example.mapapp.viewmodel.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
@@ -26,6 +27,9 @@ class MainActivity : ComponentActivity() {
             ),
             0
         )
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        }
         enableEdgeToEdge()
         setContent {
             AppWrapper()
