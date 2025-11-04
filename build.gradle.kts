@@ -4,4 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.secrets.gradle.plugin) apply false
+
+    id("com.google.devtools.ksp") version "2.2.21-2.0.4" apply false
+
 }
