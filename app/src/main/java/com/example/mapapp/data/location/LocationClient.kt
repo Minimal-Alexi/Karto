@@ -1,4 +1,4 @@
-package com.example.mapapp.model.location
+package com.example.mapapp.data.location
 
 import android.location.Location
 import kotlinx.coroutines.flow.Flow

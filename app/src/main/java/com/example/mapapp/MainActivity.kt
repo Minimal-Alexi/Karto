@@ -5,10 +5,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.navigation.NavGraph
 import com.example.mapapp.ui.theme.MapAppTheme
 import com.google.android.libraries.places.api.Places
+import com.example.mapapp.viewmodel.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,9 +32,20 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            MapAppTheme {
-                NavGraph()
-            }
+            AppWrapper()
         }
+    }
+}
+
+@Composable
+fun AppWrapper() {
+    val application = LocalContext.current.applicationContext as KartoApplication
+    val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModel.Factory(application))
+    val useDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+
+    MapAppTheme(
+        darkTheme = useDarkTheme
+    ) {
+        NavGraph()
     }
 }

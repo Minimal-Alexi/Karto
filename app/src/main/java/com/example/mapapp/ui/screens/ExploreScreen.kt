@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -56,6 +57,7 @@ fun ExploreScreen() {
 fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
 
     val userLocation = mapViewModel.userLocation.collectAsState()
+    val nearbyLocations = mapViewModel.nearbyPlaces.collectAsState()
     val helsinki = LatLng(60.1699, 24.9384)
 
     val polyline = mapViewModel.routePolyline.collectAsState()
@@ -152,6 +154,14 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     snippet = "Your current location"
                 )
             }
+            if(nearbyLocations.value != null){
+                for(place in nearbyLocations.value){
+                    Marker(
+                        state = rememberUpdatedMarkerState(position = place.location),
+                        title = place.displayName.text,
+                    )
+                }
+            }
             Marker(
                 state = rememberUpdatedMarkerState(position = helsinki),
                 title = "Helsinki",
@@ -185,6 +195,9 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     title = "Destination"
                 )
             }
+        }
+        Button(onClick = { mapViewModel.getNearbyPlaces() }) {
+            Text("Check nearby locations.")
         }
     }
 }
