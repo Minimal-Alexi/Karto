@@ -104,14 +104,14 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     .fillMaxWidth()
                     .clickable {
                         val placeId = prediction.placeId
-                        val placeFields = listOf(Place.Field.LAT_LNG, Place.Field.NAME)
+                        val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
                         val request = FetchPlaceRequest.newInstance(placeId, placeFields)
 
                         placesClient.fetchPlace(request)
                             .addOnSuccessListener { response ->
                                 val place = response.place
-                                destinationLatLng = com.example.mapapp.data.model.RouteLatLng(place.latLng!!.latitude, place.latLng!!.longitude)
-                                destination = com.example.mapapp.data.model.RouteLatLng(place.latLng!!.latitude, place.latLng!!.longitude)
+                                destinationLatLng = com.example.mapapp.data.model.RouteLatLng(place.location!!.latitude, place.location!!.longitude)
+                                destination = com.example.mapapp.data.model.RouteLatLng(place.location!!.latitude, place.location!!.longitude)
                             }
 
                     }

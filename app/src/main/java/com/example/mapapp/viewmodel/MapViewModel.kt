@@ -8,11 +8,7 @@ import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.data.model.RouteLocation
 import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.network.RoutesApi
-import com.example.mapapp.model.location.DefaultLocationClient
-import com.example.mapapp.model.location.LocationClient
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Center
@@ -70,16 +66,22 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
                     destination = RouteLocation(location = LatLngLiteral(latLng = destination))
                 )
-                val response = RoutesApi.service.computeRoutes(request, fieldMask = "routes.polyline.encodedPolyline")
+                val response = RoutesApi.service.computeRoutes(
+                    request,
+                    fieldMask = "routes.polyline.encodedPolyline"
+                )
                 val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
                 _routePolyline.value = polyline
             } catch (e: Exception) {
                 e.printStackTrace()
                 _routePolyline.value = null
-    fun getNearbyPlaces(){
+            }
+        }
+    }
+    fun getNearbyPlaces() {
         viewModelScope.launch {
-            try{
-                if(_userLocation.value != null){
+            try {
+                if (_userLocation.value != null) {
                     val placeRequest = PlacesRequest(
                         locationRestriction = LocationRestriction(
                             Circle(
@@ -91,16 +93,19 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     )
                     val apiKey = SecretsHolder.apiKey
-                    if(apiKey!= null){
-                        val response = PlacesApi.service.getNearbyPlaces(placeRequest,apiKey,"places.displayName,places.location")
+                    if (apiKey != null) {
+                        val response = PlacesApi.service.getNearbyPlaces(
+                            placeRequest,
+                            apiKey,
+                            "places.displayName,places.location"
+                        )
                         _nearbyPlaces.value = response.places
-                        Log.d(null,"PLACES: " + _nearbyPlaces.value.toString())
-                    }
-                    else{
-                        Log.w(null,"No API key provided, how is this even working?")
+                        Log.d(null, "PLACES: " + _nearbyPlaces.value.toString())
+                    } else {
+                        Log.w(null, "No API key provided, how is this even working?")
                     }
                 }
-            }catch(e:Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
