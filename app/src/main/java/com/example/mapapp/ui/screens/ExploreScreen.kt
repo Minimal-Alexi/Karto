@@ -1,5 +1,7 @@
 package com.example.mapapp.ui.screens
 
+import android.R.attr.onClick
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,75 +64,118 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
 
     val polyline = mapViewModel.routePolyline.collectAsState()
 
-    var origin = com.example.mapapp.data.model.RouteLatLng(60.1699, 24.9384)
-    var destination = com.example.mapapp.data.model.RouteLatLng(60.2055, 24.6559)
-
-    LaunchedEffect(Unit) {
-        mapViewModel.fetchRoute(origin, destination)
-    }
-
     /**
-
+     * Code of route polyline is below
      */
     val context = LocalContext.current
     val placesClient = remember { Places.createClient(context) }
     val placeViewModel = remember { PlaceViewModel(placesClient) }
 
-    var query by remember { mutableStateOf("") }
-    val predictions by placeViewModel.predictions.collectAsState()
+    var originText by remember { mutableStateOf("") }
+    var destinationText by remember { mutableStateOf("") }
+    val originPredictions by placeViewModel.originPredictions.collectAsState()
+    val destinationPredictions by placeViewModel.destinationPredictions.collectAsState()
 
-    var originLatLng by remember { mutableStateOf<com.example.mapapp.data.model.RouteLatLng?>(null) }
-    var destinationLatLng by remember {
-        mutableStateOf<com.example.mapapp.data.model.RouteLatLng?>(
-            null
-        )
+    var origin by remember { mutableStateOf(RouteLatLng(60.1699, 24.9384)) }
+    var destination by remember {
+        mutableStateOf(RouteLatLng(0.0, 0.0))
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = {
-                query = it
-                if (it.length > 2) placeViewModel.searchPlaces(it)
-            },
-            label = { Text("Search Places") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        predictions.forEach { prediction ->
-            Text(
-                text = prediction.getFullText(null).toString(),
-                modifier = Modifier
-                    .fillMaxWidth()
+        Column {
+            OutlinedTextField(
+                value = originText,
+                onValueChange = {
+                    placeViewModel.clearPredictionsForDestination()
+                    originText = it
+                    if (it.length > 2) placeViewModel.searchPlacesForOrigin(it)
+                },
+                label = { Text("Origin") },
+                modifier = Modifier.fillMaxWidth()
                     .clickable {
-                        val placeId = prediction.placeId
-                        val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
-                        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-                        placesClient.fetchPlace(request)
-                            .addOnSuccessListener { response ->
-                                val place = response.place
-                                destinationLatLng = com.example.mapapp.data.model.RouteLatLng(place.location!!.latitude, place.location!!.longitude)
-                                destination = com.example.mapapp.data.model.RouteLatLng(place.location!!.latitude, place.location!!.longitude)
-                            }
-
+                        placeViewModel.clearPredictionsForDestination()
                     }
-                    .padding(8.dp)
             )
+            originPredictions.forEach { prediction ->
+                Text(
+                    text = prediction.getFullText(null).toString(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            val placeId = prediction.placeId
+                            val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
+                            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+                            placesClient.fetchPlace(request)
+                                .addOnSuccessListener { response ->
+                                    val place = response.place
+                                    origin = RouteLatLng(
+                                        place.location!!.latitude,
+                                        place.location!!.longitude
+                                    )
+                                    originText = place.formattedAddress ?: place.displayName
+                                            ?: "" // Update the textFiled
+                                    placeViewModel.clearPredictionsForOrigin() // Clear the predictions after selecting one
+                                    mapViewModel.fetchRoute(
+                                        origin,
+                                        destination
+                                    ) // Update the Route polyline after select
+                                }
+                        }
+                        .padding(8.dp)
+                )
+            }
         }
 
-        destinationLatLng?.let { latLng ->
-            Text(
-                text = ", latitude: ${latLng.latitude}, longitude: ${latLng.longitude}",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 16.dp)
+        Column {
+            OutlinedTextField(
+                value = destinationText,
+                onValueChange = {
+                    placeViewModel.clearPredictionsForOrigin()
+                    destinationText = it
+                    if (it.length > 2) placeViewModel.searchPlacesForDestination(it)
+                },
+                label = { Text("Destination") },
+                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        placeViewModel.clearPredictionsForOrigin()
+                    }
             )
+            destinationPredictions.forEach { prediction ->
+                Text(
+                    text = prediction.getFullText(null).toString(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            val placeId = prediction.placeId
+                            val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
+                            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+                            placesClient.fetchPlace(request)
+                                .addOnSuccessListener { response ->
+                                    val place = response.place
+                                    destination = RouteLatLng(
+                                        place.location!!.latitude,
+                                        place.location!!.longitude
+                                    )
+                                    destinationText = place.formattedAddress ?: place.displayName
+                                            ?: "" // Update the textFiled
+                                    placeViewModel.clearPredictionsForDestination() // Clear the predictions after selecting one
+                                    mapViewModel.fetchRoute(
+                                        origin,
+                                        destination
+                                    ) // Update the Route polyline after select
+                                }
+                        }
+                        .padding(8.dp)
+                )
+            }
         }
     }
 
 
     /**
-     *
+     * Code of route polyline is above
      */
 
 
@@ -154,8 +199,8 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     snippet = "Your current location"
                 )
             }
-            if(nearbyLocations.value != null){
-                for(place in nearbyLocations.value){
+            if (nearbyLocations.value != null) {
+                for (place in nearbyLocations.value) {
                     Marker(
                         state = rememberUpdatedMarkerState(position = place.location),
                         title = place.displayName.text,
@@ -169,32 +214,35 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
             )
 
 
-
-            destinationLatLng?.let {
-                polyline.value?.let { encoded ->
-                    val path = PolyUtil.decode(encoded)
-                    Polyline(
-                        points = path,
-                        color = Color.Blue,
-                        width = 8f
-                    )
-                }
-
-                Marker(
-                    state = rememberUpdatedMarkerState(GmsLatLng(origin.latitude, origin.longitude)),
-                    title = "Origin"
-                )
-
-                Marker(
-                    state = rememberUpdatedMarkerState(
-                        GmsLatLng(
-                            destination.latitude,
-                            destination.longitude
-                        )
-                    ),
-                    title = "Destination"
+            polyline.value?.let { encoded ->
+                val path = PolyUtil.decode(encoded)
+                Polyline(
+                    points = path,
+                    color = Color.Blue,
+                    width = 8f
                 )
             }
+
+            Marker(
+                state = rememberUpdatedMarkerState(
+                    GmsLatLng(
+                        origin.latitude,
+                        origin.longitude
+                    )
+                ),
+                title = "Origin"
+            )
+
+            Marker(
+                state = rememberUpdatedMarkerState(
+                    GmsLatLng(
+                        destination.latitude,
+                        destination.longitude
+                    )
+                ),
+                title = "Destination"
+            )
+
         }
         Button(onClick = { mapViewModel.getNearbyPlaces() }) {
             Text("Check nearby locations.")

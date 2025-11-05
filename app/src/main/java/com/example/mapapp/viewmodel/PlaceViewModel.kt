@@ -11,12 +11,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class PlaceViewModel(private val placesClient: PlacesClient) : ViewModel() {
-    private val _predictions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
-    val predictions = _predictions.asStateFlow()
+    private val _originPredictions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
+    private val _destinationPredictions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
+
+
+    val originPredictions = _originPredictions.asStateFlow()
+    val destinationPredictions = _destinationPredictions.asStateFlow()
 
     private val token = AutocompleteSessionToken.newInstance()
 
-    fun searchPlaces(query: String) {
+    fun searchPlacesForOrigin(query: String) {
         val request = FindAutocompletePredictionsRequest.builder()
             .setSessionToken(token)
             .setQuery(query)
@@ -25,9 +29,32 @@ class PlaceViewModel(private val placesClient: PlacesClient) : ViewModel() {
         viewModelScope.launch {
             placesClient.findAutocompletePredictions(request)
                 .addOnSuccessListener { response ->
-                    _predictions.value = response.autocompletePredictions
+                    _originPredictions.value = response.autocompletePredictions
                 }
-                .addOnFailureListener { _predictions.value = emptyList() }
+                .addOnFailureListener { _originPredictions.value = emptyList() }
         }
+    }
+
+    fun searchPlacesForDestination(query: String) {
+        val request = FindAutocompletePredictionsRequest.builder()
+            .setSessionToken(token)
+            .setQuery(query)
+            .build()
+
+        viewModelScope.launch {
+            placesClient.findAutocompletePredictions(request)
+                .addOnSuccessListener { response ->
+                    _destinationPredictions.value = response.autocompletePredictions
+                }
+                .addOnFailureListener { _destinationPredictions.value = emptyList() }
+        }
+    }
+
+    fun clearPredictionsForOrigin() {
+        _originPredictions.value = emptyList()
+    }
+
+    fun clearPredictionsForDestination() {
+        _destinationPredictions.value = emptyList()
     }
 }
