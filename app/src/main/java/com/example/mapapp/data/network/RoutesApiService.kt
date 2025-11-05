@@ -2,6 +2,7 @@ package com.example.mapapp.data.network
 
 import com.example.mapapp.BuildConfig
 import com.example.mapapp.data.model.*
+import com.example.mapapp.utils.SecretsHolder
 
 import retrofit2.http.Body
 import retrofit2.http.Header
@@ -13,7 +14,7 @@ interface RoutesApiService {
     @POST("directions/v2:computeRoutes")
     suspend fun computeRoutes(
         @Body request: RoutesRequest,
-        @Header("X-Goog-Api-Key") apiKey: String = BuildConfig.MAPS_API_KEY,
+        @Header("X-Goog-Api-Key") apiKey: String = SecretsHolder.apiKey!!,
         @Header("X-Goog-FieldMask") fieldMask: String = "",
     ): RoutesResponse
 }
