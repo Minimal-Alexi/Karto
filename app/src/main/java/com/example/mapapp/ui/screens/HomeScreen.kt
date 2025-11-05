@@ -187,7 +187,6 @@ fun MakeYourRouteCard() {
                 }
             }
             Spacer(modifier = Modifier.height(1.dp))
-            var startLocation by remember { mutableStateOf("Rautatientasema, Helsinki") }
 
             Text("starting from", style = MaterialTheme.typography.bodyMedium)
 
@@ -217,7 +216,7 @@ fun MakeYourRouteCard() {
             Spacer(modifier = Modifier.height(2.dp))
             Text("within total walking distance of", style = MaterialTheme.typography.bodyMedium)
 
-            var range by remember { mutableStateOf(1.5f..9.2f) }
+            var range by remember { mutableStateOf(1.5f..9.0f) }
 
             RangeSlider(
                 value = range,
@@ -240,13 +239,13 @@ fun MakeYourRouteCard() {
 
             Button(
                 onClick = { /* TODO: Generate route */ },
-                modifier = Modifier.fillMaxWidth().padding(1.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50) // green button
-                )
+                    containerColor = MaterialTheme.colorScheme.secondary
+                ),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Make A Route", color = Color.White, style = MaterialTheme.typography.labelLarge)
+                Text("Make A Route", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(4.dp))
             }
         }
     }
@@ -309,16 +308,14 @@ fun SuggestionItem(icon: ImageVector, title: String, subtitle: String) {
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
