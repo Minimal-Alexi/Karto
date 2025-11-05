@@ -1,6 +1,5 @@
 package com.example.mapapp.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,8 +8,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.example.mapapp.ui.theme.Grey100
 
 private val DarkColorScheme = darkColorScheme(
     primary = Blue500,
@@ -18,7 +17,9 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = Orange500,
     error = Red500,
     background = Grey1000,
-    surface = Grey800
+    onBackground = Grey100,
+    surface = Grey800,
+    onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -26,8 +27,10 @@ private val LightColorScheme = lightColorScheme(
     secondary = Green500,
     tertiary = Orange500,
     error = Red500,
-    background = Grey100,
-    surface = Grey0
+    background = Grey150,
+    onBackground = Grey1000,
+    surface = Color.White,
+    onSurface = Grey800,
 
     /* Other default colors to override
     onPrimary = Color.White,
@@ -41,8 +44,8 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun MapAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // We don't use dynamic colors, we use own theme colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
