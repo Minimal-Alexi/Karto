@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.R.attr.onClick
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -85,11 +86,15 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
             OutlinedTextField(
                 value = originText,
                 onValueChange = {
+                    placeViewModel.clearPredictionsForDestination()
                     originText = it
                     if (it.length > 2) placeViewModel.searchPlacesForOrigin(it)
                 },
                 label = { Text("Origin") },
                 modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        placeViewModel.clearPredictionsForDestination()
+                    }
             )
             originPredictions.forEach { prediction ->
                 Text(
@@ -126,11 +131,15 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
             OutlinedTextField(
                 value = destinationText,
                 onValueChange = {
+                    placeViewModel.clearPredictionsForOrigin()
                     destinationText = it
                     if (it.length > 2) placeViewModel.searchPlacesForDestination(it)
                 },
                 label = { Text("Destination") },
                 modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        placeViewModel.clearPredictionsForOrigin()
+                    }
             )
             destinationPredictions.forEach { prediction ->
                 Text(
