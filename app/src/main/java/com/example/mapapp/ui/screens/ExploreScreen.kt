@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.viewmodel.MapViewModel
 import com.example.mapapp.viewmodel.PlaceViewModel
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
@@ -50,7 +51,6 @@ fun ExploreScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "Hello Explore Screen!", fontSize = 20.sp)
         MapScreen()
     }
 }
@@ -81,7 +81,11 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
         mutableStateOf(RouteLatLng(0.0, 0.0))
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(
+        modifier = Modifier.padding(16.dp)
+        .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
+    ) {
         Column {
             OutlinedTextField(
                 value = originText,
@@ -91,7 +95,8 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     if (it.length > 2) placeViewModel.searchPlacesForOrigin(it)
                 },
                 label = { Text("Origin") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clickable {
                         placeViewModel.clearPredictionsForDestination()
                     }
@@ -136,7 +141,8 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     if (it.length > 2) placeViewModel.searchPlacesForDestination(it)
                 },
                 label = { Text("Destination") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .clickable {
                         placeViewModel.clearPredictionsForOrigin()
                     }
@@ -171,15 +177,13 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 )
             }
         }
-    }
+        Button(onClick = { mapViewModel.getNearbyPlaces() }) {
+            Text("Check nearby locations.")
+        }
+        /**
+         * Code of route polyline is above
+         */
 
-
-    /**
-     * Code of route polyline is above
-     */
-
-
-    Box(modifier = Modifier.fillMaxSize()) {
         // GoogleMap Compose
         GoogleMap(
             modifier = Modifier
@@ -204,14 +208,10 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                     Marker(
                         state = rememberUpdatedMarkerState(position = place.location),
                         title = place.displayName.text,
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                     )
                 }
             }
-            Marker(
-                state = rememberUpdatedMarkerState(position = helsinki),
-                title = "Helsinki",
-                snippet = "Marker in Helsinki"
-            )
 
 
             polyline.value?.let { encoded ->
@@ -243,9 +243,6 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 title = "Destination"
             )
 
-        }
-        Button(onClick = { mapViewModel.getNearbyPlaces() }) {
-            Text("Check nearby locations.")
         }
     }
 }
