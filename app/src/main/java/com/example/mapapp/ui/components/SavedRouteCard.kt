@@ -42,9 +42,9 @@ fun SavedRouteCard(route: String) {
                 Text(
                     text = route, style = MaterialTheme.typography.titleLarge,
                 )
-                Text(text = "Completed 23 October 2023", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "4 locations", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "15 km", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Completed 23 October 2023", style = MaterialTheme.typography.bodySmall)
+                Text(text = "4 locations", style = MaterialTheme.typography.bodySmall)
+                Text(text = "15 km", style = MaterialTheme.typography.bodySmall)
             }
             Icon(
                 painterResource(R.drawable.arrow_icon),
