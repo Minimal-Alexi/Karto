@@ -23,15 +23,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MapViewModel(application: Application) : AndroidViewModel(application) {
+class ExploreViewModel(application: Application) : AndroidViewModel(application) {
 
     /*
-    Nearby Places
+    Nearby Places & Filtering Variables
     */
     private val _nearbyPlaces = MutableStateFlow<List<Place>?>(null)
     val nearbyPlaces: StateFlow<List<Place>?> = _nearbyPlaces
+    private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
+    val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
 
-
+    /*
+    User Location
+    */
     private val _userLocation = MutableStateFlow<LatLng?>(null)
     val userLocation: StateFlow<LatLng?> = _userLocation
 
@@ -57,6 +61,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun changeDistanceToPlaces(newValue: Double){
+        if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
+    }
 
     fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng) {
         viewModelScope.launch {
