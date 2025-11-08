@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
+import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.viewmodel.PredictionViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -170,8 +171,12 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                 )
             }
         }
-        Button(onClick = { exploreViewModel.getNearbyPlaces() }) {
-            Text("Check nearby locations.",style = MaterialTheme.typography.labelLarge)
+        Column(){
+            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
+                exploreViewModel::changeDistanceToPlaces)
+            Button(onClick = { exploreViewModel.getNearbyPlaces() }) {
+                Text("Check nearby locations.",style = MaterialTheme.typography.labelLarge)
+            }
         }
         /**
          * Code of route polyline is above
