@@ -178,7 +178,7 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 )
             }
         }
-        PlaceTypeSelector(mapViewModel.placeTypeSelector.value,mapViewModel::changePlaceType)
+        PlaceTypeSelector(mapViewModel.placeTypeSelector.collectAsState().value,mapViewModel::changePlaceType)
         Button(onClick = { mapViewModel.getNearbyPlaces() }) {
             Text("Check nearby locations.")
         }
