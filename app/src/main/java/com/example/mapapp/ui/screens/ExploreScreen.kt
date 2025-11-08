@@ -178,7 +178,7 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
             }
         }
         Button(onClick = { mapViewModel.getNearbyPlaces() }) {
-            Text("Check nearby locations.")
+            Text("Check nearby locations.",style = MaterialTheme.typography.labelLarge)
         }
         /**
          * Code of route polyline is above
