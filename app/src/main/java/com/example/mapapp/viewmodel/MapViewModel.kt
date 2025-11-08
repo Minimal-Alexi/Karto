@@ -89,6 +89,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 if (_userLocation.value != null) {
                     val placeRequest = PlacesRequest(
+                        includedTypes = _placeTypeSelection.value.places,
                         locationRestriction = LocationRestriction(
                             Circle(
                                 Center(
