@@ -242,7 +242,6 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 ),
                 title = "Destination"
             )
-
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,10 @@ fun SavedRouteCard(route: String) {
         modifier = Modifier
             .padding(5.dp)
             .fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -40,7 +45,7 @@ fun SavedRouteCard(route: String) {
 
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = route, style = MaterialTheme.typography.titleLarge,
+                    text = route, style = MaterialTheme.typography.titleMedium,
                 )
                 Text(text = "Completed 23 October 2023", style = MaterialTheme.typography.bodySmall)
                 Text(text = "4 locations", style = MaterialTheme.typography.bodySmall)
