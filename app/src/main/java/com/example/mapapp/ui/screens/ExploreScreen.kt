@@ -171,7 +171,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                 )
             }
         }
-        Column(){
+        Column(horizontalAlignment = Alignment.CenterHorizontally){
             DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
                 exploreViewModel::changeDistanceToPlaces)
             Button(onClick = { exploreViewModel.getNearbyPlaces() }) {
