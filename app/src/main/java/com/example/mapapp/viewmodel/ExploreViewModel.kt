@@ -91,7 +91,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     val placeRequest = PlacesRequest(
                         locationRestriction = LocationRestriction(
                             Circle(
-                                _userLocation.value!!
+                                _userLocation.value!!,
+                                _distanceToPlaces.value
                             )
                         )
                     )
