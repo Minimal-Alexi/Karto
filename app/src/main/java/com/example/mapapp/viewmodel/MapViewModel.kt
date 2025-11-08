@@ -11,7 +11,6 @@ import com.example.mapapp.data.network.RoutesApi
 import android.util.Log
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
-import com.example.mapapp.data.model.Center
 import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
@@ -85,10 +84,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     val placeRequest = PlacesRequest(
                         locationRestriction = LocationRestriction(
                             Circle(
-                                Center(
-                                    _userLocation.value!!.latitude,
-                                    _userLocation.value!!.longitude
-                                )
+                                _userLocation.value!!
                             )
                         )
                     )
