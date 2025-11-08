@@ -10,9 +10,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mapapp.ui.components.BottomBar
 import com.example.mapapp.ui.screens.HomeScreen
 import com.example.mapapp.ui.screens.ExploreScreen
+import com.example.mapapp.ui.screens.LocationScreen
 import com.example.mapapp.ui.screens.RouteScreen
 import com.example.mapapp.ui.screens.SavedScreen
 import com.example.mapapp.ui.screens.SettingsScreen
+
+object Constants {
+    const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
+}
 
 @Composable
 fun NavGraph() {
@@ -30,7 +35,11 @@ fun NavGraph() {
             composable("explore") { ExploreScreen() }
             composable("route") { RouteScreen() }
             composable("saved") { SavedScreen() }
-            composable("settings") { SettingsScreen() }
+            composable("settings") { SettingsScreen(navController) }
+
+            composable("location/{locationID}") {
+                val locationID = it.arguments?.getString("locationID")
+                LocationScreen(locationID = locationID, navController = navController) }
         }
     }
 }
