@@ -45,6 +45,7 @@ enum class TypesOfPlaces(val displayName: String, val places: List<String>) {
 
 data class PlacesRequest(
     val maxResultCount:Int = 20,
+    val includedTypes:List <String>,
     val locationRestriction: LocationRestriction
 )
 
