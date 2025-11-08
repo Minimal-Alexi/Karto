@@ -16,6 +16,7 @@ import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
@@ -31,6 +32,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     */
     private val _nearbyPlaces = MutableStateFlow<List<Place>?>(null)
     val nearbyPlaces: StateFlow<List<Place>?> = _nearbyPlaces
+    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.BEACHES)
+    val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
 
 
     private val _userLocation = MutableStateFlow<LatLng?>(null)
@@ -59,6 +62,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
+    fun changePlaceType(newPlaceType : TypesOfPlaces){
+        _placeTypeSelection.value = newPlaceType
+    }
     fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng) {
         viewModelScope.launch {
             try {

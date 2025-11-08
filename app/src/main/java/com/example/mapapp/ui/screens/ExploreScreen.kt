@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
+import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.viewmodel.MapViewModel
 import com.example.mapapp.viewmodel.PlaceViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -177,6 +178,7 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 )
             }
         }
+        PlaceTypeSelector(mapViewModel.placeTypeSelector.value,mapViewModel::changePlaceType)
         Button(onClick = { mapViewModel.getNearbyPlaces() }) {
             Text("Check nearby locations.")
         }
