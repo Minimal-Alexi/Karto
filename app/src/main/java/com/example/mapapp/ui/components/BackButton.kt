@@ -13,7 +13,6 @@ import com.example.mapapp.R
 @Composable
 fun BackButton(onClick : () -> Unit) {
     FilledIconButton(onClick = onClick,
-        modifier = Modifier.padding(12.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
         Icon(
