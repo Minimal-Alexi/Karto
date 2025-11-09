@@ -65,12 +65,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
-    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng) {
+    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travellingMode: String = "WALK") {
         viewModelScope.launch {
             try {
                 val request = RoutesRequest(
                     origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
-                    destination = RouteLocation(location = LatLngLiteral(latLng = destination))
+                    destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
+                    travelMode = travellingMode
                 )
                 val response = RoutesApi.service.computeRoutes(
                     request,

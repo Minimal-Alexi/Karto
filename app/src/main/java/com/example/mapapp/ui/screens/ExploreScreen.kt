@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.ui.components.DistanceSlider
+import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.viewmodel.PredictionViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -171,6 +172,9 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                 )
             }
         }
+
+        TravelModeSelector()
+
         Column(horizontalAlignment = Alignment.CenterHorizontally){
             DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
                 exploreViewModel::changeDistanceToPlaces)
