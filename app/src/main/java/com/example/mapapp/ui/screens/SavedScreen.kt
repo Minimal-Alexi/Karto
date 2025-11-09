@@ -26,9 +26,11 @@ fun SavedScreen() {
             modifier = Modifier.padding(top = 12.dp)
         )
 
-        val routes = listOf("route 1", "route 2", "route 3") // this will fetch last 3 from user later
+        val routes = listOf("Beaches of Helsinki", "Bars in Venice", "Museums in Paris") // this will fetch all saved routes
 
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             SavedRouteCard(routes[0])
             SavedRouteCard(routes[1])
             SavedRouteCard(routes[2])

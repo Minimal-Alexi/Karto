@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -17,45 +19,58 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.example.mapapp.R
 
-// this should later take in the actual route as parameter though... just styling for now
+// this should later take in the actual route as parameter later
 @Composable
 fun SavedRouteCard(route: String) {
     Card(
-        modifier = Modifier
-            .padding(5.dp)
-            .fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            )
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Row(
+            modifier = Modifier.padding(8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             Icon(
                 painterResource(R.drawable.route_icon),
                 contentDescription = "Route Icon",
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.padding(top = 8.dp).size(40.dp)
             )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(text = route, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(0.dp))
+                Text(text = "Saved 9 November 2025", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "4 locations (15 km)", style = MaterialTheme.typography.bodyMedium)
 
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    text = route, style = MaterialTheme.typography.titleMedium,
-                )
-                Text(text = "Completed 23 October 2023", style = MaterialTheme.typography.bodySmall)
-                Text(text = "4 locations", style = MaterialTheme.typography.bodySmall)
-                Text(text = "15 km", style = MaterialTheme.typography.bodySmall)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    SecondaryButton(
+                        text = "Open",
+                        backgroundColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        /* TODO: Open route */
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    SecondaryButton(
+                        text = "Delete",
+                        backgroundColor = MaterialTheme.colorScheme.error
+                    ) {
+                        /* TODO: Delete route */
+                    }
+                }
             }
-            Icon(
-                painterResource(R.drawable.arrow_icon),
-                contentDescription = "Arrow right",
-                modifier = Modifier.size(30.dp)
-            )
         }
     }
 }
