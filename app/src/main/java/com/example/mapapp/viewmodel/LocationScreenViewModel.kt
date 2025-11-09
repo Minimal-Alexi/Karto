@@ -1,7 +1,6 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.network.PlacesApi
@@ -15,13 +14,18 @@ class LocationScreenViewModel(application : Application) : AndroidViewModel(appl
         val placeID : String? = null,
         val displayName : String? = null,
         val rating : Double? = null,
-        val summary : String? = null
+        val summary : String? = null,
+        val type : String? = null
     )
 
     private val _uiState = MutableStateFlow(LocationUIState())
     val uiState : StateFlow<LocationUIState> = _uiState
 
     fun getLocationInformation(placeID : String) {
+        if (placeID == _uiState.value.placeID) {
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val apiKey = SecretsHolder.apiKey
@@ -29,29 +33,19 @@ class LocationScreenViewModel(application : Application) : AndroidViewModel(appl
                     val response = PlacesApi.service.getPlaceInformation(
                         placeID,
                         apiKey,
-                        "displayName,rating,editorialSummary"
+                        "displayName,rating,editorialSummary,primaryTypeDisplayName"
                     )
+
                     _uiState.value = _uiState.value.copy(placeID = placeID,
-                        displayName = response.displayName.text,
+                        displayName = response.displayName?.text,
                         rating = response.rating,
-                        summary = response.editorialSummary.text)
-                    Log.d("APPTAG", response.toString())
+                        summary = response.editorialSummary?.text,
+                        type = response.primaryTypeDisplayName?.text
+                    )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-    }
-
-    /* TODO: DELETE!!! */
-    fun setUIStateWithoutFetch() {
-        _uiState.value = LocationUIState("testFAKE_ID",
-            "Cool Place",
-            2.3,
-            "This is the best place ever. This text could be quite long but it might also not be")
-    }
-
-    fun clearUIState() {
-        _uiState.value = LocationUIState()
     }
 }

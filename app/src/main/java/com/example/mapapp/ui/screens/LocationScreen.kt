@@ -35,7 +35,6 @@ fun LocationScreen(locationID: String?, navController: NavController) {
 fun LocationDetailsScreen(locationID: String, navController: NavController) {
     val vm = viewModel<LocationScreenViewModel>()
     vm.getLocationInformation(locationID)
-    // vm.setUIStateWithoutFetch()
     val locationInformation = vm.uiState.collectAsState().value
 
     Column(
@@ -47,16 +46,10 @@ fun LocationDetailsScreen(locationID: String, navController: NavController) {
     ) {
         BackButton(onClick = {
             navController.navigateUp()
-            vm.clearUIState()
         })
 
-        if (locationInformation.displayName != null) {
-            Text(
-                text = locationInformation.displayName,
-                style = MaterialTheme.typography.titleLarge
-            )
-        }
-
+        locationInformation.displayName?.let{ Text(text = it, style = MaterialTheme.typography.titleLarge) }
+        locationInformation.type?.let{ Text(text = it) }
         locationInformation.summary?.let{ Text(text = it) }
         locationInformation.rating?.let { RatingRow(it) }
     }
@@ -85,12 +78,16 @@ fun RatingRow(rating: Double) {
         )
     }
 
-    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-        getIcon(1)
-        getIcon(2)
-        getIcon(3)
-        getIcon(4)
-        getIcon(5)
-        Text(text = " ($rating)")
+    if (rating <= 0.0 || rating > 5.0) {
+        Text(text = "(No ratings)")
+    } else {
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            getIcon(1)
+            getIcon(2)
+            getIcon(3)
+            getIcon(4)
+            getIcon(5)
+            Text(text = " ($rating)")
+        }
     }
 }
