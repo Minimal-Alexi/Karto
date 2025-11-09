@@ -173,7 +173,12 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
             }
         }
 
-        TravelModeSelector()
+        var selectedMode by remember { mutableStateOf("Walking") }
+
+        TravelModeSelector(
+            selectedMode = selectedMode,
+            onModeSelected = { selectedMode = it }
+        )
 
         Column(horizontalAlignment = Alignment.CenterHorizontally){
             DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
