@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PlaceViewModel(private val placesClient: PlacesClient) : ViewModel() {
+class PredictionViewModel(private val placesClient: PlacesClient) : ViewModel() {
     private val _originPredictions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
     private val _destinationPredictions = MutableStateFlow<List<AutocompletePrediction>>(emptyList())
 
