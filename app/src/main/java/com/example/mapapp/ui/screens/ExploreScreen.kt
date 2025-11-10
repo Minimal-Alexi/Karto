@@ -184,7 +184,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
         TravelModeSelector()
 
         Column(horizontalAlignment = Alignment.CenterHorizontally){
-            PlaceTypeSelector(mapViewModel.placeTypeSelector.collectAsState().value,mapViewModel::changePlaceType)
+            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
             DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
                 exploreViewModel::changeDistanceToPlaces)
             Button(onClick = { exploreViewModel.getNearbyPlaces() }) {
