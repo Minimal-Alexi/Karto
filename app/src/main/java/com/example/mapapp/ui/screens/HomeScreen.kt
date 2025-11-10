@@ -8,8 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -42,6 +40,7 @@ import androidx.compose.material.icons.filled.Nature
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.mapapp.ui.components.PrimaryButton
 
 @Composable
 fun HomeScreen() {
@@ -236,16 +235,11 @@ fun MakeYourRouteCard() {
                 Text(String.format("%.1f km", range.start))
                 Text(String.format("%.1f km", range.endInclusive))
             }
-
-            Button(
-                onClick = { /* TODO: Generate route */ },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                ),
-                modifier = Modifier.fillMaxWidth()
+            PrimaryButton(
+                text = "Make A Route",
+                backgroundColor = MaterialTheme.colorScheme.secondary
             ) {
-                Text("Make A Route", color = Color.White, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(4.dp))
+                /* TODO: Generate route */
             }
         }
     }

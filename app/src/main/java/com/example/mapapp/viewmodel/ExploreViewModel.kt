@@ -11,11 +11,11 @@ import com.example.mapapp.data.network.RoutesApi
 import android.util.Log
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
-import com.example.mapapp.data.model.Center
 import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
@@ -24,15 +24,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MapViewModel(application: Application) : AndroidViewModel(application) {
+class ExploreViewModel(application: Application) : AndroidViewModel(application) {
 
     /*
-    Nearby Places
+    Nearby Places & Filtering Variables
     */
     private val _nearbyPlaces = MutableStateFlow<List<Place>?>(null)
     val nearbyPlaces: StateFlow<List<Place>?> = _nearbyPlaces
+    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.BEACHES)
+    val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
+    private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
+    val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
 
-
+    /*
+    User Location
+    */
     private val _userLocation = MutableStateFlow<LatLng?>(null)
     val userLocation: StateFlow<LatLng?> = _userLocation
 
@@ -58,13 +64,20 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun changeDistanceToPlaces(newValue: Double){
+        if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
+    }
 
-    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng) {
+    fun changePlaceType(newPlaceType : TypesOfPlaces){
+        _placeTypeSelection.value = newPlaceType
+    }
+    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travellingMode: String = "WALK") {
         viewModelScope.launch {
             try {
                 val request = RoutesRequest(
                     origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
-                    destination = RouteLocation(location = LatLngLiteral(latLng = destination))
+                    destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
+                    travelMode = travellingMode
                 )
                 val response = RoutesApi.service.computeRoutes(
                     request,
@@ -83,12 +96,11 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 if (_userLocation.value != null) {
                     val placeRequest = PlacesRequest(
+                        includedTypes = _placeTypeSelection.value.places,
                         locationRestriction = LocationRestriction(
                             Circle(
-                                Center(
-                                    _userLocation.value!!.latitude,
-                                    _userLocation.value!!.longitude
-                                )
+                                _userLocation.value!!,
+                                _distanceToPlaces.value
                             )
                         )
                     )

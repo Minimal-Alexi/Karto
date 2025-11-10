@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.ui.components.HistoryRouteCard
 import androidx.navigation.NavController
 import com.example.mapapp.navigation.Constants
 import com.example.mapapp.ui.components.SavedRouteCard
@@ -142,9 +143,9 @@ fun RouteHistory() {
     }
 
     Column {
-        SavedRouteCard(routes[0])
-        SavedRouteCard(routes[1])
-        SavedRouteCard(routes[2])
+        HistoryRouteCard(routes[0])
+        HistoryRouteCard(routes[1])
+        HistoryRouteCard(routes[2])
         Spacer(modifier = Modifier.height(16.dp))
     }
 }

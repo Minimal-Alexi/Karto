@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
-import com.example.mapapp.viewmodel.MapViewModel
-import com.example.mapapp.viewmodel.PlaceViewModel
+import com.example.mapapp.viewmodel.ExploreViewModel
+import com.example.mapapp.viewmodel.PredictionViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
@@ -39,19 +39,19 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
-fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
+fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
 
-    val userLocation = mapViewModel.userLocation.collectAsState()
-    val nearbyLocations = mapViewModel.nearbyPlaces.collectAsState()
+    val userLocation = exploreViewModel.userLocation.collectAsState()
+    val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val helsinki = LatLng(60.1699, 24.9384)
 
-    val polyline = mapViewModel.routePolyline.collectAsState()
+    val polyline = exploreViewModel.routePolyline.collectAsState()
 
     var origin = RouteLatLng(60.1699, 24.9384)
     var destination = RouteLatLng(60.2055, 24.6559)
 
     LaunchedEffect(Unit) {
-        mapViewModel.fetchRoute(origin, destination)
+        exploreViewModel.fetchRoute(origin, destination)
     }
 
     /**
@@ -59,10 +59,10 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
      */
     val context = LocalContext.current
     val placesClient = remember { Places.createClient(context) }
-    val placeViewModel = remember { PlaceViewModel(placesClient) }
+    val predictionViewModel = remember { PredictionViewModel(placesClient) }
 
     var query by remember { mutableStateOf("") }
-    val predictions by placeViewModel.originPredictions.collectAsState()
+    val predictions by predictionViewModel.originPredictions.collectAsState()
 
     var originLatLng by remember { mutableStateOf<RouteLatLng?>(null) }
     var destinationLatLng by remember {
@@ -76,7 +76,7 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
             value = query,
             onValueChange = {
                 query = it
-                if (it.length > 2) placeViewModel.searchPlacesForOrigin(it)
+                if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
             },
             label = { Text("Search Places") },
             modifier = Modifier.fillMaxWidth()
@@ -181,7 +181,7 @@ fun MapScreen(mapViewModel: MapViewModel = viewModel()) {
                 )
             }
         }
-        Button(onClick = { mapViewModel.getNearbyPlaces() }) {
+        Button(onClick = { exploreViewModel.getNearbyPlaces() }) {
             Text("Check nearby locations.")
         }
     }
@@ -196,10 +196,10 @@ fun RouteInput(){
 
     val context = LocalContext.current
     val placesClient = remember { Places.createClient(context) }
-    val placeViewModel = remember { PlaceViewModel(placesClient) }
+    val predictionViewModel = remember { PredictionViewModel(placesClient) }
 
     var query by remember { mutableStateOf("") }
-    val predictions by placeViewModel.originPredictions.collectAsState()
+    val predictions by predictionViewModel.originPredictions.collectAsState()
 
     var originLatLng by remember { mutableStateOf<RouteLatLng?>(null) }
     var destinationLatLng by remember {
@@ -214,7 +214,7 @@ fun RouteInput(){
             value = query,
             onValueChange = {
                 query = it
-                if (it.length > 2) placeViewModel.searchPlacesForOrigin(it)
+                if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
             },
             label = { Text("Search Places") },
             modifier = Modifier.fillMaxWidth()
