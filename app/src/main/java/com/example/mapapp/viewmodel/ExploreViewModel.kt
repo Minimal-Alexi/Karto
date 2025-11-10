@@ -67,13 +67,14 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun changeDistanceToPlaces(newValue: Double){
-        if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
+    fun changeDistanceToPlaces(newValue: Double) {
+        if (newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
-    fun changePlaceType(newPlaceType : TypesOfPlaces){
+    fun changePlaceType(newPlaceType: TypesOfPlaces) {
         _placeTypeSelection.value = newPlaceType
     }
+
     fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travelMode: String = "WALK") {
         viewModelScope.launch {
             try {
@@ -88,7 +89,15 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 )
                 val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
                 _routePolyline.value = polyline
-                _routeInfo.value = response.routes?.firstOrNull()?.distanceMeters ?: "No route found"
+
+                val routeInfoWalkOrDrive =
+                    Pair(
+                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                        response.routes?.firstOrNull()?.duration ?: "No route found"
+                    )
+
+                _routeInfo.value =
+                    "Distance: ${routeInfoWalkOrDrive.first} meters, Time cost: ${routeInfoWalkOrDrive.second} seconds, Travel mode: $travelMode"
             } catch (e: Exception) {
                 e.printStackTrace()
                 _routePolyline.value = null
@@ -97,6 +106,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
+
     fun getNearbyPlaces() {
         viewModelScope.launch {
             try {

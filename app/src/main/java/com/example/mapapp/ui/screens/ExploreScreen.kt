@@ -200,7 +200,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
         )
 
         Text(
-            text = if (routeInfo != null) "Distance: $routeInfo" else "",
+            text = if (routeInfo != null) "$routeInfo" else "",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
