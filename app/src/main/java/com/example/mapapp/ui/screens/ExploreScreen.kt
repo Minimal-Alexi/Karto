@@ -63,9 +63,9 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
 
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val helsinki = LatLng(60.1699, 24.9384)
 
     val polyline = exploreViewModel.routePolyline.collectAsState()
+    val routeInfo by exploreViewModel.routeInfo.collectAsState()
 
     /**
      * Code of route polyline is below
@@ -84,9 +84,13 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
         mutableStateOf(RouteLatLng(0.0, 0.0))
     }
 
+    var selectedMode by remember { mutableStateOf("Walking") }
+
+
     Column(
-        modifier = Modifier.padding(16.dp)
-        .fillMaxSize(),
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
     ) {
         Column {
@@ -126,7 +130,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                                     predictionViewModel.clearPredictionsForOrigin() // Clear the predictions after selecting one
                                     exploreViewModel.fetchRoute(
                                         origin,
-                                        destination
+                                        destination,
+                                        travelMode = selectedMode
                                     ) // Update the Route polyline after select
                                 }
                         }
@@ -172,7 +177,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                                     predictionViewModel.clearPredictionsForDestination() // Clear the predictions after selecting one
                                     exploreViewModel.fetchRoute(
                                         origin,
-                                        destination
+                                        destination,
+                                        travelMode = selectedMode
                                     ) // Update the Route polyline after select
                                 }
                         }
@@ -181,19 +187,36 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
             }
         }
 
-        var selectedMode by remember { mutableStateOf("Walking") }
-
         TravelModeSelector(
             selectedMode = selectedMode,
-            onModeSelected = { selectedMode = it }
+            onModeSelected = {
+                selectedMode = it
+                exploreViewModel.fetchRoute(
+                    origin,
+                    destination,
+                    travelMode = selectedMode
+                )
+            }
         )
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally){
-            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
-            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
-                exploreViewModel::changeDistanceToPlaces)
+        Text(
+            text = if (routeInfo != null) "Distance: $routeInfo" else "",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            PlaceTypeSelector(
+                exploreViewModel.placeTypeSelector.collectAsState().value,
+                exploreViewModel::changePlaceType
+            )
+            DistanceSlider(
+                exploreViewModel.distanceToPlaces.collectAsState().value,
+                exploreViewModel::changeDistanceToPlaces
+            )
             Button(onClick = { exploreViewModel.getNearbyPlaces() }) {
-                Text("Check nearby locations.",style = MaterialTheme.typography.labelLarge)
+                Text("Check nearby locations.", style = MaterialTheme.typography.labelLarge)
             }
         }
         /**

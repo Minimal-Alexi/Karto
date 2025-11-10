@@ -28,7 +28,7 @@ fun TravelModeSelector(
     selectedMode: String,
     onModeSelected: (String) -> Unit,
 ) {
-    val modes = listOf("Walking", "Cycling", "Driving")
+    val modes = listOf("Walk", "TRANSIT", "Drive")
     val icons = listOf(
         Icons.Default.DirectionsCar,
         Icons.AutoMirrored.Filled.DirectionsWalk, Icons.Default.DirectionsTransit

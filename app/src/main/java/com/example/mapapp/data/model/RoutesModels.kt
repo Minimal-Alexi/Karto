@@ -26,6 +26,8 @@ data class RoutesResponse(
 
 data class Route(
     val polyline: Polyline?,
+    val distanceMeters: String?,
+    val duration: String?
 )
 
 data class Polyline(
