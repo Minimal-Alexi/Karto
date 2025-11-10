@@ -253,7 +253,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                 ),
                 title = "Destination"
             )
-
         }
     }
 }
