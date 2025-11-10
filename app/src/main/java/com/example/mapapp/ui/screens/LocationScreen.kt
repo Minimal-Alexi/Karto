@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,38 +47,44 @@ fun LocationDetailsScreen(locationID: String, navController: NavController) {
     vm.getLocationInformation(locationID)
     val locationInformation = vm.uiState.collectAsState().value
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painterResource(R.drawable.helsinki),
-            contentDescription = "helsinki",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().height(340.dp)
-        )
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val imageHeight = this.maxHeight / 2
 
-        BackButton(onClick = {
-            navController.navigateUp()
-        }, modifier = Modifier.padding(12.dp))
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painterResource(R.drawable.helsinki),
+                contentDescription = "helsinki",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(imageHeight)
+            )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 300.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                )
-                .padding(16.dp, 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column {
-                locationInformation.displayName?.let {
-                    Text(text = it, style = MaterialTheme.typography.titleLarge)
+            BackButton(onClick = {
+                navController.navigateUp()
+            }, modifier = Modifier.padding(12.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = imageHeight - 40.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    )
+                    .padding(16.dp, 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column {
+                    locationInformation.displayName?.let {
+                        Text(text = it, style = MaterialTheme.typography.titleLarge)
+                    }
+                    locationInformation.type?.let { Text(text = it) }
                 }
-                locationInformation.type?.let { Text(text = it) }
+                locationInformation.summary?.let { Text(text = it) }
+                locationInformation.rating?.let { RatingRow(it) }
             }
-            locationInformation.summary?.let { Text(text = it) }
-            locationInformation.rating?.let { RatingRow(it) }
         }
     }
 }

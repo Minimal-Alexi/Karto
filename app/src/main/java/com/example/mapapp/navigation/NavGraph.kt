@@ -22,6 +22,14 @@ object Constants {
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
+    val navigateToLocationScreen: (String) -> Unit = { placesID ->
+        navController.navigate(
+            Constants.LOCATION_SCREEN_ROUTE.replace(
+                "{locationID}",
+                placesID
+            )
+        )
+    }
 
     Scaffold(
         bottomBar = { BottomBar(navController) }
@@ -33,13 +41,14 @@ fun NavGraph() {
         ) {
             composable("home") { HomeScreen() }
             composable("explore") { ExploreScreen() }
-            composable("route") { RouteScreen() }
+            composable("route") { RouteScreen(navigateToLocationScreen = navigateToLocationScreen) }
             composable("saved") { SavedScreen() }
-            composable("settings") { SettingsScreen(navController) }
+            composable("settings") { SettingsScreen() }
 
             composable("location/{locationID}") {
                 val locationID = it.arguments?.getString("locationID")
-                LocationScreen(locationID = locationID, navController = navController) }
+                LocationScreen(locationID = locationID, navController = navController)
+            }
         }
     }
 }

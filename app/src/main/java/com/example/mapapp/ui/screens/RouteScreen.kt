@@ -39,10 +39,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.compose.rememberNavController
+import com.example.mapapp.navigation.Constants
 import com.example.mapapp.ui.components.PrimaryButton
 
 @Composable
-fun RouteScreen() {
+fun RouteScreen(navigateToLocationScreen: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,7 +54,7 @@ fun RouteScreen() {
     ) {
         RouteTitleSection()
         MapScreenPlaceholder()
-        OnRouteSection()
+        OnRouteSection(navigateToLocationScreen)
         RouteSummarySection()
         PrimaryButton(
             text = "Pause This Route",
@@ -67,7 +69,9 @@ fun RouteScreen() {
 @Composable
 fun RouteTitleSection() {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -99,7 +103,8 @@ fun MapScreenPlaceholder() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     currentLatLng = LatLng(location.latitude, location.longitude)
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLatLng!!, 14f)
+                    cameraPositionState.position =
+                        CameraPosition.fromLatLngZoom(currentLatLng!!, 14f)
                 }
             }
         } catch (e: SecurityException) {
@@ -124,7 +129,9 @@ fun MapScreenPlaceholder() {
 }
 
 @Composable
-fun OnRouteSection() {
+fun OnRouteSection(
+    navigateToLocationScreen: (String) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -147,13 +154,42 @@ fun OnRouteSection() {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                RouteStopItem(time = "12:05", location = "Beach X", distance = "2.7 km", duration = "30 min")
+                RouteStopItem(
+                    time = "12:05",
+                    locationName = "Mustikkamaan ranta",
+                    distance = "2.7 km",
+                    duration = "30 min",
+                    placesID = "ChIJqwoUM14JkkYRtUIe2tzlrF8",
+                    navigateToLocationScreen = navigateToLocationScreen
+                )
                 HorizontalDivider(color = Color(0xFFDDDDDD))
-                RouteStopItem(time = "12:55", location = "Beach X", distance = "2.7 km", duration = "30 min", closingInfo = "Closes at 16:00")
+                RouteStopItem(
+                    time = "12:55",
+                    locationName = "Karhusaari Beach",
+                    distance = "2.7 km",
+                    duration = "30 min",
+                    closingInfo = "Closes at 16:00",
+                    placesID = "ChIJabi06Yb1jUYRh5VZ9yyiOr8",
+                    navigateToLocationScreen = navigateToLocationScreen
+                )
                 HorizontalDivider(color = Color(0xFFDDDDDD))
-                RouteStopItem(time = "13:40", location = "Beach X", distance = "2.7 km", duration = "30 min")
+                RouteStopItem(
+                    time = "13:40",
+                    locationName = "Vetokannas Swimming Beach",
+                    distance = "2.7 km",
+                    duration = "30 min",
+                    placesID = "ChIJ2YucHr33jUYRoa1UdtWwqSM",
+                    navigateToLocationScreen = navigateToLocationScreen
+                )
                 HorizontalDivider(color = Color(0xFFDDDDDD))
-                RouteStopItem(time = "14:25", location = "Beach X", distance = "2.7 km", duration = "30 min")
+                RouteStopItem(
+                    time = "14:25",
+                    locationName = "Hietaranta Beach",
+                    distance = "2.7 km",
+                    duration = "30 min",
+                    placesID = "ChIJC4WpRTkKkkYRH_pPtYjChjg",
+                    navigateToLocationScreen = navigateToLocationScreen
+                )
             }
         }
     }
@@ -162,10 +198,12 @@ fun OnRouteSection() {
 @Composable
 fun RouteStopItem(
     time: String,
-    location: String,
+    locationName: String,
     distance: String,
     duration: String,
-    closingInfo: String? = null
+    closingInfo: String? = null,
+    placesID: String,
+    navigateToLocationScreen: (String) -> Unit
 ) {
     var isVisited by remember { mutableStateOf(false) }
 
@@ -201,7 +239,9 @@ fun RouteStopItem(
                         .size(20.dp)
                         .border(
                             width = 2.dp,
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            color = if (isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = 0.5f
+                            ),
                             shape = CircleShape
                         )
                         .background(
@@ -231,15 +271,12 @@ fun RouteStopItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = location,
+                        text = locationName,
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.width(240.dp)
                     )
-                    Text(
-                        text = "(Description or review score??)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+
                     closingInfo?.let {
                         Text(
                             text = it,
@@ -252,8 +289,10 @@ fun RouteStopItem(
 
             // Book icon on the right
             IconButton(
-                onClick = { /* TODO: Read more about this stop */ },
-                modifier = Modifier.size(25.dp)
+                onClick = {
+                    navigateToLocationScreen(placesID)
+                },
+                modifier = Modifier.size(32.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.MenuBook,

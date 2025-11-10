@@ -21,14 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.ui.components.HistoryRouteCard
-import androidx.navigation.NavController
-import com.example.mapapp.navigation.Constants
-import com.example.mapapp.ui.components.SavedRouteCard
 import com.example.mapapp.viewmodel.SettingsViewModel
 import com.example.mapapp.viewmodel.ThemeViewModel
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -40,17 +37,6 @@ fun SettingsScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            /* TODO: remove these buttons when the actual place is ready */
-            Button(onClick = { navController.navigate(Constants.LOCATION_SCREEN_ROUTE.replace("{locationID}","ChIJj61dQgK6j4AR4GeTYWZsKWw"))
-            }) {
-                Text("test location screen ChIJj61dQgK6j4AR4GeTYWZsKWw")
-            }
-
-            Button(onClick = { navController.navigate(Constants.LOCATION_SCREEN_ROUTE.replace("{locationID}","ChIJZexZ7Qf4jUYRPDNL6MX8Zvo"))
-            }) {
-                Text("test location screen ChIJZexZ7Qf4jUYRPDNL6MX8Zvo")
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
             Profile()
             Settings()
