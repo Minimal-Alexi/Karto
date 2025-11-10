@@ -15,6 +15,7 @@ import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
@@ -30,6 +31,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     */
     private val _nearbyPlaces = MutableStateFlow<List<Place>?>(null)
     val nearbyPlaces: StateFlow<List<Place>?> = _nearbyPlaces
+    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.BEACHES)
+    val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
     private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
     val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
 
@@ -65,6 +68,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
+    fun changePlaceType(newPlaceType : TypesOfPlaces){
+        _placeTypeSelection.value = newPlaceType
+    }
     fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travellingMode: String = "WALK") {
         viewModelScope.launch {
             try {
@@ -90,6 +96,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             try {
                 if (_userLocation.value != null) {
                     val placeRequest = PlacesRequest(
+                        includedTypes = _placeTypeSelection.value.places,
                         locationRestriction = LocationRestriction(
                             Circle(
                                 _userLocation.value!!,
