@@ -63,6 +63,7 @@ data class PlaceDetailsResponse(
 )
 
 data class Place(
+    val id:String,
     val displayName:DisplayName,
     val location: LatLng
 )
