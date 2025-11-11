@@ -2,6 +2,9 @@ package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -29,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -237,69 +241,80 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
          */
 
         // GoogleMap Compose
-        GoogleMap(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp),
-            cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(
-                    LatLng(60.1699, 24.9384),
-                    12f
-                ) // Helsinki in default
-            }
+                .height(400.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, _ ->
+                        change.consume()
+                    }
+                }
         ) {
-            if (userLocation.value != null) {
-                Marker(
-                    state = rememberUpdatedMarkerState(position = userLocation.value!!),
-                    title = "Your location",
-                    snippet = "Your current location"
-                )
-            }
-            if (nearbyLocations.value != null) {
-                for (place in nearbyLocations.value) {
+            GoogleMap(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp),
+                cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(
+                        LatLng(60.1699, 24.9384),
+                        12f
+                    ) // Helsinki in default
+                }
+            ) {
+                if (userLocation.value != null) {
                     Marker(
-                        state = rememberUpdatedMarkerState(position = place.location),
-                        title = place.displayName.text,
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                        tag = place,
-                        onClick =
-                            {
-                                exploreViewModel.toggleRouteStop(place)
-                                false
-                            }
+                        state = rememberUpdatedMarkerState(position = userLocation.value!!),
+                        title = "Your location",
+                        snippet = "Your current location"
                     )
                 }
-            }
+                if (nearbyLocations.value != null) {
+                    for (place in nearbyLocations.value) {
+                        Marker(
+                            state = rememberUpdatedMarkerState(position = place.location),
+                            title = place.displayName.text,
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                            tag = place,
+                            onClick =
+                                {
+                                    exploreViewModel.toggleRouteStop(place)
+                                    false
+                                }
+                        )
+                    }
+                }
 
 
-            polyline.value?.let { encoded ->
-                val path = PolyUtil.decode(encoded)
-                Polyline(
-                    points = path,
-                    color = Color.Blue,
-                    width = 8f
+                polyline.value?.let { encoded ->
+                    val path = PolyUtil.decode(encoded)
+                    Polyline(
+                        points = path,
+                        color = Color.Blue,
+                        width = 8f
+                    )
+                }
+
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        GmsLatLng(
+                            origin.latitude,
+                            origin.longitude
+                        )
+                    ),
+                    title = "Origin"
+                )
+
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        GmsLatLng(
+                            destination.latitude,
+                            destination.longitude
+                        )
+                    ),
+                    title = "Destination"
                 )
             }
-
-            Marker(
-                state = rememberUpdatedMarkerState(
-                    GmsLatLng(
-                        origin.latitude,
-                        origin.longitude
-                    )
-                ),
-                title = "Origin"
-            )
-
-            Marker(
-                state = rememberUpdatedMarkerState(
-                    GmsLatLng(
-                        destination.latitude,
-                        destination.longitude
-                    )
-                ),
-                title = "Destination"
-            )
         }
     }
 }
