@@ -26,10 +26,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
+import com.example.mapapp.ui.components.RatingRow
 
 @Composable
 fun LocationScreen(locationID: String?, navController: NavController) {
@@ -48,26 +50,34 @@ fun LocationDetailsScreen(locationID: String, navController: NavController) {
     val locationInformation = vm.uiState.collectAsState().value
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val imageHeight = this.maxHeight / 2
+        val containerHeight = this.maxHeight
 
         Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painterResource(R.drawable.helsinki),
-                contentDescription = "helsinki",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(imageHeight)
-            )
+            if (locationInformation.photo != null) {
+                Image(
+                    bitmap = locationInformation.photo.asImageBitmap(),
+                    contentDescription = "helsinki",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = containerHeight / 2)
+                )
 
-            BackButton(onClick = {
-                navController.navigateUp()
-            }, modifier = Modifier.padding(12.dp))
+                BackButton(onClick = {
+                    navController.navigateUp()
+                }, modifier = Modifier.padding(12.dp))
+            }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = imageHeight - 40.dp)
+                    .padding(
+                        top = if (locationInformation.photo != null) {
+                            (containerHeight / 2) - 40.dp
+                        } else {
+                            0.dp
+                        }
+                    )
                     .background(
                         color = MaterialTheme.colorScheme.background,
                         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
@@ -78,50 +88,19 @@ fun LocationDetailsScreen(locationID: String, navController: NavController) {
             ) {
                 Column {
                     locationInformation.displayName?.let {
-                        Text(text = it, style = MaterialTheme.typography.titleLarge)
+                        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                            if (locationInformation.photo == null) {
+                                BackButton(onClick = { navController.navigateUp() }, modifier = Modifier.padding(0.dp))
+                            }
+
+                            Text(text = it, style = MaterialTheme.typography.titleLarge)
+                        }
+                        locationInformation.type?.let { Text(text = it) }
                     }
-                    locationInformation.type?.let { Text(text = it) }
+                    locationInformation.summary?.let { Text(text = it) }
+                    locationInformation.rating?.let { RatingRow(it) }
                 }
-                locationInformation.summary?.let { Text(text = it) }
-                locationInformation.rating?.let { RatingRow(it) }
             }
-        }
-    }
-}
-
-@Composable
-fun RatingRow(rating: Double) {
-    @Composable
-    fun getIcon(index: Int) {
-        val painter = when {
-            rating - index >= 0.0 -> painterResource(R.drawable.star_filled)
-            rating - index >= -0.5 -> painterResource(R.drawable.star_half)
-            else -> painterResource(R.drawable.star_empty)
-        }
-
-        val description = when {
-            rating - index >= 0.0 -> "filled star icon"
-            rating - index >= -0.5 -> "half star icon"
-            else -> "empty star icon"
-        }
-
-        Icon(
-            painter = painter,
-            contentDescription = description,
-            tint = Color.Unspecified
-        )
-    }
-
-    if (rating <= 0.0 || rating > 5.0) {
-        Text(text = "(No ratings)")
-    } else {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            getIcon(1)
-            getIcon(2)
-            getIcon(3)
-            getIcon(4)
-            getIcon(5)
-            Text(text = " ($rating)")
         }
     }
 }
