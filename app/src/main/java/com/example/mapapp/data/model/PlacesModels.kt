@@ -54,6 +54,7 @@ data class PlacesResponse(
 )
 
 data class Place(
+    val id:String,
     val displayName:DisplayName,
     val location: LatLng
 )
