@@ -97,7 +97,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     )
 
                 _routeInfo.value =
-                    "Distance: ${routeInfoWalkOrDrive.first} meters, Time cost: ${routeInfoWalkOrDrive.second} seconds, Travel mode: $travelMode"
+                    "Distance: ${routeInfoWalkOrDrive.first} meters, Time cost: ${routeInfoWalkOrDrive.second} seconds"
             } catch (e: Exception) {
                 e.printStackTrace()
                 _routePolyline.value = null
