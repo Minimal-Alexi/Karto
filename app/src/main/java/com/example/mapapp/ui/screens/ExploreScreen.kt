@@ -36,6 +36,7 @@ import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.viewmodel.PredictionViewModel
@@ -67,7 +68,8 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
 
         MapScreen(exploreViewModel)
 
-        SelectedStopsSection(navigateToLocationScreen)
+        SelectedStopsSection(navigateToLocationScreen,
+            exploreViewModel.routeStops.collectAsState().value)
 
         RouteSummarySection()
 
@@ -343,7 +345,10 @@ fun RouteSummarySection() {
 }
 
 @Composable
-fun SelectedStopsSection(navigateToLocationScreen: (String) -> Unit) {
+fun SelectedStopsSection(
+    navigateToLocationScreen: (String) -> Unit,
+    selectedRouteStops: List<com.example.mapapp.data.model.Place>
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -366,195 +371,22 @@ fun SelectedStopsSection(navigateToLocationScreen: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SelectedStopItem(
-                    time = "12:05",
-                    locationName = "Mustikkamaan ranta",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJqwoUM14JkkYRtUIe2tzlrF8",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                SelectedStopItem(
-                    time = "12:55",
-                    locationName = "Karhusaari Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    closingInfo = "Closes at 16:00",
-                    placesID = "ChIJabi06Yb1jUYRh5VZ9yyiOr8",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                SelectedStopItem(
-                    time = "13:40",
-                    locationName = "Vetokannas Swimming Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJ2YucHr33jUYRoa1UdtWwqSM",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                SelectedStopItem(
-                    time = "14:25",
-                    locationName = "Hietaranta Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJC4WpRTkKkkYRH_pPtYjChjg",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SelectedStopItem(
-    time: String,
-    locationName: String,
-    distance: String,
-    duration: String,
-    closingInfo: String? = null,
-    placesID: String,
-    navigateToLocationScreen: (String) -> Unit,
-    onStayTimeChange: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val stayTimeOptions: List<String> = listOf("15 min", "30 min", "45 min", "1 h")
-    var selectedStayTime by remember { mutableStateOf(stayTimeOptions.first()) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.Top) {
-                Column {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "Location icon",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = distance,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = duration,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = locationName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.widthIn(max = 210.dp)
-                    )
-
-                    closingInfo?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    // Stay time selector
-                    Box {
-                        OutlinedTextField(
-                            value = selectedStayTime,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Stay time") },
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .clickable { expanded = true },
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select stay time"
-                                )
-                            }
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            stayTimeOptions.forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(option) },
-                                    onClick = {
-                                        selectedStayTime = option
-                                        onStayTimeChange(option)
-                                        expanded = false
-                                    }
-                                )
-                            }
+                for(place:com.example.mapapp.data.model.Place in selectedRouteStops){
+                    SelectedStopItem(
+                        time = "12:05",
+                        locationName = place.displayName.text,
+                        distance = "2.7 km",
+                        duration = "30 min",
+                        placesID = place.id,
+                        navigateToLocationScreen = navigateToLocationScreen,
+                        onStayTimeChange = { selectedTime ->
+                            // handle the selected stay time
+                            println("Stay time selected: $selectedTime")
                         }
-                    }
+                    )
+                    HorizontalDivider(color = Color(0xFFDDDDDD))
                 }
             }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // "Read more about the route stop" button
-                IconButton(
-                    onClick = {
-                        navigateToLocationScreen(placesID)
-                    },
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.MenuBook,
-                        contentDescription = "Read more",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-
-                // "Delete the route stop" button
-                IconButton(
-                    onClick = { /* TODO: Delete the route stop */ },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Delete,
-                        contentDescription = "Delete the route stop",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
