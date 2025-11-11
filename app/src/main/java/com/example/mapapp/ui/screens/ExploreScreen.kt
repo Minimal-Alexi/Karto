@@ -221,7 +221,11 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
                         title = place.displayName.text,
                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                         tag = place,
-                        /*TODO: Add onclick that creates route stop. onClick = {} */
+                        onClick =
+                            {
+                                exploreViewModel.toggleRouteStop(place)
+                                false
+                            }
                     )
                 }
             }
