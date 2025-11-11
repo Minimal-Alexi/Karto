@@ -45,6 +45,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     /*
     Route and Polyline
      */
+    private val _routeStops = MutableStateFlow<List<Place>>(listOf())
+    val routeStops: StateFlow<List<Place>> = _routeStops
     private val _routePolyline = MutableStateFlow<String?>(null)
     val routePolyline: StateFlow<String?> = _routePolyline
 
@@ -63,7 +65,16 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 }
         }
     }
-
+    fun toggleRouteStop(placeToToggle: Place) {
+        val currentList = _routeStops.value.toMutableList()
+        if (currentList.contains(placeToToggle)) {
+            currentList.remove(placeToToggle)
+        } else {
+            currentList.add(placeToToggle)
+        }
+        _routeStops.value = currentList
+        Log.d(null, "List of route stops:$currentList")
+    }
     fun changeDistanceToPlaces(newValue: Double){
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
