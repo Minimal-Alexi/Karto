@@ -40,7 +40,7 @@ fun NavGraph() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") { HomeScreen() }
-            composable("explore") { ExploreScreen() }
+            composable("explore") { ExploreScreen(navigateToLocationScreen = navigateToLocationScreen) }
             composable("route") { RouteScreen(navigateToLocationScreen = navigateToLocationScreen) }
             composable("saved") { SavedScreen() }
             composable("settings") { SettingsScreen() }

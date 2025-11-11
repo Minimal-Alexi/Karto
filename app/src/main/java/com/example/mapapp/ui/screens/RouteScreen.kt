@@ -51,7 +51,7 @@ fun RouteScreen(navigateToLocationScreen: (String) -> Unit) {
         RouteTitleSection()
         MapScreenPlaceholder()
         OnRouteSection(navigateToLocationScreen)
-        RouteSummarySection()
+        RouteProgressSection()
         PrimaryButton(
             text = "Pause This Route",
             backgroundColor = MaterialTheme.colorScheme.error
@@ -303,7 +303,7 @@ fun RouteStopItem(
 }
 
 @Composable
-fun RouteSummarySection() {
+fun RouteProgressSection() {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
