@@ -54,7 +54,8 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
-fun ExploreScreen(navigateToLocationScreen: (String) -> Unit) {
+fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
+                  exploreViewModel: ExploreViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,7 +65,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit) {
     ) {
         RouteTitleSection()
 
-        MapScreen()
+        MapScreen(exploreViewModel)
 
         SelectedStopsSection(navigateToLocationScreen)
 
@@ -93,7 +94,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit) {
 }
 
 @Composable
-fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
+fun MapScreen(exploreViewModel: ExploreViewModel) {
 
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
