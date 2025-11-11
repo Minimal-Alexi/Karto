@@ -49,8 +49,17 @@ data class PlacesRequest(
     val locationRestriction: LocationRestriction
 )
 
+/* nearby places */
 data class PlacesResponse(
     val places:List<Place>
+)
+
+/* location screen*/
+data class PlaceDetailsResponse(
+    val displayName : DisplayName,
+    val rating: Double,
+    val editorialSummary : EditorialSummary,
+    val primaryTypeDisplayName : PrimaryTypeDisplayName,
 )
 
 data class Place(
@@ -68,4 +77,12 @@ data class LocationRestriction(
 data class Circle(
     val center: LatLng,
     val radius:Double = 1000.0
+)
+
+data class EditorialSummary(
+    val text : String
+)
+
+data class PrimaryTypeDisplayName (
+    val text : String
 )
