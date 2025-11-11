@@ -3,6 +3,7 @@ package com.example.mapapp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -57,41 +58,41 @@ import com.google.android.gms.maps.model.LatLng as GmsLatLng
 @Composable
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                   exploreViewModel: ExploreViewModel = viewModel()) {
-    Column(
+
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp, 0.dp)
-            .verticalScroll(rememberScrollState()),
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        RouteTitleSection()
-
-        MapScreen(exploreViewModel)
-
-        SelectedStopsSection(navigateToLocationScreen,
-            exploreViewModel.routeStops.collectAsState().value)
-
-        RouteSummarySection()
-
-        PrimaryButton(
-            text = "Start This Route",
-            backgroundColor = MaterialTheme.colorScheme.secondary
-        ) {
-            /* TODO: Start route */
+        item { RouteTitleSection() }
+        item { MapScreen(exploreViewModel) }
+        item {
+            SelectedStopsSection(
+                navigateToLocationScreen,
+                exploreViewModel.routeStops.collectAsState().value
+            )
         }
-        PrimaryButton(
-            text = "Save This Route For Later",
-            backgroundColor = MaterialTheme.colorScheme.primary
-        ) {
-            /* TODO: Save route */
+        item { RouteSummarySection() }
+        item {
+            PrimaryButton(
+                text = "Start This Route",
+                backgroundColor = MaterialTheme.colorScheme.secondary
+            ) { /* TODO */ }
         }
-        PrimaryButton(
-            text = "Reset This Route",
-            backgroundColor = MaterialTheme.colorScheme.error
-        ) {
-            /* TODO: Reset route */
+        item {
+            PrimaryButton(
+                text = "Save This Route For Later",
+                backgroundColor = MaterialTheme.colorScheme.primary
+            ) { /* TODO */ }
         }
-        Spacer(modifier = Modifier.height(0.dp))
+        item {
+            PrimaryButton(
+                text = "Reset This Route",
+                backgroundColor = MaterialTheme.colorScheme.error
+            ) { /* TODO */ }
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
