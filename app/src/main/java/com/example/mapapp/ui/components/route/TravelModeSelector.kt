@@ -28,10 +28,11 @@ fun TravelModeSelector(
     selectedMode: String,
     onModeSelected: (String) -> Unit,
 ) {
-    val modes = listOf("Walk", "TRANSIT", "Drive")
+    val modes = listOf("Walk", "Transit", "Drive")
     val icons = listOf(
-        Icons.Default.DirectionsCar,
-        Icons.AutoMirrored.Filled.DirectionsWalk, Icons.Default.DirectionsTransit
+        Icons.AutoMirrored.Filled.DirectionsWalk,
+        Icons.Default.DirectionsTransit,
+        Icons.Default.DirectionsCar
     )
 
     Row(
@@ -42,13 +43,14 @@ fun TravelModeSelector(
     ) {
         modes.forEachIndexed { index, mode ->
             val isSelected = selectedMode == mode
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (isSelected) Color(0xFF1976D2) else Color.LightGray)
                     .clickable { onModeSelected(mode) }
-                    .padding(12.dp)) {
+                    .padding(12.dp)
+            ) {
 
                 Icon(
                     imageVector = icons[index],

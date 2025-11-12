@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.view.MotionEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -17,8 +18,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,6 +34,7 @@ import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.TravelModeSelector
+
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.viewmodel.PredictionViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -63,7 +70,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 exploreViewModel.routeStops.collectAsState().value,
             )
         }
-        item { RouteSummarySection() }
+        item { RouteSummarySection(exploreViewModel) }
         item {
             PrimaryButton(
                 text = "Start This Route",
@@ -224,13 +231,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             }
         )
 
-        Text(
-            text = if (routeInfo != null) "Distance: $routeInfo" else "",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        )
-
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ){
@@ -251,17 +251,11 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        change.consume()
-                    }
-                }
+                .height(400.dp),
         ) {
             GoogleMap(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp),
+                    .fillMaxSize(),
                 cameraPositionState = rememberCameraPositionState {
                     position = CameraPosition.fromLatLngZoom(
                         LatLng(60.1699, 24.9384),
@@ -327,7 +321,9 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
 }
 
 @Composable
-fun RouteSummarySection() {
+fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
+    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -351,15 +347,7 @@ fun RouteSummarySection() {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "Locations: 4 restaurants",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "Distance: 5.4 km",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "Time: ≈ 1 hour 40 minutes",
+                    text = if (routeInfo != null) "$routeInfo" else "",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
