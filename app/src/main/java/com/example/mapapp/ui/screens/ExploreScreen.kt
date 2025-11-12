@@ -118,6 +118,9 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
         mutableStateOf(RouteLatLng(0.0, 0.0))
     }
 
+    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+    var selectedMode by remember { mutableStateOf("Walking") }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -215,10 +218,28 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
             }
         }
 
+        TravelModeSelector(
+            selectedMode = selectedMode,
+            onModeSelected = {
+                selectedMode = it
+                exploreViewModel.fetchRoute(
+                    origin,
+                    destination,
+                    travelMode = selectedMode
+                )
+            }
+        )
+
+        Text(
+            text = if (routeInfo != null) "Distance: $routeInfo" else "",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
+
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ){
-            TravelModeSelector()
             PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
             DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
                 exploreViewModel::changeDistanceToPlaces)
