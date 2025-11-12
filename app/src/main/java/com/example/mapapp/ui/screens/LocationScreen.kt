@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mapapp.ui.components.BackButton
@@ -25,12 +25,9 @@ import com.example.mapapp.viewmodel.LocationScreenViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.mapapp.R
 import com.example.mapapp.ui.components.RatingRow
 
 @Composable
@@ -46,7 +43,11 @@ fun LocationScreen(locationID: String?, navController: NavController) {
 @Composable
 fun LocationDetailsScreen(locationID: String, navController: NavController) {
     val vm = viewModel<LocationScreenViewModel>()
-    vm.getLocationInformation(locationID)
+
+    LaunchedEffect(key1 = locationID) {
+        vm.getLocationInformation(locationID)
+    }
+
     val locationInformation = vm.uiState.collectAsState().value
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -87,7 +88,7 @@ fun LocationDetailsScreen(locationID: String, navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Column {
-                    locationInformation.displayName?.let {
+                    locationInformation.displayName?.let { it ->
                         Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                             if (locationInformation.photo == null) {
                                 BackButton(onClick = { navController.navigateUp() }, modifier = Modifier.padding(0.dp))
