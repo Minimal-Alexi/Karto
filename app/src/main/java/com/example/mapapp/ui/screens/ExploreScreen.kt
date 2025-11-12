@@ -2,20 +2,11 @@ package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -25,17 +16,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.viewmodel.PredictionViewModel
@@ -54,46 +45,49 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
-fun ExploreScreen(navigateToLocationScreen: (String) -> Unit) {
-    Column(
+fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
+                  exploreViewModel: ExploreViewModel = viewModel()) {
+
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp, 0.dp)
-            .verticalScroll(rememberScrollState()),
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        RouteTitleSection()
-
-        MapScreen()
-
-        SelectedStopsSection(navigateToLocationScreen)
-
-        RouteSummarySection()
-
-        PrimaryButton(
-            text = "Start This Route",
-            backgroundColor = MaterialTheme.colorScheme.secondary
-        ) {
-            /* TODO: Start route */
+        item { RouteTitleSection() }
+        item { MapScreen(exploreViewModel) }
+        item {
+            SelectedStopsSection(
+                navigateToLocationScreen,
+                exploreViewModel::removeRouteStop,
+                exploreViewModel.routeStops.collectAsState().value,
+            )
         }
-        PrimaryButton(
-            text = "Save This Route For Later",
-            backgroundColor = MaterialTheme.colorScheme.primary
-        ) {
-            /* TODO: Save route */
+        item { RouteSummarySection() }
+        item {
+            PrimaryButton(
+                text = "Start This Route",
+                backgroundColor = MaterialTheme.colorScheme.secondary
+            ) { /* TODO */ }
         }
-        PrimaryButton(
-            text = "Reset This Route",
-            backgroundColor = MaterialTheme.colorScheme.error
-        ) {
-            /* TODO: Reset route */
+        item {
+            PrimaryButton(
+                text = "Save This Route For Later",
+                backgroundColor = MaterialTheme.colorScheme.primary
+            ) { /* TODO */ }
         }
-        Spacer(modifier = Modifier.height(0.dp))
+        item {
+            PrimaryButton(
+                text = "Reset This Route",
+                backgroundColor = MaterialTheme.colorScheme.error
+            ) { /* TODO */ }
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
 @Composable
-fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
+fun MapScreen(exploreViewModel: ExploreViewModel) {
 
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
@@ -254,65 +248,80 @@ fun MapScreen(exploreViewModel: ExploreViewModel = viewModel()) {
          */
 
         // GoogleMap Compose
-        GoogleMap(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp),
-            cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(
-                    LatLng(60.1699, 24.9384),
-                    12f
-                ) // Helsinki in default
-            }
+                .height(400.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, _ ->
+                        change.consume()
+                    }
+                }
         ) {
-            if (userLocation.value != null) {
-                Marker(
-                    state = rememberUpdatedMarkerState(position = userLocation.value!!),
-                    title = "Your location",
-                    snippet = "Your current location"
-                )
-            }
-            if (nearbyLocations.value != null) {
-                for (place in nearbyLocations.value) {
+            GoogleMap(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp),
+                cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(
+                        LatLng(60.1699, 24.9384),
+                        12f
+                    ) // Helsinki in default
+                }
+            ) {
+                if (userLocation.value != null) {
                     Marker(
-                        state = rememberUpdatedMarkerState(position = place.location),
-                        title = place.displayName.text,
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                        tag = place,
-                        /*TODO: Add onclick that creates route stop. onClick = {} */
+                        state = rememberUpdatedMarkerState(position = userLocation.value!!),
+                        title = "Your location",
+                        snippet = "Your current location"
                     )
                 }
-            }
+                if (nearbyLocations.value != null) {
+                    for (place in nearbyLocations.value) {
+                        Marker(
+                            state = rememberUpdatedMarkerState(position = place.location),
+                            title = place.displayName.text,
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                            tag = place,
+                            onClick =
+                                {
+                                    exploreViewModel.addRouteStop(place)
+                                    false
+                                }
+                        )
+                    }
+                }
 
 
-            polyline.value?.let { encoded ->
-                val path = PolyUtil.decode(encoded)
-                Polyline(
-                    points = path,
-                    color = Color.Blue,
-                    width = 8f
+                polyline.value?.let { encoded ->
+                    val path = PolyUtil.decode(encoded)
+                    Polyline(
+                        points = path,
+                        color = Color.Blue,
+                        width = 8f
+                    )
+                }
+
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        GmsLatLng(
+                            origin.latitude,
+                            origin.longitude
+                        )
+                    ),
+                    title = "Origin"
+                )
+
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        GmsLatLng(
+                            destination.latitude,
+                            destination.longitude
+                        )
+                    ),
+                    title = "Destination"
                 )
             }
-
-            Marker(
-                state = rememberUpdatedMarkerState(
-                    GmsLatLng(
-                        origin.latitude,
-                        origin.longitude
-                    )
-                ),
-                title = "Origin"
-            )
-
-            Marker(
-                state = rememberUpdatedMarkerState(
-                    GmsLatLng(
-                        destination.latitude,
-                        destination.longitude
-                    )
-                ),
-                title = "Destination"
-            )
         }
     }
 }
@@ -359,7 +368,11 @@ fun RouteSummarySection() {
 }
 
 @Composable
-fun SelectedStopsSection(navigateToLocationScreen: (String) -> Unit) {
+fun SelectedStopsSection(
+    navigateToLocationScreen: (String) -> Unit,
+    deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
+    selectedRouteStops: List<com.example.mapapp.data.model.Place>
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -382,195 +395,23 @@ fun SelectedStopsSection(navigateToLocationScreen: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                SelectedStopItem(
-                    time = "12:05",
-                    locationName = "Mustikkamaan ranta",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJqwoUM14JkkYRtUIe2tzlrF8",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                SelectedStopItem(
-                    time = "12:55",
-                    locationName = "Karhusaari Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    closingInfo = "Closes at 16:00",
-                    placesID = "ChIJabi06Yb1jUYRh5VZ9yyiOr8",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                SelectedStopItem(
-                    time = "13:40",
-                    locationName = "Vetokannas Swimming Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJ2YucHr33jUYRoa1UdtWwqSM",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                SelectedStopItem(
-                    time = "14:25",
-                    locationName = "Hietaranta Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJC4WpRTkKkkYRH_pPtYjChjg",
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    }
-                )
+                for(place:com.example.mapapp.data.model.Place in selectedRouteStops){
+                    SelectedStopItem(
+                        time = "12:05",
+                        locationName = place.displayName.text,
+                        distance = "2.7 km",
+                        duration = "30 min",
+                        placesID = place.id,
+                        navigateToLocationScreen = navigateToLocationScreen,
+                        onStayTimeChange = { selectedTime ->
+                            // handle the selected stay time
+                            println("Stay time selected: $selectedTime")
+                        },
+                        deleteOnClick = { deleteOnClick(place) }
+                    )
+                    HorizontalDivider(color = Color(0xFFDDDDDD))
+                }
             }
         }
-    }
-}
-
-@Composable
-fun SelectedStopItem(
-    time: String,
-    locationName: String,
-    distance: String,
-    duration: String,
-    closingInfo: String? = null,
-    placesID: String,
-    navigateToLocationScreen: (String) -> Unit,
-    onStayTimeChange: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val stayTimeOptions: List<String> = listOf("15 min", "30 min", "45 min", "1 h")
-    var selectedStayTime by remember { mutableStateOf(stayTimeOptions.first()) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.Top) {
-                Column {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "Location icon",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = distance,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = duration,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = locationName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.widthIn(max = 210.dp)
-                    )
-
-                    closingInfo?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    // Stay time selector
-                    Box {
-                        OutlinedTextField(
-                            value = selectedStayTime,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Stay time") },
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .clickable { expanded = true },
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select stay time"
-                                )
-                            }
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            stayTimeOptions.forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(option) },
-                                    onClick = {
-                                        selectedStayTime = option
-                                        onStayTimeChange(option)
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // "Read more about the route stop" button
-                IconButton(
-                    onClick = {
-                        navigateToLocationScreen(placesID)
-                    },
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.MenuBook,
-                        contentDescription = "Read more",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-
-                // "Delete the route stop" button
-                IconButton(
-                    onClick = { /* TODO: Delete the route stop */ },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Delete,
-                        contentDescription = "Delete the route stop",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-
-        }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
