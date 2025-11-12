@@ -3,23 +3,10 @@ package com.example.mapapp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,12 +16,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
@@ -74,7 +59,8 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
         item {
             SelectedStopsSection(
                 navigateToLocationScreen,
-                exploreViewModel.routeStops.collectAsState().value
+                exploreViewModel::removeRouteStop,
+                exploreViewModel.routeStops.collectAsState().value,
             )
         }
         item { RouteSummarySection() }
@@ -278,7 +264,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                             tag = place,
                             onClick =
                                 {
-                                    exploreViewModel.toggleRouteStop(place)
+                                    exploreViewModel.addRouteStop(place)
                                     false
                                 }
                         )
@@ -363,6 +349,7 @@ fun RouteSummarySection() {
 @Composable
 fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
+    deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
     selectedRouteStops: List<com.example.mapapp.data.model.Place>
 ) {
     Column(
@@ -398,7 +385,8 @@ fun SelectedStopsSection(
                         onStayTimeChange = { selectedTime ->
                             // handle the selected stay time
                             println("Stay time selected: $selectedTime")
-                        }
+                        },
+                        deleteOnClick = { deleteOnClick(place) }
                     )
                     HorizontalDivider(color = Color(0xFFDDDDDD))
                 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.mapapp.data.model.Place
 
 @Composable
 fun SelectedStopItem(
@@ -42,7 +43,8 @@ fun SelectedStopItem(
     closingInfo: String? = null,
     placesID: String,
     navigateToLocationScreen: (String) -> Unit,
-    onStayTimeChange: (String) -> Unit
+    onStayTimeChange: (String) -> Unit,
+    deleteOnClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     val stayTimeOptions: List<String> = listOf("15 min", "30 min", "45 min", "1 h")
@@ -152,7 +154,7 @@ fun SelectedStopItem(
 
                 // "Delete the route stop" button
                 IconButton(
-                    onClick = { /* TODO: Delete the route stop */ },
+                    onClick = deleteOnClick,
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(

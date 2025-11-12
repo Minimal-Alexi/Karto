@@ -65,15 +65,17 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 }
         }
     }
-    fun toggleRouteStop(placeToToggle: Place) {
+    fun addRouteStop(placeToToggle: Place) {
         val currentList = _routeStops.value.toMutableList()
-        if (currentList.contains(placeToToggle)) {
-            currentList.remove(placeToToggle)
-        } else {
+        if (!currentList.contains(placeToToggle)) {
             currentList.add(placeToToggle)
         }
         _routeStops.value = currentList
-        Log.d(null, "List of route stops:$currentList")
+    }
+    fun removeRouteStop(placeToRemove:Place){
+        val currentList = _routeStops.value.toMutableList()
+        currentList.remove(placeToRemove)
+        _routeStops.value = currentList
     }
     fun changeDistanceToPlaces(newValue: Double){
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
