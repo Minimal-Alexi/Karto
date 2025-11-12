@@ -50,6 +50,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val _routePolyline = MutableStateFlow<String?>(null)
     val routePolyline: StateFlow<String?> = _routePolyline
 
+    private val _routeInfo = MutableStateFlow<String?>(null)
+    val routeInfo: StateFlow<String?> = _routeInfo
+
 
     private val locationClient: LocationClient =
         DefaultLocationClient(
@@ -77,33 +80,47 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         currentList.remove(placeToRemove)
         _routeStops.value = currentList
     }
+
     fun changeDistanceToPlaces(newValue: Double){
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
-    fun changePlaceType(newPlaceType : TypesOfPlaces){
+    fun changePlaceType(newPlaceType: TypesOfPlaces) {
         _placeTypeSelection.value = newPlaceType
     }
-    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travellingMode: String = "WALK") {
+
+    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travelMode: String = "WALK") {
         viewModelScope.launch {
             try {
                 val request = RoutesRequest(
                     origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
                     destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
-                    travelMode = travellingMode
+                    travelMode = travelMode
                 )
                 val response = RoutesApi.service.computeRoutes(
                     request,
-                    fieldMask = "routes.polyline.encodedPolyline"
+                    fieldMask = "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
                 )
                 val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
                 _routePolyline.value = polyline
+
+                val routeInfoWalkOrDrive =
+                    Pair(
+                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                        response.routes?.firstOrNull()?.duration ?: "No route found"
+                    )
+
+                _routeInfo.value =
+                    "Distance: ${routeInfoWalkOrDrive.first} meters, Time cost: ${routeInfoWalkOrDrive.second} seconds"
             } catch (e: Exception) {
                 e.printStackTrace()
                 _routePolyline.value = null
+                _routeInfo.value = "No route found"
+
             }
         }
     }
+
     fun getNearbyPlaces() {
         viewModelScope.launch {
             try {
