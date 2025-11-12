@@ -43,6 +43,7 @@ enum class TypesOfPlaces(val displayName: String, val places: List<String>) {
     ));
 }
 
+/* nearby places */
 data class PlacesRequest(
     val maxResultCount:Int = 20,
     val includedTypes:List <String>,
@@ -53,7 +54,21 @@ data class PlacesResponse(
     val places:List<Place>
 )
 
+/* location screen*/
+data class PlaceDetailsResponse(
+    val displayName : DisplayName,
+    val rating: Double,
+    val editorialSummary : EditorialSummary,
+    val primaryTypeDisplayName : PrimaryTypeDisplayName,
+    val photos : List<Photo>
+)
+
+data class Photo(
+    val name : String
+)
+
 data class Place(
+    val id:String,
     val displayName:DisplayName,
     val location: LatLng
 )
@@ -68,4 +83,12 @@ data class LocationRestriction(
 data class Circle(
     val center: LatLng,
     val radius:Double = 1000.0
+)
+
+data class EditorialSummary(
+    val text : String
+)
+
+data class PrimaryTypeDisplayName (
+    val text : String
 )

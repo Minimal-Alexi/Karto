@@ -20,7 +20,7 @@ val Typography = Typography(
         fontFamily = pjs,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
+        lineHeight = 18.sp,
         letterSpacing = 0.5.sp
     ),
 
@@ -36,7 +36,7 @@ val Typography = Typography(
         fontFamily = pjs,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
-        lineHeight = 16.sp,
+        lineHeight = 14.sp,
         letterSpacing = 0.5.sp
     ),
 
@@ -45,6 +45,13 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 32.sp,
+    ),
+
+    titleMedium = TextStyle(
+        fontFamily = pjs,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = 30.sp,
     ),
 
     titleSmall = TextStyle(

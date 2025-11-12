@@ -1,8 +1,6 @@
 package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -20,12 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import com.example.mapapp.ui.components.SavedRouteCard
+import com.example.mapapp.ui.components.HistoryRouteCard
 import com.example.mapapp.viewmodel.SettingsViewModel
 import com.example.mapapp.viewmodel.ThemeViewModel
 
@@ -120,7 +115,7 @@ fun DarkModeSwitch() {
 
 @Composable
 fun RouteHistory() {
-    val routes = listOf("route 1", "route 2", "route 3") // this will fetch last 3 from user later
+    val routes = listOf("route 1", "route 2", "route 3")
 
     Row {
         Text(
@@ -134,9 +129,9 @@ fun RouteHistory() {
     }
 
     Column {
-        SavedRouteCard(routes[0])
-        SavedRouteCard(routes[1])
-        SavedRouteCard(routes[2])
+        HistoryRouteCard(routes[0])
+        HistoryRouteCard(routes[1])
+        HistoryRouteCard(routes[2])
         Spacer(modifier = Modifier.height(16.dp))
     }
 }

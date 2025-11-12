@@ -125,7 +125,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                         val response = PlacesApi.service.getNearbyPlaces(
                             placeRequest,
                             apiKey,
-                            "places.displayName,places.location"
+                            "places.displayName,places.location,places.id"
                         )
                         _nearbyPlaces.value = response.places
                         Log.d(null, "PLACES: " + _nearbyPlaces.value.toString())
