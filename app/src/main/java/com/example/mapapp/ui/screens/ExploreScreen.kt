@@ -97,7 +97,7 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(1000.dp) // fixed height is important
+            .height(400.dp) // fixed height is important
             .pointerInput(Unit) {
                 awaitPointerEventScope {
                     while (true) {
@@ -149,126 +149,126 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     val routeInfo by exploreViewModel.routeInfo.collectAsState()
     var selectedMode by remember { mutableStateOf("Walking") }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Column {
-            OutlinedTextField(
-                value = originText,
-                onValueChange = {
-                    predictionViewModel.clearPredictionsForDestination()
-                    originText = it
-                    if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
-                },
-                label = { Text("Origin") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        predictionViewModel.clearPredictionsForDestination()
-                    }
-            )
-            originPredictions.forEach { prediction ->
-                Text(
-                    text = prediction.getFullText(null).toString(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            val placeId = prediction.placeId
-                            val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
-                            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-                            placesClient.fetchPlace(request)
-                                .addOnSuccessListener { response ->
-                                    val place = response.place
-                                    origin = RouteLatLng(
-                                        place.location!!.latitude,
-                                        place.location!!.longitude
-                                    )
-                                    originText = place.formattedAddress ?: place.displayName
-                                            ?: "" // Update the textFiled
-                                    predictionViewModel.clearPredictionsForOrigin() // Clear the predictions after selecting one
-                                    exploreViewModel.fetchRoute(
-                                        origin,
-                                        destination
-                                    ) // Update the Route polyline after select
-                                }
-                        }
-                        .padding(8.dp)
-                )
-            }
-        }
-
-        // For testing now, remove later
-        Column {
-            OutlinedTextField(
-                value = destinationText,
-                onValueChange = {
-                    predictionViewModel.clearPredictionsForOrigin()
-                    destinationText = it
-                    if (it.length > 2) predictionViewModel.searchPlacesForDestination(it)
-                },
-                label = { Text("Destination") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        predictionViewModel.clearPredictionsForOrigin()
-                    }
-            )
-            destinationPredictions.forEach { prediction ->
-                Text(
-                    text = prediction.getFullText(null).toString(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            val placeId = prediction.placeId
-                            val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
-                            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-                            placesClient.fetchPlace(request)
-                                .addOnSuccessListener { response ->
-                                    val place = response.place
-                                    destination = RouteLatLng(
-                                        place.location!!.latitude,
-                                        place.location!!.longitude
-                                    )
-                                    destinationText = place.formattedAddress ?: place.displayName
-                                            ?: "" // Update the textFiled
-                                    predictionViewModel.clearPredictionsForDestination() // Clear the predictions after selecting one
-                                    exploreViewModel.fetchRoute(
-                                        origin,
-                                        destination
-                                    ) // Update the Route polyline after select
-                                }
-                        }
-                        .padding(8.dp)
-                )
-            }
-        }
-
-        TravelModeSelector(
-            selectedMode = selectedMode,
-            onModeSelected = {
-                selectedMode = it
-                exploreViewModel.fetchRoute(
-                    origin,
-                    destination,
-                    travelMode = selectedMode
-                )
-            }
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ){
-            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
-            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
-                exploreViewModel::changeDistanceToPlaces)
-            PrimaryButton(
-                text = "Check nearby locations",
-                backgroundColor = MaterialTheme.colorScheme.primary
-            ) { exploreViewModel.getNearbyPlaces() }
-        }
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        verticalArrangement = Arrangement.spacedBy(12.dp)
+//    ) {
+//        Column {
+//            OutlinedTextField(
+//                value = originText,
+//                onValueChange = {
+//                    predictionViewModel.clearPredictionsForDestination()
+//                    originText = it
+//                    if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
+//                },
+//                label = { Text("Origin") },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .clickable {
+//                        predictionViewModel.clearPredictionsForDestination()
+//                    }
+//            )
+//            originPredictions.forEach { prediction ->
+//                Text(
+//                    text = prediction.getFullText(null).toString(),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            val placeId = prediction.placeId
+//                            val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
+//                            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+//
+//                            placesClient.fetchPlace(request)
+//                                .addOnSuccessListener { response ->
+//                                    val place = response.place
+//                                    origin = RouteLatLng(
+//                                        place.location!!.latitude,
+//                                        place.location!!.longitude
+//                                    )
+//                                    originText = place.formattedAddress ?: place.displayName
+//                                            ?: "" // Update the textFiled
+//                                    predictionViewModel.clearPredictionsForOrigin() // Clear the predictions after selecting one
+//                                    exploreViewModel.fetchRoute(
+//                                        origin,
+//                                        destination
+//                                    ) // Update the Route polyline after select
+//                                }
+//                        }
+//                        .padding(8.dp)
+//                )
+//            }
+//        }
+//
+//        // For testing now, remove later
+//        Column {
+//            OutlinedTextField(
+//                value = destinationText,
+//                onValueChange = {
+//                    predictionViewModel.clearPredictionsForOrigin()
+//                    destinationText = it
+//                    if (it.length > 2) predictionViewModel.searchPlacesForDestination(it)
+//                },
+//                label = { Text("Destination") },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .clickable {
+//                        predictionViewModel.clearPredictionsForOrigin()
+//                    }
+//            )
+//            destinationPredictions.forEach { prediction ->
+//                Text(
+//                    text = prediction.getFullText(null).toString(),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .clickable {
+//                            val placeId = prediction.placeId
+//                            val placeFields = listOf(Place.Field.LOCATION, Place.Field.DISPLAY_NAME)
+//                            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+//
+//                            placesClient.fetchPlace(request)
+//                                .addOnSuccessListener { response ->
+//                                    val place = response.place
+//                                    destination = RouteLatLng(
+//                                        place.location!!.latitude,
+//                                        place.location!!.longitude
+//                                    )
+//                                    destinationText = place.formattedAddress ?: place.displayName
+//                                            ?: "" // Update the textFiled
+//                                    predictionViewModel.clearPredictionsForDestination() // Clear the predictions after selecting one
+//                                    exploreViewModel.fetchRoute(
+//                                        origin,
+//                                        destination
+//                                    ) // Update the Route polyline after select
+//                                }
+//                        }
+//                        .padding(8.dp)
+//                )
+//            }
+//        }
+//
+//        TravelModeSelector(
+//            selectedMode = selectedMode,
+//            onModeSelected = {
+//                selectedMode = it
+//                exploreViewModel.fetchRoute(
+//                    origin,
+//                    destination,
+//                    travelMode = selectedMode
+//                )
+//            }
+//        )
+//
+//        Column(
+//            verticalArrangement = Arrangement.spacedBy(12.dp)
+//        ){
+//            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
+//            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
+//                exploreViewModel::changeDistanceToPlaces)
+//            PrimaryButton(
+//                text = "Check nearby locations",
+//                backgroundColor = MaterialTheme.colorScheme.primary
+//            ) { exploreViewModel.getNearbyPlaces() }
+//        }
 
         /**
          * Code of route polyline is above
@@ -345,7 +345,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             }
         }
     }
-}
 
 @Composable
 fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
