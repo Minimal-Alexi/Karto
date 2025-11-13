@@ -1,15 +1,12 @@
 package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -21,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
@@ -30,15 +26,10 @@ import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.TravelModeSelector
-
 import com.example.mapapp.viewmodel.ExploreViewModel
-import com.example.mapapp.viewmodel.PredictionViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -111,7 +102,6 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
                         // wait for the first down
                         val down = awaitFirstDown(requireUnconsumed = false)
                         mapInteraction.value = true
-
                         // keep reading pointer events until all pointers are up
                         do {
                             val event = awaitPointerEvent()
@@ -132,29 +122,16 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
 
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val helsinki = LatLng(60.1699, 24.9384)
-
     val polyline = exploreViewModel.routePolyline.collectAsState()
 
     /**
      * Code of route polyline is below
      */
-    val context = LocalContext.current
-    val placesClient = remember { Places.createClient(context) }
-    val predictionViewModel = remember { PredictionViewModel(placesClient) }
-
-    var originText by remember { mutableStateOf("") }
-    var destinationText by remember { mutableStateOf("") }
-    val originPredictions by predictionViewModel.originPredictions.collectAsState()
-    val destinationPredictions by predictionViewModel.destinationPredictions.collectAsState()
 
     var origin by remember { mutableStateOf(RouteLatLng(60.1699, 24.9384)) }
     var destination by remember {
         mutableStateOf(RouteLatLng(0.0, 0.0))
     }
-
-    val routeInfo by exploreViewModel.routeInfo.collectAsState()
-    var selectedMode by remember { mutableStateOf("Walking") }
 
 //    Column(
 //        modifier = Modifier.fillMaxSize(),
