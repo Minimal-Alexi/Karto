@@ -252,18 +252,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
 //                )
 //            }
 //        }
-//
-//        TravelModeSelector(
-//            selectedMode = selectedMode,
-//            onModeSelected = {
-//                selectedMode = it
-//                exploreViewModel.fetchRoute(
-//                    origin,
-//                    destination,
-//                    travelMode = selectedMode
-//                )
-//            }
-//        )
 
         /**
          * Code of route polyline is above
