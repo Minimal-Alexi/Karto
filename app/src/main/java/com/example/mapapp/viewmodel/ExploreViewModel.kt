@@ -15,6 +15,7 @@ import com.example.mapapp.data.model.Circle
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.utils.SecretsHolder
@@ -45,6 +46,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     /*
     Route and Polyline
      */
+    private val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
+    val travelMode: StateFlow<TravelModes> = _travelMode
     private val _routeStops = MutableStateFlow<List<Place>>(listOf())
     val routeStops: StateFlow<List<Place>> = _routeStops
     private val _routePolyline = MutableStateFlow<String?>(null)
@@ -67,6 +70,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
         }
+    }
+    fun changeTravelMode(newTravelMode: TravelModes){
+        _travelMode.value = newTravelMode
     }
     fun addRouteStop(placeToToggle: Place) {
         val currentList = _routeStops.value.toMutableList()

@@ -64,6 +64,10 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
         item {
             NearbyPlaceSelector(exploreViewModel)
         }
+        item{
+            TravelModeSelector(exploreViewModel.travelMode.collectAsState().value,
+                exploreViewModel::changeTravelMode)
+        }
         item { MapWrapper(exploreViewModel,mapInteraction) }
         item {
             SelectedStopsSection(
