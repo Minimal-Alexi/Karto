@@ -61,6 +61,9 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
         userScrollEnabled = !mapInteraction.value
     ) {
         item { RouteTitleSection() }
+        item {
+            NearbyPlaceSelector(exploreViewModel)
+        }
         item { MapWrapper(exploreViewModel,mapInteraction) }
         item {
             SelectedStopsSection(
@@ -257,18 +260,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
 //                )
 //            }
 //        )
-//
-//        Column(
-//            verticalArrangement = Arrangement.spacedBy(12.dp)
-//        ){
-//            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
-//            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
-//                exploreViewModel::changeDistanceToPlaces)
-//            PrimaryButton(
-//                text = "Check nearby locations",
-//                backgroundColor = MaterialTheme.colorScheme.primary
-//            ) { exploreViewModel.getNearbyPlaces() }
-//        }
 
         /**
          * Code of route polyline is above
@@ -380,7 +371,20 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
         }
     }
 }
-
+@Composable
+fun NearbyPlaceSelector(exploreViewModel : ExploreViewModel){
+    Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ){
+            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
+            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
+                exploreViewModel::changeDistanceToPlaces)
+            PrimaryButton(
+                text = "Check nearby locations",
+                backgroundColor = MaterialTheme.colorScheme.primary
+            ) { exploreViewModel.getNearbyPlaces() }
+        }
+}
 @Composable
 fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
