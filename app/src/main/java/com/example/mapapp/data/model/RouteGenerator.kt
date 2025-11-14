@@ -1,8 +1,5 @@
 package com.example.mapapp.data.model
 
-import java.util.Collections
-import kotlin.math.min
-
 data class TravelRoute(
     val travelPath : Array<Int>,
     val travelCost: Int
@@ -28,15 +25,47 @@ data class TravelRoute(
 
 class RouteGenerator(){
 
-//    fun generateRoute(originTravelCost : Array<Int>,travelCostMatrix: Array<Array<Int>>) : TravelRoute{
-//        val numberOfNodes = travelCostMatrix.size
-//
-//    }
-    fun permutations(
+    fun generateRoute(originTravelCost : Array<Int>,travelCostMatrix: Array<Array<Int>>) : TravelRoute{
+        val numberOfNodes = travelCostMatrix.size
+        val availablePermutations = permutations((1..numberOfNodes).toMutableList(),arrayOf(0))
+        var minimumTravelRoute = TravelRoute(
+            availablePermutations[0],
+            calculateTravelCost
+                (
+                originTravelCost,
+                availablePermutations[0],
+                travelCostMatrix
+                        )
+        )
+        while (!availablePermutations.isEmpty()){
+            val newTravelRoute = TravelRoute(
+                availablePermutations[0],
+                calculateTravelCost
+                    (
+                    originTravelCost,
+                    availablePermutations[0],
+                    travelCostMatrix
+                )
+            )
+            if(minimumTravelRoute.travelCost > newTravelRoute.travelCost)
+                minimumTravelRoute = newTravelRoute
+            availablePermutations.drop(1)
+            println(availablePermutations)
+        }
+        return minimumTravelRoute
+    }
+    private fun calculateTravelCost(originTravelCost: Array<Int>,travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
+        var sum = originTravelCost[travelPath[1]]
+        for(i in 2 until travelPath.size - 1){
+            sum += travelCostMatrix[travelPath[i-1]][travelPath[i]]
+        }
+        return sum
+    }
+    private fun permutations(
         nodes: List<Int>,
-        prefix: List<Int> = emptyList(),
-        acc: MutableList<List<Int>> = mutableListOf()
-    ): List<List<Int>> {
+        prefix: Array<Int> = emptyArray(),
+        acc: MutableList<Array<Int>> = mutableListOf()
+    ): List<Array<Int>> {
 
         if (nodes.isEmpty()) {
             acc.add(prefix)
