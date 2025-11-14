@@ -37,20 +37,11 @@ class RouteGenerator(){
                 travelCostMatrix
                         )
         )
-        while (!availablePermutations.isEmpty()){
-            val newTravelRoute = TravelRoute(
-                availablePermutations[0],
-                calculateTravelCost
-                    (
-                    originTravelCost,
-                    availablePermutations[0],
-                    travelCostMatrix
-                )
-            )
-            if(minimumTravelRoute.travelCost > newTravelRoute.travelCost)
-                minimumTravelRoute = newTravelRoute
-            availablePermutations.drop(1)
-            println(availablePermutations)
+        for(path in availablePermutations){
+            val cost = calculateTravelCost(originTravelCost, path, travelCostMatrix)
+            if (cost < minimumTravelRoute.travelCost) {
+                minimumTravelRoute = TravelRoute(path, cost)
+            }
         }
         return minimumTravelRoute
     }
