@@ -20,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
+import com.example.mapapp.data.database.routes.RouteEntity
 
-// this should later take in the actual route as parameter later
 @Composable
-fun SavedRouteCard(route: String) {
+fun SavedRouteCard(
+    route: RouteEntity,
+    onDelete: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -45,9 +48,15 @@ fun SavedRouteCard(route: String) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(text = route, style = MaterialTheme.typography.titleMedium)
+                Text(text = route.title, style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(0.dp))
-                Text(text = "Saved 9 November 2025", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = "Saved ${
+                        java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault())
+                            .format(java.util.Date(route.savedAt))
+                    }",
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Text(text = "4 locations (15 km)", style = MaterialTheme.typography.bodyMedium)
 
                 Row(
@@ -67,7 +76,7 @@ fun SavedRouteCard(route: String) {
                         text = "Delete",
                         backgroundColor = MaterialTheme.colorScheme.error
                     ) {
-                        /* TODO: Delete route */
+                        onDelete()
                     }
                 }
             }
