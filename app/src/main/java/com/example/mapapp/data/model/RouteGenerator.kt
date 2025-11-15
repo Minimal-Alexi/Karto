@@ -95,7 +95,12 @@ class RouteGenerator(){
         return TravelRoute(travelPath.toTypedArray(),travelCost)
     }
     private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
-
+        val n = travelPath.size
+        var sum = 0
+        for(i in 1..n - 1){
+            sum += travelCostMatrix[travelPath[i - 1]][travelPath[i]]
+        }
+        return sum
     }
     private fun permutations(
         nodes: List<Int>,
