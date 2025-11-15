@@ -63,4 +63,23 @@ class RouteGeneratorUnitTest {
             routeGenerator.generateRouteGreedy(matrix2))
 
     }
+    @Test
+    fun testCheckIfAllNodesAreReachable(){
+        val matrix1 = arrayOf(
+            arrayOf(0,2,6,7,13),
+            arrayOf(0,0,4,7,32),
+            arrayOf(0,4,0,6,25),
+            arrayOf(0,7,6,0,3),
+            arrayOf(0,25,32,3,0),
+        )
+        assertTrue(routeGenerator.checkIfAllNodesAreReachable(matrix1))
+        val matrix2 = arrayOf(
+            arrayOf(0,2,6,7,0),
+            arrayOf(0,0,4,7,0),
+            arrayOf(0,4,0,6,0),
+            arrayOf(0,7,6,0,0),
+            arrayOf(0,0,0,0,0),
+        )
+        assertFalse(routeGenerator.checkIfAllNodesAreReachable(matrix2))
+    }
 }
