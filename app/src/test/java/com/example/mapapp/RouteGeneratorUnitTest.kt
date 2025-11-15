@@ -1,11 +1,10 @@
 package com.example.mapapp
 
-import com.example.mapapp.data.model.RouteGenerator
-import com.example.mapapp.data.model.TravelRoute
+import com.example.mapapp.utils.RouteGenerator
+import com.example.mapapp.utils.TravelRoute
 
 import org.junit.Test
 import org.junit.Assert.*
-import kotlin.collections.listOf
 
 /**
  * Example local unit test, which will execute on the development machine (host).

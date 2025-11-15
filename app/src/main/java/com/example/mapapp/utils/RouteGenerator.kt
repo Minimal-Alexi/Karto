@@ -1,4 +1,4 @@
-package com.example.mapapp.data.model
+package com.example.mapapp.utils
 
 import java.lang.Exception
 
