@@ -47,8 +47,8 @@ class RouteGenerator(){
     }
     private fun calculateTravelCost(originTravelCost: Array<Int>,travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
         var sum = originTravelCost[travelPath[1]]
-        for(i in 2 until travelPath.size - 1){
-            sum += travelCostMatrix[travelPath[i-1]][travelPath[i]]
+        for(i in 2 until travelPath.size){
+            sum += travelCostMatrix[travelPath[i-1]][travelPath[i]-1]
         }
         return sum
     }
