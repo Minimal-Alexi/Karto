@@ -38,7 +38,6 @@ class RouteGenerator(){
     To be discussed in detail later.
     This mean its time complexity is (n!), meaning it shouldn't be used for more than ten or so nodes, unless we want to turn the app into a screen saver.
     */
-    /*TODO: WORK ON GENERATE ROUTE ACCURATE.*/
     fun generateRouteAccurate(travelCostMatrix: Array<Array<Int>>): TravelRoute {
         val numberOfNodes = travelCostMatrix.size
         val availablePermutations = permutations(
