@@ -1,7 +1,6 @@
 package com.example.mapapp.data.model
 
 import java.lang.Exception
-import kotlin.math.min
 
 class UnreachableNodeException(message:String) : Exception(message)
 
