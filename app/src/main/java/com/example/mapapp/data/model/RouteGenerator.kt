@@ -25,32 +25,14 @@ data class TravelRoute(
 
 class RouteGenerator(){
 
-    fun generateRoute(originTravelCost : Array<Int>,travelCostMatrix: Array<Array<Int>>) : TravelRoute{
+    fun generateRoute(travelCostMatrix: Array<Array<Int>>) : TravelRoute{
         val numberOfNodes = travelCostMatrix.size
-        val availablePermutations = permutations((1.. numberOfNodes).toMutableList(),arrayOf(0))
-        var minimumTravelRoute = TravelRoute(
-            availablePermutations[0],
-            calculateTravelCost
-                (
-                originTravelCost,
-                availablePermutations[0],
-                travelCostMatrix
-                        )
-        )
-        for(path in availablePermutations){
-            val cost = calculateTravelCost(originTravelCost, path, travelCostMatrix)
-            if (cost < minimumTravelRoute.travelCost) {
-                minimumTravelRoute = TravelRoute(path, cost)
-            }
-        }
-        return minimumTravelRoute
+        val availablePermutations = permutations((1.. numberOfNodes - 1).toMutableList(),
+            arrayOf(0))
+
     }
-    private fun calculateTravelCost(originTravelCost: Array<Int>,travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
-        var sum = originTravelCost[travelPath[1]]
-        for(i in 2 until travelPath.size){
-            sum += travelCostMatrix[travelPath[i-1]][travelPath[i]-1]
-        }
-        return sum
+    private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
+
     }
     private fun permutations(
         nodes: List<Int>,
