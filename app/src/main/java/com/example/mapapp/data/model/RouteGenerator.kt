@@ -1,5 +1,7 @@
 package com.example.mapapp.data.model
 
+import kotlin.math.min
+
 data class TravelRoute(
     val travelPath : Array<Int>,
     val travelCost: Int
@@ -28,6 +30,7 @@ class RouteGenerator(){
     The route generator class contains two functions, generateRouteCorrect, and generateRouteGreedy.
     They both take the input travelCostMatrix, and both of the algorithms start from the point of origin 0.
     They return a TravelRoute data class, which contains the travel path, and the cost of said route.
+    If there are unreachable nodes, BOTH algorithms will break!
      */
     /*
     generateRouteAccurate generates all the permutations of possible routes that can be done, and finds the least costly route.
@@ -44,10 +47,37 @@ class RouteGenerator(){
     }
     /*
     generateRouteGreedy creates a route, by travelling from node to node, selecting the shortest route between each two nodes.
-    This mean its time complexity is (n), making it way more time efficient than generateRouteAccurate(), at the cost of the result being "acceptable enough."
+    This mean its time complexity is (n^2), making it way more time efficient than generateRouteAccurate(), at the cost of the result being "acceptable enough."
     */
-    fun generateRouteGreedy(travelCostMatrix: Array<Array<Int>>) : TravelRoute{
-        return TravelRoute(arrayOf(0),0)
+    fun generateRouteGreedy(travelCostMatrix: Array<Array<Int>>, startingPoint: Int = 0) : TravelRoute{
+        val visitedNodes : MutableList<Boolean> = MutableList(travelCostMatrix.size){false}
+        visitedNodes[startingPoint] = true
+
+        var currentNode = startingPoint
+        var travelCost = 0
+        val travelPath: MutableList<Int> = mutableListOf(currentNode)
+
+        while(visitedNodes.contains(false)){
+            var selectedNextNode = -1
+            var minimumValue = Int.MAX_VALUE
+            var indexOfI = 0
+            for(i in travelCostMatrix[currentNode]){
+                if(minimumValue > i && i >= 0 && !visitedNodes[indexOfI]){
+                    selectedNextNode = indexOfI
+                    minimumValue = i
+                }
+                indexOfI++
+            }
+
+            if (selectedNextNode == -1) break
+
+            visitedNodes[selectedNextNode] = true
+            currentNode = selectedNextNode
+            travelPath.add(currentNode)
+            travelCost += minimumValue
+        }
+
+        return TravelRoute(travelPath.toTypedArray(),travelCost)
     }
 //    private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
 //
