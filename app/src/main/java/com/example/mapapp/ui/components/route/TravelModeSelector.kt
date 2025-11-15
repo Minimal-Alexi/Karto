@@ -21,19 +21,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mapapp.data.model.TravelModes
 
 
 @Composable
 fun TravelModeSelector(
-    selectedMode: String,
-    onModeSelected: (String) -> Unit,
+    selectedMode: TravelModes,
+    onModeSelected: (TravelModes) -> Unit,
 ) {
-    val modes = listOf("Walk", "Transit", "Drive")
-    val icons = listOf(
-        Icons.AutoMirrored.Filled.DirectionsWalk,
-        Icons.Default.DirectionsTransit,
-        Icons.Default.DirectionsCar
-    )
+    val modes = TravelModes.entries
 
     Row(
         modifier = Modifier
@@ -53,12 +49,12 @@ fun TravelModeSelector(
             ) {
 
                 Icon(
-                    imageVector = icons[index],
-                    contentDescription = mode,
+                    imageVector = mode.icon,
+                    contentDescription = mode.name,
                     tint = if (isSelected) Color.White else Color.Black
                 )
                 Text(
-                    text = mode,
+                    text = mode.name,
                     color = if (isSelected) Color.White else Color.Black,
                     fontSize = 14.sp
                 )
