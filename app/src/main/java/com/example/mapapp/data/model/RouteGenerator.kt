@@ -1,6 +1,9 @@
 package com.example.mapapp.data.model
 
+import java.lang.Exception
 import kotlin.math.min
+
+class UnreachableNodeException(message:String) : Exception(message)
 
 data class TravelRoute(
     val travelPath : Array<Int>,
@@ -32,6 +35,16 @@ class RouteGenerator(){
     They return a TravelRoute data class, which contains the travel path, and the cost of said route.
     If there are unreachable nodes, BOTH algorithms will break!
      */
+    fun generateRoute(travelCostMatrix: Array<Array<Int>>): TravelRoute{
+        if(checkIfAllNodesAreReachable(travelCostMatrix)){
+            return if(travelCostMatrix.size >= 10)
+                generateRouteGreedy(travelCostMatrix)
+            else
+                generateRouteAccurate(travelCostMatrix)
+        }else{
+            throw UnreachableNodeException("Not all nodes can be visited. There is a missing route.")
+        }
+    }
     /*
     generateRouteAccurate generates all the permutations of possible routes that can be done, and finds the least costly route.
     If you check the test case, you can notice the routes are WAY better than the greedyRoutes, but this comes at a time cost.
@@ -92,6 +105,9 @@ class RouteGenerator(){
         }
 
         return TravelRoute(travelPath.toTypedArray(),travelCost)
+    }
+    fun checkIfAllNodesAreReachable(travelCostMatrix: Array<Array<Int>>): Boolean{
+        return false
     }
     private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
         val n = travelPath.size
