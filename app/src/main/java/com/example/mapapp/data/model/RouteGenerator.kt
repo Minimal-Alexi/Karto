@@ -39,11 +39,26 @@ class RouteGenerator(){
     This mean its time complexity is (n!), meaning it shouldn't be used for more than ten or so nodes, unless we want to turn the app into a screen saver.
     */
     /*TODO: WORK ON GENERATE ROUTE ACCURATE.*/
-    fun generateRouteAccurate(travelCostMatrix: Array<Array<Int>>) : TravelRoute{
+    fun generateRouteAccurate(travelCostMatrix: Array<Array<Int>>): TravelRoute {
         val numberOfNodes = travelCostMatrix.size
-        val availablePermutations = permutations((1.. numberOfNodes - 1).toMutableList(),
-            arrayOf(0))
-        return TravelRoute(arrayOf(0),0)
+        val availablePermutations = permutations(
+            (1..numberOfNodes - 1).toMutableList(),
+            arrayOf(0)
+        )
+        var minimumTravelRoute = TravelRoute(
+            availablePermutations[0], calculateTravelCost
+                (
+                availablePermutations[0],
+                travelCostMatrix
+            )
+        )
+        for (i in availablePermutations) {
+            val newCost = calculateTravelCost(i, travelCostMatrix)
+            if(newCost < minimumTravelRoute.travelCost){
+                minimumTravelRoute = TravelRoute(i,newCost)
+            }
+        }
+        return minimumTravelRoute
     }
     /*
     generateRouteGreedy creates a route, by travelling from node to node, selecting the shortest route between each two nodes.
@@ -79,9 +94,9 @@ class RouteGenerator(){
 
         return TravelRoute(travelPath.toTypedArray(),travelCost)
     }
-//    private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
-//
-//    }
+    private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
+
+    }
     private fun permutations(
         nodes: List<Int>,
         prefix: Array<Int> = emptyArray(),
