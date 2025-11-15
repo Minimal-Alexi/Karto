@@ -107,7 +107,22 @@ class RouteGenerator(){
         return TravelRoute(travelPath.toTypedArray(),travelCost)
     }
     fun checkIfAllNodesAreReachable(travelCostMatrix: Array<Array<Int>>): Boolean{
-        return false
+        val visitedNodes = BooleanArray(travelCostMatrix.size)
+        dfs(travelCostMatrix,visitedNodes)
+        return !visitedNodes.contains(false)
+    }
+    private fun dfs(
+        travelCostMatrix: Array<Array<Int>>,
+        visited: BooleanArray,
+        startingPoint: Int = 0
+    ) {
+        visited[startingPoint] = true
+
+        for (i in travelCostMatrix.indices) {
+            if (!visited[i] && travelCostMatrix[startingPoint][i] != 0) {
+                dfs(travelCostMatrix, visited, i)
+            }
+        }
     }
     private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
         val n = travelPath.size
