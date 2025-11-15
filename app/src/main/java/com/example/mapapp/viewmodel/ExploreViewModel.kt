@@ -9,6 +9,7 @@ import com.example.mapapp.data.model.RouteLocation
 import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.network.RoutesApi
 import android.util.Log
+import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Circle
@@ -17,6 +18,7 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
+import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
+    private val routeRepository = (application as KartoApplication).routeRepository
 
     /*
     Nearby Places & Filtering Variables
@@ -150,6 +153,17 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    fun saveRoute(title: String) {
+        val routeEntity = RouteEntity(
+            title = title,
+            savedAt = System.currentTimeMillis()
+        )
+
+        viewModelScope.launch {
+            routeRepository.saveRoute(routeEntity)
         }
     }
 }

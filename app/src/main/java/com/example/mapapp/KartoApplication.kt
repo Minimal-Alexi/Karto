@@ -4,12 +4,14 @@ import android.app.Application
 import android.content.pm.PackageManager
 import androidx.room.Room
 import com.example.mapapp.data.database.KartoDatabase
-import com.example.mapapp.data.database.UserRepository
+import com.example.mapapp.data.database.user.UserRepository
+import com.example.mapapp.data.database.routes.RouteRepository
 import com.example.mapapp.utils.SecretsHolder
 
 class KartoApplication : Application() {
     private val database by lazy { KartoDatabase.getDatabase(this) }
     val userRepository by lazy { UserRepository(database.userDao()) }
+    val routeRepository by lazy { RouteRepository(database.routeDao()) }
 
     override fun onCreate() {
         super.onCreate()

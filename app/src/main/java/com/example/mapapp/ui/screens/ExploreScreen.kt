@@ -55,13 +55,24 @@ import com.google.android.gms.maps.model.LatLng as GmsLatLng
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                   exploreViewModel: ExploreViewModel = viewModel()) {
 
+    var routeTitle by remember { mutableStateOf("Default Route Title") }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { RouteTitleSection() }
+        item {
+            OutlinedTextField(
+                value = routeTitle,
+                onValueChange = { routeTitle = it },
+                label = { Text("Route Title") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+        }
         item { MapScreen(exploreViewModel) }
         item {
             SelectedStopsSection(
@@ -81,7 +92,10 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
             PrimaryButton(
                 text = "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
-            ) { /* TODO */ }
+            ) {
+                val titleToSave = routeTitle.ifBlank { "No name route" }
+                exploreViewModel.saveRoute(title = titleToSave)
+            }
         }
         item {
             PrimaryButton(
