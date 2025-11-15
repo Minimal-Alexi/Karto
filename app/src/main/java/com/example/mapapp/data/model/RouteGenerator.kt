@@ -24,11 +24,18 @@ data class TravelRoute(
 }
 
 class RouteGenerator(){
-
-    fun generateRoute(travelCostMatrix: Array<Array<Int>>) : TravelRoute{
+    /*
+    The route generator class contains two functions, generateRouteCorrect, and generateRouteGreedy.
+    They both take the input travelCostMatrix, and both of the algorithms start from the point of origin 0.
+    They return a TravelRoute data class, which contains the travel path, and the cost of said route.
+     */
+    fun generateRouteAccurate(travelCostMatrix: Array<Array<Int>>) : TravelRoute{
         val numberOfNodes = travelCostMatrix.size
         val availablePermutations = permutations((1.. numberOfNodes - 1).toMutableList(),
             arrayOf(0))
+
+    }
+    fun generateRouteGreedy(travelCostMatrix: Array<Array<Int>>) : TravelRoute{
 
     }
     private fun calculateTravelCost(travelPath: Array<Int>, travelCostMatrix: Array<Array<Int>>):Int{
