@@ -50,7 +50,8 @@ import com.example.mapapp.viewmodel.HomeViewModel
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 
     val location = homeViewModel.greetingLocation.collectAsState().value
-    LaunchedEffect(location){
+    val userCoordinates = homeViewModel.userLocation.collectAsState().value
+    LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
     }
 

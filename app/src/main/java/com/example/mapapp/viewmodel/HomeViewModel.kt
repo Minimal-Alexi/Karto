@@ -22,8 +22,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _greetingLocation = MutableStateFlow<String>("Unknown")
     val greetingLocation : StateFlow<String> = _greetingLocation
 
-    private var _userLocation:LatLng? = null
-
+    private val _userLocation = MutableStateFlow<LatLng?>(null)
+    val userLocation: StateFlow<LatLng?> = _userLocation
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -34,7 +34,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             locationClient.getLocationUpdates(_LocationCallbackUpdate)
                 .collect { location ->
-                    _userLocation = LatLng(location.latitude, location.longitude)
+                    _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
         }
     }
@@ -42,8 +42,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun getReverseGeocodedLocation(){
         viewModelScope.launch{
             try{
-                if(_userLocation != null){
-                    val response = GeocodingApi.service.reverseGeocode(_userLocation.toString(),
+                if(_userLocation.value != null){
+                    val latitude = _userLocation.value!!.latitude
+                    val longitude = _userLocation.value!!.longitude
+                    val response = GeocodingApi.service.reverseGeocode(
+                        "$latitude,$longitude",
                         "locality|country",
                         SecretsHolder.apiKey!!)
                     val geoResult = extractCityAndCountryFlexible(response)
@@ -57,6 +60,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     private fun createGreeting(geoResult: GeoResult){
+        Log.d(null,geoResult)
         val stringBuilder = StringBuilder()
         if(geoResult.city != null){
             stringBuilder.append(geoResult.city + ", ")
