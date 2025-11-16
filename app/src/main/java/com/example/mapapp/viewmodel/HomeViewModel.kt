@@ -7,10 +7,15 @@ import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
+    private val _LocationCallbackUpdate = 3600000L // Once every hour.
 
+    private val _userLocation = MutableStateFlow<LatLng?>(null)
+    val userLocationString: StateFlow<LatLng?> = _userLocation
 
     private val locationClient: LocationClient =
         DefaultLocationClient(
@@ -19,12 +24,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         )
 
     /*TODO: Figure out how to not bomb the GeoCode API with thousands of requests.*/
-//    init {
-//        viewModelScope.launch {
-//            locationClient.getLocationUpdates(10000L)
-//                .collect { location ->
-//                    _userLocation.value = LatLng(location.latitude, location.longitude)
-//                }
-//        }
-//    }
+    init {
+        viewModelScope.launch {
+            locationClient.getLocationUpdates(_LocationCallbackUpdate)
+                .collect { location ->
+                    _userLocation.value = LatLng(location.latitude, location.longitude)
+                }
+        }
+    }
 }
