@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.network.GeocodingApi
@@ -14,11 +15,15 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = (application as KartoApplication).userRepository
     private val _LocationCallbackUpdate = 3600000L // Once every hour.
 
+    private val _firstName = MutableStateFlow<String>("First name not found")
+    val firstName : StateFlow<String> = _firstName
     private val _greetingLocation = MutableStateFlow<String>("Unknown")
     val greetingLocation : StateFlow<String> = _greetingLocation
 
@@ -36,6 +41,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
+            repository.getUser().collectLatest{ user ->
+                if(user?.firstName !=null){
+                    _firstName.value = user.firstName
+                }
+
+            }
         }
     }
 
