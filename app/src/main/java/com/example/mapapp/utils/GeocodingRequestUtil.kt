@@ -8,7 +8,10 @@ data class GeoResult(
 )
 
 fun extractCityAndCountryFlexible(response: ReverseGeocodingResponse): GeoResult {
-    val components = response.results.toList()
+    val firstResult = response.results.firstOrNull()
+        ?: return GeoResult(null, null)
+
+    val components = firstResult.addressComponents
 
     val city = sequenceOf(
         "locality",

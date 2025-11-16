@@ -60,7 +60,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
     private fun createGreeting(geoResult: GeoResult){
-        Log.d(null,geoResult)
         val stringBuilder = StringBuilder()
         if(geoResult.city != null){
             stringBuilder.append(geoResult.city + ", ")
