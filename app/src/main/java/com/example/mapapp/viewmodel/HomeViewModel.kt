@@ -1,10 +1,15 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
+import com.example.mapapp.data.network.GeocodingApi
+import com.example.mapapp.utils.GeoResult
+import com.example.mapapp.utils.SecretsHolder
+import com.example.mapapp.utils.extractCityAndCountryFlexible
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +19,10 @@ import kotlinx.coroutines.launch
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _LocationCallbackUpdate = 3600000L // Once every hour.
 
-    private val _userLocation = MutableStateFlow<LatLng?>(null)
-    val userLocationString: StateFlow<LatLng?> = _userLocation
+    private val _greetingLocation = MutableStateFlow<String>("Unknown")
+    val greetingLocation : StateFlow<String> = _greetingLocation
+
+    private var _userLocation:LatLng? = null
 
     private val locationClient: LocationClient =
         DefaultLocationClient(
@@ -23,13 +30,41 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             LocationServices.getFusedLocationProviderClient(application)
         )
 
-    /*TODO: Figure out how to not bomb the GeoCode API with thousands of requests.*/
     init {
         viewModelScope.launch {
             locationClient.getLocationUpdates(_LocationCallbackUpdate)
                 .collect { location ->
-                    _userLocation.value = LatLng(location.latitude, location.longitude)
+                    _userLocation = LatLng(location.latitude, location.longitude)
                 }
         }
+    }
+
+    fun getReverseGeocodedLocation(){
+        viewModelScope.launch{
+            try{
+                if(_userLocation == null){
+                    val response = GeocodingApi.service.reverseGeocode(_userLocation.toString(),
+                        "locality|country",
+                        SecretsHolder.apiKey!!)
+                    val geoResult = extractCityAndCountryFlexible(response)
+                    createGreeting(geoResult)
+                }
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+        }
+    }
+    private fun createGreeting(geoResult: GeoResult){
+        val stringBuilder = StringBuilder()
+        if(geoResult.city != null){
+            stringBuilder.append(geoResult.city + ", ")
+        }
+        if(geoResult.country != null){
+            stringBuilder.append(geoResult.country)
+        }
+        _greetingLocation.value = stringBuilder.toString()
+        Log.d(null,_greetingLocation.value)
     }
 }
