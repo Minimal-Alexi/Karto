@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object GeocodingApi {
     private const val BASE_URL = "https://maps.googleapis.com/maps/api/geocode"
 
-    val service: PlacesApiService by lazy {
+    val service: GeocodingApiService by lazy {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -22,6 +22,6 @@ object GeocodingApi {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(PlacesApiService::class.java)
+            .create(GeocodingApiService::class.java)
     }
 }
