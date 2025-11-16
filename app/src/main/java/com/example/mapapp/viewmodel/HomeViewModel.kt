@@ -22,13 +22,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = (application as KartoApplication).userRepository
     private val _LocationCallbackUpdate = 3600000L // Once every hour.
 
+    /*
+    Greeting Card Variables
+    */
     private val _firstName = MutableStateFlow<String>("First name not found")
     val firstName : StateFlow<String> = _firstName
     private val _greetingLocation = MutableStateFlow<String>("Unknown")
     val greetingLocation : StateFlow<String> = _greetingLocation
-
     private val _userLocation = MutableStateFlow<LatLng?>(null)
     val userLocation: StateFlow<LatLng?> = _userLocation
+
+    /*
+    Route Generation Setup
+    */
+    private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
+    val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -42,6 +50,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
         }
+    }
+
+    fun changeDistanceToPlaces(newValue: Double){
+        if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
     fun getName(){

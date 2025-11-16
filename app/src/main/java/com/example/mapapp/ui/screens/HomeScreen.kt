@@ -53,6 +53,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val greeting = homeViewModel.firstName.collectAsState().value
     val location = homeViewModel.greetingLocation.collectAsState().value
     val userCoordinates = homeViewModel.userLocation.collectAsState().value
+    val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
     }
@@ -74,7 +75,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             modifier = Modifier.padding(top = 12.dp)
         )
         CurrentLocationWidget(location)
-        MakeYourRouteCard()
+        MakeYourRouteCard(distanceToPlaces,homeViewModel::changeDistanceToPlaces)
         SuggestionsSection()
         Spacer(modifier = Modifier.height(0.dp))
     }
@@ -148,7 +149,7 @@ fun CurrentLocationWidget(location:String) {
 }
 
 @Composable
-fun MakeYourRouteCard() {
+fun MakeYourRouteCard(distanceToPlaces: Double, distanceSliderOnChange: (Double) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,17 +235,10 @@ fun MakeYourRouteCard() {
             var range by remember { mutableStateOf(1.5f..9.0f) }
 
             DistanceSlider(
-                distanceValue = 0.0,
-                onDistanceChange = {}
+                distanceValue = distanceToPlaces,
+                onDistanceChange = {distanceSliderOnChange(it)}
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(String.format("%.1f km", range.start))
-                Text(String.format("%.1f km", range.endInclusive))
-            }
             PrimaryButton(
                 text = "Make A Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
