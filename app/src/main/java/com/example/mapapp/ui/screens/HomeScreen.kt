@@ -43,7 +43,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.ui.components.DistanceSlider
+import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.viewmodel.HomeViewModel
 
@@ -54,6 +56,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val location = homeViewModel.greetingLocation.collectAsState().value
     val userCoordinates = homeViewModel.userLocation.collectAsState().value
     val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
+    val typeOfPlaceToVisit = homeViewModel.placeTypeSelector.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
     }
@@ -75,7 +78,10 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             modifier = Modifier.padding(top = 12.dp)
         )
         CurrentLocationWidget(location)
-        MakeYourRouteCard(distanceToPlaces,homeViewModel::changeDistanceToPlaces)
+        MakeYourRouteCard(typeOfPlaceToVisit,
+            distanceToPlaces,
+            homeViewModel::changeDistanceToPlaces,
+            homeViewModel::changePlaceType)
         SuggestionsSection()
         Spacer(modifier = Modifier.height(0.dp))
     }
@@ -149,7 +155,11 @@ fun CurrentLocationWidget(location:String) {
 }
 
 @Composable
-fun MakeYourRouteCard(distanceToPlaces: Double, distanceSliderOnChange: (Double) -> Unit) {
+fun MakeYourRouteCard(
+    currentTypesOfPlace: TypesOfPlaces,
+    distanceToPlaces: Double,
+    distanceSliderOnChange: (Double) -> Unit,
+    onDropdownMenuChange: (TypesOfPlaces) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,41 +177,7 @@ fun MakeYourRouteCard(distanceToPlaces: Double, distanceSliderOnChange: (Double)
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            var selectedCategory by remember { mutableStateOf("Beaches") }
-            var expanded by remember { mutableStateOf(false) }
-            val categories = listOf("Beaches", "Parks", "Museums", "Cafes")
-            Spacer(modifier = Modifier.height(2.dp))
-            Text("I want a route of", style = MaterialTheme.typography.bodyMedium)
-            Box {
-                OutlinedTextField(
-                    value = selectedCategory,
-                    onValueChange = {},
-                    readOnly = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = {
-                        IconButton(onClick = { expanded = !expanded }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    categories.forEach { item ->
-                        DropdownMenuItem(
-                            text = { Text(item) },
-                            onClick = {
-                                selectedCategory = item
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
+            PlaceTypeSelector(currentTypesOfPlace,onDropdownMenuChange)
             Spacer(modifier = Modifier.height(1.dp))
 
             Text("starting from", style = MaterialTheme.typography.bodyMedium)

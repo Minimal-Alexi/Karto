@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
+import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.GeocodingApi
 import com.example.mapapp.utils.GeoResult
 import com.example.mapapp.utils.SecretsHolder
@@ -35,6 +36,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     /*
     Route Generation Setup
     */
+    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.BEACHES)
+    val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
     private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
     val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
     private val locationClient: LocationClient =
@@ -50,6 +53,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
         }
+    }
+    fun changePlaceType(newPlaceType: TypesOfPlaces) {
+        _placeTypeSelection.value = newPlaceType
     }
 
     fun changeDistanceToPlaces(newValue: Double){
