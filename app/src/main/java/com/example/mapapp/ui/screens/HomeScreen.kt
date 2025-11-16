@@ -39,11 +39,21 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material.icons.filled.Nature
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+
+    val location = homeViewModel.greetingLocation.collectAsState().value
+    LaunchedEffect(location){
+        homeViewModel.getReverseGeocodedLocation()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -57,7 +67,7 @@ fun HomeScreen() {
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(top = 12.dp)
         )
-        CurrentLocationWidget()
+        CurrentLocationWidget(location)
         MakeYourRouteCard()
         SuggestionsSection()
         Spacer(modifier = Modifier.height(0.dp))
@@ -65,7 +75,7 @@ fun HomeScreen() {
 }
 
 @Composable
-fun CurrentLocationWidget() {
+fun CurrentLocationWidget(location:String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -105,7 +115,7 @@ fun CurrentLocationWidget() {
                     )
 
                     Text(
-                        text = "Helsinki, Finland",
+                        text = location,
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
