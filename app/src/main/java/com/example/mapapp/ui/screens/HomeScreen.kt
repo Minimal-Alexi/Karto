@@ -43,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.viewmodel.HomeViewModel
 
@@ -232,15 +233,9 @@ fun MakeYourRouteCard() {
 
             var range by remember { mutableStateOf(1.5f..9.0f) }
 
-            RangeSlider(
-                value = range,
-                onValueChange = { range = it },
-                valueRange = 0f..15f,
-                steps = 14,
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary
-                )
+            DistanceSlider(
+                distanceValue = 0.0,
+                onDistanceChange = {}
             )
 
             Row(
