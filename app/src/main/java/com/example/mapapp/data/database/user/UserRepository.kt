@@ -1,13 +1,13 @@
-package com.example.mapapp.data.database
+package com.example.mapapp.data.database.user
 
 import kotlinx.coroutines.flow.Flow
 
 class UserRepository(private val dao : UserDao) {
-    fun getUser() : Flow<User?> {
+    fun getUser() : Flow<UserEntity?> {
         return dao.getUser()
     }
 
-    suspend fun upsertUser(user: User) {
+    suspend fun upsertUser(user: UserEntity) {
         dao.upsertUser(user)
     }
 }

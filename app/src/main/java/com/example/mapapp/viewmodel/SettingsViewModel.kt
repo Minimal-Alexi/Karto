@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
-import com.example.mapapp.data.database.User
+import com.example.mapapp.data.database.user.UserEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -41,7 +41,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     fun createNew() {
         viewModelScope.launch {
-            repository.upsertUser(User(firstName = "", lastName = "", darkThemePreferred = false))
+            repository.upsertUser(UserEntity(firstName = "", lastName = "", darkThemePreferred = false))
         }
     }
 

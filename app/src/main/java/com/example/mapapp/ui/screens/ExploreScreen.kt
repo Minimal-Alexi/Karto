@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -42,7 +43,10 @@ import com.google.android.gms.maps.model.LatLng as GmsLatLng
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                   exploreViewModel: ExploreViewModel = viewModel()) {
 
+    var routeTitle by remember { mutableStateOf("Default Route Title") }
+
     val mapInteraction = remember { mutableStateOf(false) }
+
 
     LazyColumn(
         modifier = Modifier
@@ -51,7 +55,17 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         userScrollEnabled = !mapInteraction.value
     ) {
-        item { RouteTitleSection() }
+        item {
+            OutlinedTextField(
+                value = routeTitle,
+                onValueChange = { routeTitle = it },
+                label = { Text("Route Title") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+        }
+
         item {
             NearbyPlaceSelector(exploreViewModel)
         }
@@ -60,6 +74,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 exploreViewModel::changeTravelMode)
         }
         item { MapWrapper(exploreViewModel,mapInteraction) }
+        
         item {
             SelectedStopsSection(
                 navigateToLocationScreen,
@@ -78,7 +93,10 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
             PrimaryButton(
                 text = "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
-            ) { /* TODO */ }
+            ) {
+                val titleToSave = routeTitle.ifBlank { "No name route" }
+                exploreViewModel.saveRoute(title = titleToSave)
+            }
         }
         item {
             PrimaryButton(
