@@ -6,7 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object GeocodingApi {
-    private const val BASE_URL = "https://maps.googleapis.com/maps/api/geocode"
+    private const val BASE_URL = "https://maps.googleapis.com/maps/api/geocode/"
 
     val service: GeocodingApiService by lazy {
         val logging = HttpLoggingInterceptor().apply {
