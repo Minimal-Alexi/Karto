@@ -42,7 +42,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun getReverseGeocodedLocation(){
         viewModelScope.launch{
             try{
-                if(_userLocation == null){
+                if(_userLocation != null){
                     val response = GeocodingApi.service.reverseGeocode(_userLocation.toString(),
                         "locality|country",
                         SecretsHolder.apiKey!!)
