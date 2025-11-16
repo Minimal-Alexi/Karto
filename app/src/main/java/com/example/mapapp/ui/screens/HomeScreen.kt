@@ -49,10 +49,14 @@ import com.example.mapapp.viewmodel.HomeViewModel
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 
+    val greeting = homeViewModel.firstName.collectAsState().value
     val location = homeViewModel.greetingLocation.collectAsState().value
     val userCoordinates = homeViewModel.userLocation.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
+    }
+    LaunchedEffect(greeting) {
+        homeViewModel.getName()
     }
 
     Column(
@@ -63,7 +67,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Hello, new user!",
+            text = greeting,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(top = 12.dp)

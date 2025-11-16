@@ -41,15 +41,18 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
-            repository.getUser().collectLatest{ user ->
-                if(user?.firstName !=null){
-                    _firstName.value = user.firstName
-                }
-
-            }
         }
     }
 
+    fun getName(){
+        viewModelScope.launch {
+            repository.getUser().collectLatest{ user ->
+                if(user?.firstName !=null){
+                    _firstName.value = "Hello, ${user.firstName}"
+                }
+            }
+        }
+    }
     fun getReverseGeocodedLocation(){
         viewModelScope.launch{
             try{
