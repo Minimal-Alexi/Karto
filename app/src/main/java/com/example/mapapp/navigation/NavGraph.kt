@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,6 +18,7 @@ import com.example.mapapp.ui.screens.SettingsScreen
 
 object Constants {
     const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
+    const val EXPLORE_SCREEN_ROUTE = "explore"
 }
 
 @Composable
@@ -28,7 +30,22 @@ fun NavGraph() {
                 "{locationID}",
                 placesID
             )
-        )
+        ) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToScreen: (String) -> Unit = {
+        navController.navigate("explore") {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 
     Scaffold(
@@ -41,7 +58,12 @@ fun NavGraph() {
         ) {
             composable("home") { HomeScreen() }
             composable("explore") { ExploreScreen(navigateToLocationScreen = navigateToLocationScreen) }
-            composable("route") { RouteScreen(navigateToLocationScreen = navigateToLocationScreen) }
+            composable("route") {
+                RouteScreen(
+                    navigateToLocationScreen = navigateToLocationScreen,
+                    navigateToScreen = navigateToScreen
+                )
+            }
             composable("saved") { SavedScreen() }
             composable("settings") { SettingsScreen() }
 

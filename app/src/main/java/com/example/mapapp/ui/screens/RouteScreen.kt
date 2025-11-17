@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,10 +38,60 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.navigation.Constants
+import com.example.mapapp.navigation.Constants.EXPLORE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.ui.components.SecondaryButton
+import com.example.mapapp.viewmodel.CurrentRouteViewModel
 
 @Composable
-fun RouteScreen(navigateToLocationScreen: (String) -> Unit) {
+fun RouteScreen(
+    navigateToLocationScreen: (String) -> Unit,
+    currentRouteViewModel: CurrentRouteViewModel = viewModel(),
+    navigateToScreen: (String) -> Unit
+) {
+    val isOnRoute = remember { currentRouteViewModel.isOnRoute }
+
+
+        if (isOnRoute) {
+            CurrentRouteScreen(navigateToLocationScreen)
+        } else {
+            EmptyRouteScreen(navigateToScreen)
+        }
+
+}
+
+@Composable
+fun EmptyRouteScreen(
+    navigateToScreen : (String) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "You are not on a Route currently!",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "Once you start a Route, it will be here.",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            SecondaryButton(
+                text = "Make a Route",
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                onClick = { navigateToScreen(EXPLORE_SCREEN_ROUTE) })
+        }
+    }
+}
+
+@Composable
+fun CurrentRouteScreen(navigateToLocationScreen: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -48,18 +99,17 @@ fun RouteScreen(navigateToLocationScreen: (String) -> Unit) {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        RouteTitleSection()
-        MapScreenPlaceholder()
-        OnRouteSection(navigateToLocationScreen)
-        RouteProgressSection()
-        PrimaryButton(
-            text = "Pause This Route",
-            backgroundColor = MaterialTheme.colorScheme.error
-        ) {
-            /* TODO: Pause route */
-        }
-        Spacer(modifier = Modifier.height(0.dp))
+    RouteTitleSection()
+    MapScreenPlaceholder()
+    OnRouteSection(navigateToLocationScreen)
+    RouteProgressSection()
+    PrimaryButton(
+        text = "Pause This Route",
+        backgroundColor = MaterialTheme.colorScheme.error
+    ) {
+        /* TODO: Pause route */
     }
+    Spacer(modifier = Modifier.height(0.dp))}
 }
 
 @Composable
