@@ -7,8 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
+import com.example.mapapp.data.model.Circle
+import com.example.mapapp.data.model.LocationRestriction
+import com.example.mapapp.data.model.PlacesRequest
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.GeocodingApi
+import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.utils.GeoResult
 import com.example.mapapp.utils.SecretsHolder
 import com.example.mapapp.utils.extractCityAndCountryFlexible
@@ -40,6 +44,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
     private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
     val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
+
+    /*
+    Suggestion Card
+    */
+    private val _suggestionCardNumbers = MutableStateFlow<Array<Int>>(arrayOf(0,0,0))
+    val suggestionCardNumber: StateFlow<Array<Int>> = _suggestionCardNumbers
+
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -71,6 +82,37 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    fun getNumberOfNearbySuggestions(){
+        viewModelScope.launch {
+            try {
+                if (_userLocation.value != null) {
+                    val placeRequest = PlacesRequest(
+                        includedTypes = _placeTypeSelection.value.places,
+                        locationRestriction = LocationRestriction(
+                            Circle(
+                                _userLocation.value!!,
+                                10000.0
+                            )
+                        )
+                    )
+                    val apiKey = SecretsHolder.apiKey
+                    if (apiKey != null) {
+                        val response = PlacesApi.service.getNearbyPlaces(
+                            placeRequest,
+                            apiKey,
+                            "places.id"
+                        )
+                        _nearbyPlaces.value = response.places
+                        Log.d(null, "PLACES: " + _nearbyPlaces.value.toString())
+                    } else {
+                        Log.w(null, "No API key provided, how is this even working?")
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
     fun getReverseGeocodedLocation(){
         viewModelScope.launch{
             try{
@@ -90,6 +132,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
 
         }
+    }
+    private fun getNumberOfPlaces(){
+
     }
     private fun createGreeting(geoResult: GeoResult){
         val stringBuilder = StringBuilder()
