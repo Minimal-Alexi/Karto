@@ -9,7 +9,6 @@ import com.example.mapapp.data.model.RouteLocation
 import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.network.RoutesApi
 import android.util.Log
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
