@@ -105,7 +105,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         apiKey!!,
                         "places.id"
                     )
-                    _suggestionCardNumbers.value[typeOfPlaceToFetch] = response.places.size
+                    _suggestionCardNumbers.value =
+                        _suggestionCardNumbers.value.toMutableMap().apply {
+                            this[typeOfPlaceToFetch] = response.places.size
+                        } as HashMap<TypesOfPlaces, Int>
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -131,9 +134,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
 
         }
-    }
-    private fun getNumberOfPlaces(){
-
     }
     private fun createGreeting(geoResult: GeoResult){
         val stringBuilder = StringBuilder()
