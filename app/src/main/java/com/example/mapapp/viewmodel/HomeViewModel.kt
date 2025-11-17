@@ -48,8 +48,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     /*
     Suggestion Card
     */
-    private val _suggestionCardNumbers = MutableStateFlow<Array<Int>>(arrayOf(0,0,0))
-    val suggestionCardNumber: StateFlow<Array<Int>> = _suggestionCardNumbers
+    private val _suggestionCardNumbers = MutableStateFlow<HashMap<TypesOfPlaces,Int>>(hashMapOf(
+        TypesOfPlaces.BEACHES to 0,
+        TypesOfPlaces.NATURAL_FEATURES to 0,
+        TypesOfPlaces.RESTAURANTS to 0
+    ))
+    val suggestionCardNumber: StateFlow<HashMap<TypesOfPlaces,Int>> = _suggestionCardNumbers
 
     private val locationClient: LocationClient =
         DefaultLocationClient(
@@ -82,12 +86,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-    fun getNumberOfNearbySuggestions(){
+    fun getNumberOfNearbySuggestions(typeOfPlaceToFetch: TypesOfPlaces){
         viewModelScope.launch {
             try {
                 if (_userLocation.value != null) {
                     val placeRequest = PlacesRequest(
-                        includedTypes = _placeTypeSelection.value.places,
+                        includedTypes = typeOfPlaceToFetch.places,
                         locationRestriction = LocationRestriction(
                             Circle(
                                 _userLocation.value!!,
@@ -96,17 +100,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     )
                     val apiKey = SecretsHolder.apiKey
-                    if (apiKey != null) {
-                        val response = PlacesApi.service.getNearbyPlaces(
-                            placeRequest,
-                            apiKey,
-                            "places.id"
-                        )
-                        _nearbyPlaces.value = response.places
-                        Log.d(null, "PLACES: " + _nearbyPlaces.value.toString())
-                    } else {
-                        Log.w(null, "No API key provided, how is this even working?")
-                    }
+                    val response = PlacesApi.service.getNearbyPlaces(
+                        placeRequest,
+                        apiKey!!,
+                        "places.id"
+                    )
+                    _suggestionCardNumbers.value[typeOfPlaceToFetch] = response.places.size
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
