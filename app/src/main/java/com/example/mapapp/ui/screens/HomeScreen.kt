@@ -57,8 +57,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val userCoordinates = homeViewModel.userLocation.collectAsState().value
     val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
     val typeOfPlaceToVisit = homeViewModel.placeTypeSelector.collectAsState().value
+    val suggestionCardNumbers = homeViewModel.suggestionCardNumber.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
+        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
+        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
+        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
     }
     LaunchedEffect(greeting) {
         homeViewModel.getName()
@@ -82,7 +86,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             distanceToPlaces,
             homeViewModel::changeDistanceToPlaces,
             homeViewModel::changePlaceType)
-        SuggestionsSection()
+        SuggestionsSection(suggestionCardNumbers,location)
         Spacer(modifier = Modifier.height(0.dp))
     }
 }
@@ -226,7 +230,8 @@ fun MakeYourRouteCard(
 }
 
 @Composable
-fun SuggestionsSection() {
+fun SuggestionsSection(suggestionsMap: HashMap<TypesOfPlaces,Int>,
+                       location:String) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -239,19 +244,19 @@ fun SuggestionsSection() {
         SuggestionItem(
             icon = Icons.Default.Nature,
             title = "Nature Locations",
-            subtitle = "52 locations found in Helsinki"
+            subtitle = "${suggestionsMap[TypesOfPlaces.NATURAL_FEATURES]} locations found in $location"
         )
 
         SuggestionItem(
             icon = Icons.Default.BeachAccess,
             title = "Beaches",
-            subtitle = "24 locations found in Helsinki"
+            subtitle = "${suggestionsMap[TypesOfPlaces.BEACHES]} locations found in $location"
         )
 
         SuggestionItem(
             icon = Icons.Default.LocalBar,
             title = "Bars",
-            subtitle = "99+ locations found in Helsinki"
+            subtitle = "${suggestionsMap[TypesOfPlaces.RESTAURANTS]} locations found in $location"
         )
     }
 }
