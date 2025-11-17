@@ -22,6 +22,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
+import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
@@ -41,7 +42,8 @@ import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
-                  exploreViewModel: ExploreViewModel = viewModel()) {
+                  exploreViewModel: ExploreViewModel = viewModel(),
+                  navigateToScreen : (String) -> Unit) {
 
     var routeTitle by remember { mutableStateOf("Default Route Title") }
 
@@ -87,7 +89,9 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
             PrimaryButton(
                 text = "Start This Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
-            ) { /* TODO */ }
+            ) { /* TODO: actually make it start the route as well */
+                navigateToScreen(ROUTE_SCREEN_ROUTE)
+            }
         }
         item {
             PrimaryButton(

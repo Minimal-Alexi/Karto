@@ -19,6 +19,7 @@ import com.example.mapapp.ui.screens.SettingsScreen
 object Constants {
     const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
     const val EXPLORE_SCREEN_ROUTE = "explore"
+    const val ROUTE_SCREEN_ROUTE = "route"
 }
 
 @Composable
@@ -38,8 +39,8 @@ fun NavGraph() {
             restoreState = true
         }
     }
-    val navigateToScreen: (String) -> Unit = {
-        navController.navigate("explore") {
+    val navigateToScreen: (String) -> Unit = { destination ->
+        navController.navigate(destination) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
@@ -57,7 +58,12 @@ fun NavGraph() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") { HomeScreen() }
-            composable("explore") { ExploreScreen(navigateToLocationScreen = navigateToLocationScreen) }
+            composable("explore") {
+                ExploreScreen(
+                    navigateToLocationScreen = navigateToLocationScreen,
+                    navigateToScreen = navigateToScreen
+                )
+            }
             composable("route") {
                 RouteScreen(
                     navigateToLocationScreen = navigateToLocationScreen,
