@@ -74,6 +74,7 @@ data class Photo(
 )
 
 data class Place(
+    var typeOfPlace: TypesOfPlaces?,
     val id:String,
     val displayName:DisplayName,
     val location: LatLng

@@ -187,7 +187,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                         Marker(
                             state = rememberUpdatedMarkerState(position = place.location),
                             title = place.displayName.text,
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                            icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
+                                ?: BitmapDescriptorFactory.HUE_RED),
                             tag = place,
                             onClick =
                                 {
