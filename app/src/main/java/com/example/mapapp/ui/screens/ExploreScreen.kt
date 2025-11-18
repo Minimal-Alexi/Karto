@@ -202,21 +202,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                         }
                     }
                 }
-                for(place in routeStops.value){
-
-                    Marker(
-                        state = rememberUpdatedMarkerState(position = place.location),
-                        title = place.displayName.text,
-                        icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
-                            ?: BitmapDescriptorFactory.HUE_RED),
-                        tag = place,
-                        onClick =
-                            {
-                                //exploreViewModel.addRouteStop(place)
-                                false
-                            }
-                    )
-                }
 
 
                 polyline.value?.let { encoded ->
