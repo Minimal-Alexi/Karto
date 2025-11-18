@@ -60,6 +60,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     val routeInfo: StateFlow<String?> = _routeInfo
 
 
+    private val _LocationCallbackUpdate = 10000L
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -68,7 +69,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         viewModelScope.launch {
-            locationClient.getLocationUpdates(10000L)
+            locationClient.getLocationUpdates(_LocationCallbackUpdate)
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }

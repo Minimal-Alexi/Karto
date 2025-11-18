@@ -39,11 +39,35 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material.icons.filled.Nature
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.data.model.TypesOfPlaces
+import com.example.mapapp.ui.components.DistanceSlider
+import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+
+    val greeting = homeViewModel.firstName.collectAsState().value
+    val location = homeViewModel.greetingLocation.collectAsState().value
+    val userCoordinates = homeViewModel.userLocation.collectAsState().value
+    val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
+    val typeOfPlaceToVisit = homeViewModel.placeTypeSelector.collectAsState().value
+    val suggestionCardNumbers = homeViewModel.suggestionCardNumber.collectAsState().value
+    LaunchedEffect(location, userCoordinates){
+        homeViewModel.getReverseGeocodedLocation()
+        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
+        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
+        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
+    }
+    LaunchedEffect(greeting) {
+        homeViewModel.getName()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,20 +76,23 @@ fun HomeScreen() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Hello, new user!",
+            text = greeting,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(top = 12.dp)
         )
-        CurrentLocationWidget()
-        MakeYourRouteCard()
-        SuggestionsSection()
+        CurrentLocationWidget(location)
+        MakeYourRouteCard(typeOfPlaceToVisit,
+            distanceToPlaces,
+            homeViewModel::changeDistanceToPlaces,
+            homeViewModel::changePlaceType)
+        SuggestionsSection(suggestionCardNumbers,location)
         Spacer(modifier = Modifier.height(0.dp))
     }
 }
 
 @Composable
-fun CurrentLocationWidget() {
+fun CurrentLocationWidget(location:String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -105,7 +132,7 @@ fun CurrentLocationWidget() {
                     )
 
                     Text(
-                        text = "Helsinki, Finland",
+                        text = location,
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
@@ -132,7 +159,11 @@ fun CurrentLocationWidget() {
 }
 
 @Composable
-fun MakeYourRouteCard() {
+fun MakeYourRouteCard(
+    currentTypesOfPlace: TypesOfPlaces,
+    distanceToPlaces: Double,
+    distanceSliderOnChange: (Double) -> Unit,
+    onDropdownMenuChange: (TypesOfPlaces) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,41 +181,7 @@ fun MakeYourRouteCard() {
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            var selectedCategory by remember { mutableStateOf("Beaches") }
-            var expanded by remember { mutableStateOf(false) }
-            val categories = listOf("Beaches", "Parks", "Museums", "Cafes")
-            Spacer(modifier = Modifier.height(2.dp))
-            Text("I want a route of", style = MaterialTheme.typography.bodyMedium)
-            Box {
-                OutlinedTextField(
-                    value = selectedCategory,
-                    onValueChange = {},
-                    readOnly = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    trailingIcon = {
-                        IconButton(onClick = { expanded = !expanded }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                )
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    categories.forEach { item ->
-                        DropdownMenuItem(
-                            text = { Text(item) },
-                            onClick = {
-                                selectedCategory = item
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
+            PlaceTypeSelector(currentTypesOfPlace,onDropdownMenuChange)
             Spacer(modifier = Modifier.height(1.dp))
 
             Text("starting from", style = MaterialTheme.typography.bodyMedium)
@@ -217,24 +214,11 @@ fun MakeYourRouteCard() {
 
             var range by remember { mutableStateOf(1.5f..9.0f) }
 
-            RangeSlider(
-                value = range,
-                onValueChange = { range = it },
-                valueRange = 0f..15f,
-                steps = 14,
-                colors = SliderDefaults.colors(
-                    thumbColor = MaterialTheme.colorScheme.primary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary
-                )
+            DistanceSlider(
+                distanceValue = distanceToPlaces,
+                onDistanceChange = {distanceSliderOnChange(it)}
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(String.format("%.1f km", range.start))
-                Text(String.format("%.1f km", range.endInclusive))
-            }
             PrimaryButton(
                 text = "Make A Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
@@ -246,7 +230,8 @@ fun MakeYourRouteCard() {
 }
 
 @Composable
-fun SuggestionsSection() {
+fun SuggestionsSection(suggestionsMap: HashMap<TypesOfPlaces,Int>,
+                       location:String) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -259,19 +244,19 @@ fun SuggestionsSection() {
         SuggestionItem(
             icon = Icons.Default.Nature,
             title = "Nature Locations",
-            subtitle = "52 locations found in Helsinki"
+            subtitle = "${suggestionsMap[TypesOfPlaces.NATURAL_FEATURES]} locations found in $location"
         )
 
         SuggestionItem(
             icon = Icons.Default.BeachAccess,
             title = "Beaches",
-            subtitle = "24 locations found in Helsinki"
+            subtitle = "${suggestionsMap[TypesOfPlaces.BEACHES]} locations found in $location"
         )
 
         SuggestionItem(
             icon = Icons.Default.LocalBar,
             title = "Bars",
-            subtitle = "99+ locations found in Helsinki"
+            subtitle = "${suggestionsMap[TypesOfPlaces.RESTAURANTS]} locations found in $location"
         )
     }
 }
