@@ -1,6 +1,7 @@
 package com.example.mapapp
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,20 +19,38 @@ import com.google.android.libraries.places.api.Places
 import com.example.mapapp.viewmodel.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
+
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-            ),
-            0
-        )
+        ActivityCompat.requestPermissions(this, requiredPermissions, 100)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        val granted = grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+
+        if (granted) {
+            initializeApp()
+        }
+    }
+
+    private fun initializeApp() {
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, SecretsHolder.apiKey!!)
         }
+
         enableEdgeToEdge()
+
         setContent {
             AppWrapper()
         }
