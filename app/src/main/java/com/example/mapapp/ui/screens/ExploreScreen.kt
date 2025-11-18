@@ -177,6 +177,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                 if (userLocation.value != null) {
                     Marker(
                         state = rememberUpdatedMarkerState(position = userLocation.value!!),
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                         title = "Your location",
                         snippet = "Your current location"
                     )
