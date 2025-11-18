@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,10 +38,66 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.navigation.Constants.EXPLORE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.ui.components.SecondaryButton
+import com.example.mapapp.viewmodel.CurrentRouteViewModel
+import androidx.compose.runtime.collectAsState
+import com.example.mapapp.data.model.Place
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun RouteScreen(navigateToLocationScreen: (String) -> Unit) {
+fun RouteScreen(
+    navigateToLocationScreen: (String) -> Unit,
+    currentRouteViewModel: CurrentRouteViewModel = viewModel(),
+    navigateToScreen: (String) -> Unit
+) {
+    val isOnRoute = remember { currentRouteViewModel.isOnRoute }
+    val routeStops = remember { currentRouteViewModel.routeStops }
+
+    if (isOnRoute.collectAsState().value) {
+        CurrentRouteScreen(navigateToLocationScreen, routeStops)
+    } else {
+        EmptyRouteScreen(navigateToScreen)
+    }
+}
+
+@Composable
+fun EmptyRouteScreen(
+    navigateToScreen: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "You are not on a Route currently!",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "Once you start a Route, it will be here.",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            SecondaryButton(
+                text = "Make a Route",
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                onClick = { navigateToScreen(EXPLORE_SCREEN_ROUTE) })
+        }
+    }
+}
+
+@Composable
+fun CurrentRouteScreen(
+    navigateToLocationScreen: (String) -> Unit,
+    routeStops: StateFlow<List<Place>>
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +107,7 @@ fun RouteScreen(navigateToLocationScreen: (String) -> Unit) {
     ) {
         RouteTitleSection()
         MapScreenPlaceholder()
-        OnRouteSection(navigateToLocationScreen)
+        OnRouteSection(navigateToLocationScreen, routeStops)
         RouteProgressSection()
         PrimaryButton(
             text = "Pause This Route",
@@ -126,7 +183,8 @@ fun MapScreenPlaceholder() {
 
 @Composable
 fun OnRouteSection(
-    navigateToLocationScreen: (String) -> Unit
+    navigateToLocationScreen: (String) -> Unit,
+    routeStops: StateFlow<List<Place>>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -150,42 +208,17 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                RouteStopItem(
-                    time = "12:05",
-                    locationName = "Mustikkamaan ranta",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJqwoUM14JkkYRtUIe2tzlrF8",
-                    navigateToLocationScreen = navigateToLocationScreen
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                RouteStopItem(
-                    time = "12:55",
-                    locationName = "Karhusaari Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    closingInfo = "Closes at 16:00",
-                    placesID = "ChIJabi06Yb1jUYRh5VZ9yyiOr8",
-                    navigateToLocationScreen = navigateToLocationScreen
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                RouteStopItem(
-                    time = "13:40",
-                    locationName = "Vetokannas Swimming Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJ2YucHr33jUYRoa1UdtWwqSM",
-                    navigateToLocationScreen = navigateToLocationScreen
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
-                RouteStopItem(
-                    time = "14:25",
-                    locationName = "Hietaranta Beach",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "ChIJC4WpRTkKkkYRH_pPtYjChjg",
-                    navigateToLocationScreen = navigateToLocationScreen
-                )
+                for (location in routeStops.collectAsState().value){
+                    RouteStopItem(
+                        time = "12:05",
+                        locationName = location.displayName.text,
+                        distance = "2.7 km",
+                        duration = "30 min",
+                        placesID = location.id,
+                        navigateToLocationScreen = navigateToLocationScreen
+                    )
+                    HorizontalDivider(color = Color(0xFFDDDDDD))
+                }
             }
         }
     }
