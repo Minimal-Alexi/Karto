@@ -143,6 +143,7 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
 fun MapScreen(exploreViewModel: ExploreViewModel) {
 
     val userLocation = exploreViewModel.userLocation.collectAsState()
+    val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
 
@@ -184,18 +185,20 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                 }
                 if (nearbyLocations.value != null) {
                     for (place in nearbyLocations.value) {
-                        Marker(
-                            state = rememberUpdatedMarkerState(position = place.location),
-                            title = place.displayName.text,
-                            icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
-                                ?: BitmapDescriptorFactory.HUE_RED),
-                            tag = place,
-                            onClick =
-                                {
-                                    exploreViewModel.addRouteStop(place)
-                                    false
-                                }
-                        )
+                        if(!routeStops.value.contains(place)){
+                            Marker(
+                                state = rememberUpdatedMarkerState(position = place.location),
+                                title = place.displayName.text,
+                                icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
+                                    ?: BitmapDescriptorFactory.HUE_RED),
+                                tag = place,
+                                onClick =
+                                    {
+                                        exploreViewModel.addRouteStop(place)
+                                        false
+                                    }
+                            )
+                        }
                     }
                 }
 
