@@ -202,7 +202,19 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                         }
                     }
                 }
+                for(place in routeStops.value){
+                    Marker(
+                        state = rememberUpdatedMarkerState(position = place.location),
+                        title = place.displayName.text,
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                        tag = place,
+                        onClick =
+                            {
 
+                                false
+                            }
+                    )
+                }
 
                 polyline.value?.let { encoded ->
                     val path = PolyUtil.decode(encoded)
