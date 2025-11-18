@@ -210,7 +210,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                         tag = place,
                         onClick =
                             {
-
+                                exploreViewModel.removeRouteStop(place)
                                 false
                             }
                     )
