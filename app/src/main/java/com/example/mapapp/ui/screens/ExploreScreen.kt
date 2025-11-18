@@ -32,6 +32,7 @@ import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PinConfig
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -200,6 +201,21 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                             )
                         }
                     }
+                }
+                for(place in routeStops.value){
+
+                    Marker(
+                        state = rememberUpdatedMarkerState(position = place.location),
+                        title = place.displayName.text,
+                        icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
+                            ?: BitmapDescriptorFactory.HUE_RED),
+                        tag = place,
+                        onClick =
+                            {
+                                //exploreViewModel.addRouteStop(place)
+                                false
+                            }
+                    )
                 }
 
 
