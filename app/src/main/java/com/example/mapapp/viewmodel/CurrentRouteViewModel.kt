@@ -19,13 +19,13 @@ class CurrentRouteViewModel(application: Application) : AndroidViewModel(applica
         Place(
             "fakeID",
             displayName = DisplayName("placeholder location"),
-            location = LatLng(0.0, 0.0),
+            location = LatLng(0.0, 0.0)
         ),
 
         Place(
             "fakeID",
             displayName = DisplayName("second placeholder location"),
-            location = LatLng(0.0, 0.0),
+            location = LatLng(0.0, 0.0)
         ),
     ))
     val routeStops: StateFlow<List<Place>> = _routeStops

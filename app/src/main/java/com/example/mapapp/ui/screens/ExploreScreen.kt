@@ -103,7 +103,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 text = "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
             ) {
-                exploreViewModel.saveRoute(title = exploreViewModel.routeTitle.value)
+                exploreViewModel.saveRoute()
             }
         }
         item {
@@ -316,7 +316,7 @@ fun SelectedStopsSection(
                         locationName = place.displayName.text,
                         distance = "2.7 km",
                         duration = "30 min",
-                        placesID = place.id,
+                        placesId = place.id,
                         navigateToLocationScreen = navigateToLocationScreen,
                         onStayTimeChange = { selectedTime ->
                             // handle the selected stay time

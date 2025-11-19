@@ -1,9 +1,9 @@
 package com.example.mapapp.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -26,20 +26,17 @@ object Constants {
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
-    val navigateToLocationScreen: (String) -> Unit = { placesID ->
+    var currentRouteId: Int? = remember { null }
+
+    val navigateToLocationScreen: (String) -> Unit = { placesId ->
         navController.navigate(
             Constants.LOCATION_SCREEN_ROUTE.replace(
                 "{locationID}",
-                placesID
+                placesId
             )
-        ) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
+        )
     }
+
     val navigateToScreen: (String) -> Unit = { destination ->
         navController.navigate(destination) {
             popUpTo(navController.graph.findStartDestination().id) {
@@ -50,16 +47,34 @@ fun NavGraph() {
         }
     }
 
-    // Special navigation for saved routes to force a new instance of ExploreScreen
     val openRouteFromSaved: (Int) -> Unit = { routeId ->
-        navController.navigate("${Constants.EXPLORE_SCREEN_ROUTE}?routeId=$routeId") {
-            launchSingleTop = false // ensure new instance with updated routeId
-            restoreState = false
+        currentRouteId = routeId
+        navController.navigate("explore?routeId=$routeId") {
+            launchSingleTop = true
+        }
+    }
+
+    val navigateBottomBar: (String) -> Unit = { screen ->
+        if (screen == "explore") {
+            val route = currentRouteId
+            if (route != null) {
+                navController.navigate("explore?routeId=$route") {
+                    launchSingleTop = true
+                }
+            } else {
+                navController.navigate("explore") {
+                    launchSingleTop = true
+                }
+            }
+        } else {
+            navController.navigate(screen) {
+                launchSingleTop = true
+            }
         }
     }
 
     Scaffold(
-        bottomBar = { BottomBar(navController) }
+        bottomBar = { BottomBar(navController, navigateBottomBar) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -68,8 +83,8 @@ fun NavGraph() {
         ) {
             composable("home") { HomeScreen() }
             composable("explore?routeId={routeId}") { backStackEntry ->
-                Log.d("NavGraph", "routeId: ${backStackEntry.arguments?.getString("routeId")}")
                 val routeId = backStackEntry.arguments?.getString("routeId")?.toIntOrNull()
+                currentRouteId = routeId
                 ExploreScreen(
                     navigateToLocationScreen = navigateToLocationScreen,
                     navigateToScreen = navigateToScreen,

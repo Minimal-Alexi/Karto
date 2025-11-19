@@ -32,13 +32,14 @@ import kotlinx.coroutines.launch
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
-    var routeTitle = mutableStateOf("Default Route Title")
+    var routeTitle = mutableStateOf("Default Title")
+
     /*
     Nearby Places & Filtering Variables
     */
     private val _nearbyPlaces = MutableStateFlow<List<Place>?>(null)
     val nearbyPlaces: StateFlow<List<Place>?> = _nearbyPlaces
-    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.BEACHES)
+    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.RESTAURANTS)
     val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
     private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
     val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
@@ -89,7 +90,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 Place(
                     displayName = DisplayName(stop.name),
                     location = LatLng(stop.latitude, stop.longitude),
-                    id = stop.id.toString()
+                    id = stop.placesId
                 )
             }
         }
@@ -183,15 +184,16 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun saveRoute(title: String) {
+    fun saveRoute() {
         viewModelScope.launch {
             val route = RouteEntity(
-                title = title.ifBlank { "No name route" },
+                title = routeTitle.value.ifBlank { "No name route" },
                 savedAt = System.currentTimeMillis()
             )
             val stops = routeStops.value.mapIndexed { index, stop ->
                 RouteStopEntity(
                     routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
                     name = stop.displayName.text,
                     latitude = stop.location.latitude,
                     longitude = stop.location.longitude,

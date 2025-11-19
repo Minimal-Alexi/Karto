@@ -8,7 +8,7 @@ import androidx.compose.ui.res.painterResource
 import com.example.mapapp.R
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(navController: NavController, navigateBottomBar: (String) -> Unit) {
     val items = listOf(
         "home" to R.drawable.home_icon,
         "explore" to R.drawable.search_icon,
@@ -24,15 +24,7 @@ fun BottomBar(navController: NavController) {
             val isSelected = currentRoute?.startsWith(screen) == true
             NavigationBarItem(
                 selected = isSelected,
-                onClick = {
-                    navController.navigate(screen) {
-                        launchSingleTop = true
-                        restoreState = true
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                    }
-                },
+                onClick = { navigateBottomBar(screen) },
                 label = { Text(text = screen.replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.labelSmall) },
                 icon = { Icon(painter = painterResource(id = iconRes), contentDescription = screen.replaceFirstChar { it.uppercase() }) },
                 colors = NavigationBarItemDefaults.colors(
