@@ -13,7 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,15 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.navigation.Constants.EXPLORE_SCREEN_ROUTE
-import com.example.mapapp.ui.components.PrimaryButton
-import com.example.mapapp.ui.components.SecondaryButton
+import com.example.mapapp.ui.components.buttons.PrimaryButton
+import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.mapapp.data.database.routes.RouteEntity
-import com.example.mapapp.data.model.Place
-import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun RouteScreen(

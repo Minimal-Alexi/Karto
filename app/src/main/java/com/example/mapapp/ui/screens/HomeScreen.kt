@@ -8,14 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.mapapp.R
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material.icons.filled.Nature
@@ -46,7 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.viewmodel.HomeViewModel
 
 @Composable

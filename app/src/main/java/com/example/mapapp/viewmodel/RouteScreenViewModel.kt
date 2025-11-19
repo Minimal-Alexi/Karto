@@ -26,27 +26,6 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
             initialValue = null
         )
 
-    val isOnRoute : StateFlow<Boolean> = currentRoute
-        .map { it != null }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
-    private var _routeStops = MutableStateFlow<List<Place>>(listOf(
-        Place(
-            TypesOfPlaces.NATURAL_FEATURES,
-            "fakeID",
-            displayName = DisplayName("placeholder location"),
-            location = LatLng(0.0, 0.0),
-        ),
-
-        Place(
-            TypesOfPlaces.NATURAL_FEATURES,
-            "fakeID",
-            displayName = DisplayName("second placeholder location"),
-            location = LatLng(0.0, 0.0),
-        ),
-    ))
-    val routeStops: StateFlow<List<Place>> = _routeStops
-
     fun completeRoute() {
         val routeEntity = RouteEntity(
             title = currentRoute.value?.title ?: "Default Route Title",

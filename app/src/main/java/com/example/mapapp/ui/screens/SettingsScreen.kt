@@ -1,6 +1,5 @@
 package com.example.mapapp.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,12 +31,11 @@ fun SettingsScreen() {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(16.dp, 0.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
             Profile()
             Settings()
             RouteHistory()
@@ -49,16 +46,16 @@ fun SettingsScreen() {
 @Composable
 fun Profile() {
     val vm = viewModel<SettingsViewModel>()
-    val uiState by vm.uiState.collectAsState()
+    val user by vm.user.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
 
-    val isDataChanged = (firstName != uiState.firstName) || (lastName != uiState.lastName)
+    val isDataChanged = (firstName != user?.firstName) || (lastName != user?.lastName)
 
-    LaunchedEffect(uiState) {
-        firstName = uiState.firstName ?: ""
-        lastName = uiState.lastName ?: ""
+    LaunchedEffect(user) {
+        firstName = user?.firstName ?: ""
+        lastName = user?.lastName ?: ""
     }
     Text("Profile Name", style = MaterialTheme.typography.titleLarge)
 
@@ -124,21 +121,18 @@ fun RouteHistory() {
             "History", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(4.dp)
         )
-        // TODO: uncomment if making a separate View All screen
-        /* Spacer(modifier = Modifier.weight(1f))
-        TextButton(onClick = {}, modifier = Modifier.padding(0.dp)) {
-            Text("View All")
-        } */
     }
 
-    Column {
-        Log.d("HISTORYDEBUG", "routes: $routes")
+    if (routes.isNotEmpty()) {
+        Column {
+            // reversed so latest is first
+            for (route in routes.reversed()) {
+                HistoryRouteCard(route, onDelete = { vm.deleteRoute(route) })
+            }
 
-        for (route in routes) {
-            Log.d("HISTORYDEBUG", "route iteration: $route")
-            HistoryRouteCard(route)
+            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
+    } else {
+        Text("When you complete a route, it will appear here!")
     }
 }

@@ -26,14 +26,13 @@ import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.PrimaryButton
+import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PinConfig
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
