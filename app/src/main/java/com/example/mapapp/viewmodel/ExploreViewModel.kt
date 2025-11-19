@@ -83,9 +83,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     fun loadSavedRoute(routeId: Int) {
         viewModelScope.launch {
             val routeWithStops = routeRepository.getRouteWithStops(routeId)
-            Log.d("ExploreViewModel", "Loaded route with ID: $routeId")
             routeTitle.value = routeWithStops.route.title
-            Log.d("ExploreViewModel", "Loaded route title: ${routeTitle.value}")
             _routeStops.value = routeWithStops.stops.map { stop ->
                 Place(
                     displayName = DisplayName(stop.name),

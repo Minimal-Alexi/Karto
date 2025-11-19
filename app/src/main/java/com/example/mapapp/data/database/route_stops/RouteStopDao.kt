@@ -6,7 +6,6 @@ import androidx.room.Query
 
 @Dao
 interface RouteStopDao {
-
     @Insert
     suspend fun insert(stop: RouteStopEntity)
 
