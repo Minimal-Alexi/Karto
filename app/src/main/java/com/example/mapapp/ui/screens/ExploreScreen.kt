@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,12 +44,16 @@ import com.google.android.gms.maps.model.LatLng as GmsLatLng
 @Composable
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                   exploreViewModel: ExploreViewModel = viewModel(),
-                  navigateToScreen : (String) -> Unit) {
+                  navigateToScreen : (String) -> Unit,
+                  openedRouteId: Int? = null) {
 
-    var routeTitle by remember { mutableStateOf("Default Route Title") }
+    LaunchedEffect(openedRouteId) {
+        if (openedRouteId != null) {
+            exploreViewModel.loadSavedRoute(openedRouteId)
+        }
+    }
 
     val mapInteraction = remember { mutableStateOf(false) }
-
 
     LazyColumn(
         modifier = Modifier
@@ -59,8 +64,8 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
     ) {
         item {
             OutlinedTextField(
-                value = routeTitle,
-                onValueChange = { routeTitle = it },
+                value = exploreViewModel.routeTitle.value,
+                onValueChange = { exploreViewModel.routeTitle.value = it },
                 label = { Text("Route Title") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -98,8 +103,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 text = "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
             ) {
-                val titleToSave = routeTitle.ifBlank { "No name route" }
-                exploreViewModel.saveRoute(title = titleToSave)
+                exploreViewModel.saveRoute(title = exploreViewModel.routeTitle.value)
             }
         }
         item {

@@ -45,50 +45,50 @@ enum class TypesOfPlaces(val displayName: String, val places: List<String>) {
 
 /* nearby places */
 data class PlacesRequest(
-    val maxResultCount:Int = 20,
-    val includedTypes:List <String>,
+    val maxResultCount: Int = 20,
+    val includedTypes: List<String>,
     val locationRestriction: LocationRestriction
 )
 
 data class PlacesResponse(
-    val places:List<Place>
+    val places: List<Place>
 )
 
 /* location screen*/
 data class PlaceDetailsResponse(
-    val displayName : DisplayName,
+    val displayName: DisplayName,
     val rating: Double,
-    val editorialSummary : EditorialSummary,
-    val primaryTypeDisplayName : PrimaryTypeDisplayName,
-    val photos : List<Photo>
+    val editorialSummary: EditorialSummary,
+    val primaryTypeDisplayName: PrimaryTypeDisplayName,
+    val photos: List<Photo>
 )
 
 data class Photo(
-    val name : String
+    val name: String
 )
 
 data class Place(
-    val id:String,
-    val displayName:DisplayName,
+    val id: String,
+    val displayName: DisplayName,
     val location: LatLng
 )
 
 data class DisplayName(
-    val text:String
+    val text: String
 )
 
 data class LocationRestriction(
-    val circle:Circle
+    val circle: Circle
 )
 data class Circle(
     val center: LatLng,
-    val radius:Double = 1000.0
+    val radius: Double = 1000.0
 )
 
 data class EditorialSummary(
-    val text : String
+    val text: String
 )
 
 data class PrimaryTypeDisplayName (
-    val text : String
+    val text: String
 )

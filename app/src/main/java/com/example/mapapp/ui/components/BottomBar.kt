@@ -21,8 +21,9 @@ fun BottomBar(navController: NavController) {
 
     NavigationBar {
         items.forEach { (screen, iconRes) ->
+            val isSelected = currentRoute?.startsWith(screen) == true
             NavigationBarItem(
-                selected = currentRoute == screen,
+                selected = isSelected,
                 onClick = {
                     navController.navigate(screen) {
                         launchSingleTop = true

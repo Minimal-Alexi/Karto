@@ -9,7 +9,9 @@ import com.example.mapapp.data.model.RouteLocation
 import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.network.RoutesApi
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import com.example.mapapp.KartoApplication
+import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Circle
@@ -20,6 +22,7 @@ import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.model.DisplayName
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -29,7 +32,7 @@ import kotlinx.coroutines.launch
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
-
+    var routeTitle = mutableStateOf("Default Route Title")
     /*
     Nearby Places & Filtering Variables
     */
@@ -75,6 +78,23 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 }
         }
     }
+
+    fun loadSavedRoute(routeId: Int) {
+        viewModelScope.launch {
+            val routeWithStops = routeRepository.getRouteWithStops(routeId)
+            Log.d("ExploreViewModel", "Loaded route with ID: $routeId")
+            routeTitle.value = routeWithStops.route.title
+            Log.d("ExploreViewModel", "Loaded route title: ${routeTitle.value}")
+            _routeStops.value = routeWithStops.stops.map { stop ->
+                Place(
+                    displayName = DisplayName(stop.name),
+                    location = LatLng(stop.latitude, stop.longitude),
+                    id = stop.id.toString()
+                )
+            }
+        }
+    }
+
     fun changeTravelMode(newTravelMode: TravelModes){
         _travelMode.value = newTravelMode
     }
@@ -164,13 +184,22 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun saveRoute(title: String) {
-        val routeEntity = RouteEntity(
-            title = title,
-            savedAt = System.currentTimeMillis()
-        )
-
         viewModelScope.launch {
-            routeRepository.saveRoute(routeEntity)
+            val route = RouteEntity(
+                title = title.ifBlank { "No name route" },
+                savedAt = System.currentTimeMillis()
+            )
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index
+                )
+            }
+            routeRepository.saveRoute(route, stops)
         }
     }
 }
