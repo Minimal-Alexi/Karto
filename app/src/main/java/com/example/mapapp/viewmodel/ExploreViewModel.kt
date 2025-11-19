@@ -170,6 +170,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                             apiKey,
                             "places.displayName,places.location,places.id"
                         )
+                        response.places.forEach { it.typeOfPlace = _placeTypeSelection.value }
                         _nearbyPlaces.value = response.places
                         Log.d(null, "PLACES: " + _nearbyPlaces.value.toString())
                     } else {

@@ -1,8 +1,9 @@
 package com.example.mapapp.data.model
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 
-enum class TypesOfPlaces(val displayName: String, val places: List<String>) {
+enum class TypesOfPlaces(val displayName: String, val places: List<String>, val markerColor: Float) {
 
     RESTAURANTS("Restaurants", listOf(
         "restaurant", "cafe", "bar", "pub", "bakery", "coffee_shop",
@@ -15,24 +16,28 @@ enum class TypesOfPlaces(val displayName: String, val places: List<String>) {
         "greek_restaurant", "turkish_restaurant", "barbecue_restaurant",
         "buffet_restaurant", "dessert_restaurant", "ice_cream_shop",
         "wine_bar", "tea_house"
-    )),
+    ), BitmapDescriptorFactory.HUE_RED
+    ),
 
     BEACHES("Beaches",listOf(
         "beach"
-    )),
+    ), BitmapDescriptorFactory.HUE_YELLOW
+    ),
 
     NATURAL_FEATURES("Natural Features", listOf(
         "beach", "park", "national_park", "state_park",
         "garden", "botanical_garden", "hiking_area",
         "wildlife_park", "wildlife_refuge", "campground"
-    )),
+    ), BitmapDescriptorFactory.HUE_GREEN
+    ),
 
     LANDMARKS("Landmarks & Monuments", listOf(
         "tourist_attraction", "historical_landmark", "monument",
         "museum", "art_gallery", "cultural_landmark",
         "historical_place", "sculpture", "plaza",
         "observation_deck", "amphitheatre"
-    )),
+    ), BitmapDescriptorFactory.HUE_VIOLET
+    ),
 
     STORES("Stores", listOf(
         "store", "shopping_mall", "gift_shop",
@@ -40,7 +45,8 @@ enum class TypesOfPlaces(val displayName: String, val places: List<String>) {
         "clothing_store", "shoe_store", "jewelry_store",
         "book_store", "electronics_store", "hardware_store", "pet_store",
         "sporting_goods_store", "market", "liquor_store"
-    ));
+    ), BitmapDescriptorFactory.HUE_ORANGE
+    );
 }
 
 /* nearby places */
@@ -68,6 +74,7 @@ data class Photo(
 )
 
 data class Place(
+    var typeOfPlace: TypesOfPlaces?,
     val id: String,
     val displayName: DisplayName,
     val location: LatLng
