@@ -214,7 +214,7 @@ fun OnRouteSection(
                         locationName = location.displayName.text,
                         distance = "2.7 km",
                         duration = "30 min",
-                        placesID = location.id,
+                        placesId = location.id,
                         navigateToLocationScreen = navigateToLocationScreen
                     )
                     HorizontalDivider(color = Color(0xFFDDDDDD))
@@ -231,7 +231,7 @@ fun RouteStopItem(
     distance: String,
     duration: String,
     closingInfo: String? = null,
-    placesID: String,
+    placesId: String,
     navigateToLocationScreen: (String) -> Unit
 ) {
     var isVisited by remember { mutableStateOf(false) }
@@ -319,7 +319,7 @@ fun RouteStopItem(
             // Book icon on the right
             IconButton(
                 onClick = {
-                    navigateToLocationScreen(placesID)
+                    navigateToLocationScreen(placesId)
                 },
                 modifier = Modifier.size(32.dp)
             ) {
