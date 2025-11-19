@@ -41,7 +41,7 @@ fun SelectedStopItem(
     distance: String,
     duration: String,
     closingInfo: String? = null,
-    placesID: String,
+    placesId: String,
     navigateToLocationScreen: (String) -> Unit,
     onStayTimeChange: (String) -> Unit,
     deleteOnClick: () -> Unit
@@ -140,7 +140,7 @@ fun SelectedStopItem(
                 // "Read more about the route stop" button
                 IconButton(
                     onClick = {
-                        navigateToLocationScreen(placesID)
+                        navigateToLocationScreen(placesId)
                     },
                     modifier = Modifier.size(28.dp)
                 ) {

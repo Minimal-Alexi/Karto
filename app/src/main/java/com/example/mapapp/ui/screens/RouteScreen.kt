@@ -44,7 +44,9 @@ import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun RouteScreen(
@@ -100,7 +102,7 @@ fun EmptyRouteScreen(
 fun CurrentRouteScreen(
     navigateToLocationScreen: (String) -> Unit,
     navigateToScreen: (String) -> Unit,
-    currentRoute: RouteEntity
+    currentRoute: RouteEntity,
 ) {
     val viewModel = viewModel<RouteScreenViewModel>()
 
@@ -187,6 +189,8 @@ fun MapScreenPlaceholder() {
 fun OnRouteSection(
     navigateToLocationScreen: (String) -> Unit,
 ) {
+    val routeStops = null // TODO: FIGURE IT OUT ASAP
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -209,16 +213,17 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // for (location in routeStops.collectAsState().value) {
-                RouteStopItem(
-                    time = "12:05",
-                    locationName = "placeholder title",
-                    distance = "2.7 km",
-                    duration = "30 min",
-                    placesID = "placeholder id",
-                    navigateToLocationScreen = navigateToLocationScreen
-                )
-                HorizontalDivider(color = Color(0xFFDDDDDD))
+                //for (location in routeStops.collectAsState().value){
+                    RouteStopItem(
+                        time = "12:05",
+                        locationName = "place",
+                        distance = "2.7 km",
+                        duration = "30 min",
+                        placesID = "holder",
+                        navigateToLocationScreen = navigateToLocationScreen
+                    )
+                    HorizontalDivider(color = Color(0xFFDDDDDD))
+                //}
             }
         }
     }

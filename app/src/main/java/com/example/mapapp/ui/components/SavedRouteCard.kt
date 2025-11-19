@@ -23,10 +23,12 @@ import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.ui.components.buttons.SecondaryButton
+import com.example.mapapp.data.database.routes.RouteWithStopCount
 
 @Composable
 fun SavedRouteCard(
-    route: RouteEntity,
+    route: RouteWithStopCount,
+    onOpen: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
@@ -60,7 +62,7 @@ fun SavedRouteCard(
                     }",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(text = "4 locations", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -70,7 +72,7 @@ fun SavedRouteCard(
                         text = "Open",
                         backgroundColor = MaterialTheme.colorScheme.primary
                     ) {
-                        /* TODO: Open route */
+                        onOpen()
                     }
 
                     Spacer(modifier = Modifier.width(12.dp))

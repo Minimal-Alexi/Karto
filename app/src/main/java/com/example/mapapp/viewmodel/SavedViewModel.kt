@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
-import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.database.routes.RouteWithStopCount
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -13,12 +13,12 @@ import kotlinx.coroutines.launch
 class SavedViewModel(application : Application) : AndroidViewModel(application) {
     private val repository = (application as KartoApplication).routeRepository
 
-    val allRoutes: StateFlow<List<RouteEntity>> = repository.getSavedRoutes()
+    val allRoutes: StateFlow<List<RouteWithStopCount>> = repository.getAllRoutesWithStopCount()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun deleteRoute(route: RouteEntity) {
+    fun deleteRoute(routeId: Int) {
         viewModelScope.launch {
-            repository.deleteRoute(route)
+            repository.deleteRouteById(routeId)
         }
     }
 }
