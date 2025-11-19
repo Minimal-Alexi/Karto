@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,14 +19,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.example.mapapp.R
+import com.example.mapapp.data.database.routes.RouteEntity
 
-// this should later take in the actual route as parameter though... just styling for now
 @Composable
-fun HistoryRouteCard(route: String) {
+fun HistoryRouteCard(route: RouteEntity) {
     Card(
         modifier = Modifier
             .padding(5.dp)
             .fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -40,12 +45,15 @@ fun HistoryRouteCard(route: String) {
 
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = route, style = MaterialTheme.typography.titleLarge,
+                    text = route.title, style = MaterialTheme.typography.titleLarge,
                 )
-                Text(text = "Completed 23 October 2023", style = MaterialTheme.typography.bodySmall)
-                Text(text = "4 locations", style = MaterialTheme.typography.bodySmall)
-                Text(text = "15 km", style = MaterialTheme.typography.bodySmall)
+
+                Text(text = "Completed ${
+                    java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault())
+                        .format(java.util.Date(route.timestamp))}",
+                    style = MaterialTheme.typography.bodySmall)
             }
+
             Icon(
                 painterResource(R.drawable.arrow_icon),
                 contentDescription = "Arrow right",

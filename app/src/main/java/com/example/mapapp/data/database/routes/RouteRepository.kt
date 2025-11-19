@@ -19,6 +19,7 @@ class RouteRepository(private val dao : RouteDao) {
     }
 
     suspend fun completeRoute(route: RouteEntity) {
+        dao.deleteCurrent()
         dao.insertRoute(route.copy(status = RouteStatus.COMPLETED))
     }
 

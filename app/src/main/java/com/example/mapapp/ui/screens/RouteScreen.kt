@@ -42,7 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.navigation.Constants.EXPLORE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.ui.components.SecondaryButton
-import com.example.mapapp.viewmodel.CurrentRouteViewModel
+import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.mapapp.data.model.Place
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +50,7 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun RouteScreen(
     navigateToLocationScreen: (String) -> Unit,
-    currentRouteViewModel: CurrentRouteViewModel = viewModel(),
+    currentRouteViewModel: RouteScreenViewModel = viewModel(),
     navigateToScreen: (String) -> Unit
 ) {
     val isOnRoute = remember { currentRouteViewModel.isOnRoute }
@@ -98,6 +98,8 @@ fun CurrentRouteScreen(
     navigateToLocationScreen: (String) -> Unit,
     routeStops: StateFlow<List<Place>>
 ) {
+    val viewModel = viewModel<RouteScreenViewModel>()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,6 +117,14 @@ fun CurrentRouteScreen(
         ) {
             /* TODO: Pause route */
         }
+
+        PrimaryButton(
+            text = "Complete Route",
+            backgroundColor = MaterialTheme.colorScheme.primary
+        ) {
+            viewModel.completeRoute()
+        }
+
         Spacer(modifier = Modifier.height(0.dp))
     }
 }

@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -115,23 +116,29 @@ fun DarkModeSwitch() {
 
 @Composable
 fun RouteHistory() {
-    val routes = listOf("route 1", "route 2", "route 3")
+    val vm = viewModel<SettingsViewModel>()
+    val routes = vm.completedRoutes.collectAsState().value
 
     Row {
         Text(
             "History", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(4.dp)
         )
-        Spacer(modifier = Modifier.weight(1f))
+        // TODO: uncomment if making a separate View All screen
+        /* Spacer(modifier = Modifier.weight(1f))
         TextButton(onClick = {}, modifier = Modifier.padding(0.dp)) {
             Text("View All")
-        }
+        } */
     }
 
     Column {
-        HistoryRouteCard(routes[0])
-        HistoryRouteCard(routes[1])
-        HistoryRouteCard(routes[2])
+        Log.d("HISTORYDEBUG", "routes: $routes")
+
+        for (route in routes) {
+            Log.d("HISTORYDEBUG", "route iteration: $route")
+            HistoryRouteCard(route)
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
