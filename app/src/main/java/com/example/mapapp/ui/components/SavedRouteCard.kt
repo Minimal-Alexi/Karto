@@ -58,7 +58,7 @@ fun SavedRouteCard(
                 Text(
                     text = "Saved ${
                         java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault())
-                            .format(java.util.Date(route.timestamp))
+                            .format(java.util.Date(route.savedAt))
                     }",
                     style = MaterialTheme.typography.bodyMedium
                 )

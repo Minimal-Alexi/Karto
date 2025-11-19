@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 
-
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private val userRepository = (app as KartoApplication).userRepository
     private val routeRepository = (app as KartoApplication).routeRepository
@@ -22,15 +21,20 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
 
-    val user : StateFlow<UserEntity?> = userRepository.getUser()
+    val user: StateFlow<UserEntity?> = userRepository.getUser()
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    fun updateName(firstName: String, lastName : String) {
+    fun updateName(firstName: String, lastName: String) {
         viewModelScope.launch {
             val currentUser = userRepository.getUser().first()
 
             if (currentUser != null) {
-                userRepository.upsertUser(currentUser.copy(firstName = firstName, lastName = lastName))
+                userRepository.upsertUser(
+                    currentUser.copy(
+                        firstName = firstName,
+                        lastName = lastName
+                    )
+                )
             } else {
                 createNew()
             }
@@ -39,13 +43,19 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     fun createNew() {
         viewModelScope.launch {
-            userRepository.upsertUser(UserEntity(firstName = "", lastName = "", darkThemePreferred = false))
+            userRepository.upsertUser(
+                UserEntity(
+                    firstName = "",
+                    lastName = "",
+                    darkThemePreferred = false
+                )
+            )
         }
     }
 
     fun deleteRoute(route: RouteEntity) {
         viewModelScope.launch {
-            routeRepository.deleteRoute(route)
+            routeRepository.deleteRouteById(route.id)
         }
     }
 }

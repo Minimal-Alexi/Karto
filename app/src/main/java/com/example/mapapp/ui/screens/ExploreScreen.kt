@@ -98,7 +98,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
             ) {
                 exploreViewModel.startRoute(
                     RouteEntity (
-                        title = routeTitle,
+                        title = exploreViewModel.routeTitle.value,
                         timestamp = System.currentTimeMillis()
                     )
                 )
