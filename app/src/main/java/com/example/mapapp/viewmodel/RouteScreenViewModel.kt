@@ -1,7 +1,6 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
@@ -10,21 +9,27 @@ import com.example.mapapp.data.model.DisplayName
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class RouteScreenViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
 
-    private var _isOnRoute = MutableStateFlow(true) // TODO: get from database
-    val isOnRoute: StateFlow<Boolean> = _isOnRoute
+    val currentRoute: StateFlow<RouteEntity?> = routeRepository.getCurrentRoute()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
 
-    private var _title = MutableStateFlow("route title") // TODO: get from database
-    val title: StateFlow<String> = _title
+    val isOnRoute : StateFlow<Boolean> = currentRoute
+        .map { it != null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    // TODO: get from database
     private var _routeStops = MutableStateFlow<List<Place>>(listOf(
         Place(
             TypesOfPlaces.NATURAL_FEATURES,
@@ -44,7 +49,7 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
 
     fun completeRoute() {
         val routeEntity = RouteEntity(
-            title = _title.value,
+            title = currentRoute.value?.title ?: "Default Route Title",
             timestamp = System.currentTimeMillis()
         )
 

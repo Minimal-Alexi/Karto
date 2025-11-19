@@ -44,7 +44,10 @@ import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.ui.components.SecondaryButton
 import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
+import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.Place
+import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
+import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -53,11 +56,15 @@ fun RouteScreen(
     currentRouteViewModel: RouteScreenViewModel = viewModel(),
     navigateToScreen: (String) -> Unit
 ) {
-    val isOnRoute = remember { currentRouteViewModel.isOnRoute }
-    val routeStops = remember { currentRouteViewModel.routeStops }
+    val currentRouteFlow = remember { currentRouteViewModel.currentRoute }
+    val currentRoute = currentRouteFlow.collectAsState().value
 
-    if (isOnRoute.collectAsState().value) {
-        CurrentRouteScreen(navigateToLocationScreen, routeStops)
+    if (currentRoute != null) {
+        CurrentRouteScreen(
+            navigateToLocationScreen = navigateToLocationScreen,
+            navigateToScreen = navigateToScreen,
+            currentRoute = currentRoute
+        )
     } else {
         EmptyRouteScreen(navigateToScreen)
     }
@@ -96,7 +103,8 @@ fun EmptyRouteScreen(
 @Composable
 fun CurrentRouteScreen(
     navigateToLocationScreen: (String) -> Unit,
-    routeStops: StateFlow<List<Place>>
+    navigateToScreen: (String) -> Unit,
+    currentRoute: RouteEntity
 ) {
     val viewModel = viewModel<RouteScreenViewModel>()
 
@@ -107,22 +115,17 @@ fun CurrentRouteScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        RouteTitleSection()
+        RouteTitleSection(currentRoute.title)
         MapScreenPlaceholder()
-        OnRouteSection(navigateToLocationScreen, routeStops)
+        OnRouteSection(navigateToLocationScreen)
         RouteProgressSection()
-        PrimaryButton(
-            text = "Pause This Route",
-            backgroundColor = MaterialTheme.colorScheme.error
-        ) {
-            /* TODO: Pause route */
-        }
 
         PrimaryButton(
             text = "Complete Route",
             backgroundColor = MaterialTheme.colorScheme.primary
         ) {
             viewModel.completeRoute()
+            navigateToScreen(SETTINGS_SCREEN_ROUTE)
         }
 
         Spacer(modifier = Modifier.height(0.dp))
@@ -130,7 +133,7 @@ fun CurrentRouteScreen(
 }
 
 @Composable
-fun RouteTitleSection() {
+fun RouteTitleSection(title : String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,17 +142,10 @@ fun RouteTitleSection() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Beaches of Helsinki",
+            text = title,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
-        IconButton(onClick = { /* TODO: Edit route title */ }) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = "Edit route",
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
     }
 }
 
@@ -194,7 +190,6 @@ fun MapScreenPlaceholder() {
 @Composable
 fun OnRouteSection(
     navigateToLocationScreen: (String) -> Unit,
-    routeStops: StateFlow<List<Place>>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -218,17 +213,16 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                for (location in routeStops.collectAsState().value){
-                    RouteStopItem(
-                        time = "12:05",
-                        locationName = location.displayName.text,
-                        distance = "2.7 km",
-                        duration = "30 min",
-                        placesID = location.id,
-                        navigateToLocationScreen = navigateToLocationScreen
-                    )
-                    HorizontalDivider(color = Color(0xFFDDDDDD))
-                }
+                // for (location in routeStops.collectAsState().value) {
+                RouteStopItem(
+                    time = "12:05",
+                    locationName = "placeholder title",
+                    distance = "2.7 km",
+                    duration = "30 min",
+                    placesID = "placeholder id",
+                    navigateToLocationScreen = navigateToLocationScreen
+                )
+                HorizontalDivider(color = Color(0xFFDDDDDD))
             }
         }
     }

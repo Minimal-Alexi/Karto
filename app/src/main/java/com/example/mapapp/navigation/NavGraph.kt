@@ -20,6 +20,8 @@ object Constants {
     const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
     const val EXPLORE_SCREEN_ROUTE = "explore"
     const val ROUTE_SCREEN_ROUTE = "route"
+
+    const val SETTINGS_SCREEN_ROUTE = "settings"
 }
 
 @Composable

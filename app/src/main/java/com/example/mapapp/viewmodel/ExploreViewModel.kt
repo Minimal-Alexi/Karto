@@ -75,9 +75,11 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 }
         }
     }
-    fun changeTravelMode(newTravelMode: TravelModes){
+
+    fun changeTravelMode(newTravelMode: TravelModes) {
         _travelMode.value = newTravelMode
     }
+
     fun addRouteStop(placeToToggle: Place) {
         val currentList = _routeStops.value.toMutableList()
         if (!currentList.contains(placeToToggle)) {
@@ -85,14 +87,15 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
         _routeStops.value = currentList
     }
-    fun removeRouteStop(placeToRemove:Place){
+
+    fun removeRouteStop(placeToRemove: Place) {
         val currentList = _routeStops.value.toMutableList()
         currentList.remove(placeToRemove)
         _routeStops.value = currentList
     }
 
-    fun changeDistanceToPlaces(newValue: Double){
-        if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
+    fun changeDistanceToPlaces(newValue: Double) {
+        if (newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
     fun changePlaceType(newPlaceType: TypesOfPlaces) {
@@ -172,6 +175,12 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             routeRepository.saveRoute(routeEntity)
+        }
+    }
+
+    fun startRoute(route: RouteEntity) {
+        viewModelScope.launch {
+            routeRepository.setCurrentRoute(route)
         }
     }
 }

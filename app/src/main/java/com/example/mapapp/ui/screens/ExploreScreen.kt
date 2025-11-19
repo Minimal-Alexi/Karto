@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
@@ -90,7 +91,13 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
             PrimaryButton(
                 text = "Start This Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
-            ) { /* TODO: actually make it start the route as well */
+            ) {
+                exploreViewModel.startRoute(
+                    RouteEntity (
+                        title = routeTitle,
+                        timestamp = System.currentTimeMillis()
+                    )
+                )
                 navigateToScreen(ROUTE_SCREEN_ROUTE)
             }
         }
