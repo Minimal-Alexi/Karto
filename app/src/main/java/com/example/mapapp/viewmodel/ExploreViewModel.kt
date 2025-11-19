@@ -20,6 +20,9 @@ import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.model.RouteMatrixDestinations
+import com.example.mapapp.data.model.RouteMatrixOrigins
+import com.example.mapapp.data.model.RouteMatrixRequest
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -27,7 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ExploreViewModel(application: Application) : AndroidViewModel(application) {
+open class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
 
     /*
@@ -53,8 +56,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     val travelMode: StateFlow<TravelModes> = _travelMode
     private val _routeStops = MutableStateFlow<List<Place>>(listOf())
     val routeStops: StateFlow<List<Place>> = _routeStops
-    private val _routePolyline = MutableStateFlow<String?>(null)
-    val routePolyline: StateFlow<String?> = _routePolyline
+    private val _routePolylines = MutableStateFlow<List<String?>>(emptyList())
+    val routePolylines: StateFlow<List<String?>> = _routePolylines
 
     private val _routeInfo = MutableStateFlow<String?>(null)
     val routeInfo: StateFlow<String?> = _routeInfo
@@ -112,7 +115,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     fieldMask = "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
                 )
                 val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
-                _routePolyline.value = polyline
+                // _routePolyline.value = polyline
 
                 val routeInfoWalkOrDrive =
                     Pair(
@@ -124,9 +127,36 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
             } catch (e: Exception) {
                 e.printStackTrace()
-                _routePolyline.value = null
+                // _routePolyline.value = null
                 _routeInfo.value = "No route found"
 
+            }
+        }
+    }
+
+    fun getWayPoints(): List<RouteLocation> {
+        val waypoints = mutableListOf<RouteLocation>()
+        for (place in _routeStops.value) {
+            waypoints.add(RouteLocation(location = LatLngLiteral(latLng = RouteLatLng(place.location.latitude, place.location.longitude))))
+        }
+        return waypoints
+    }
+
+
+    fun fetchRouteMatrix() {
+        viewModelScope.launch {
+            try {
+                val request = RouteMatrixRequest(
+                    origins = RouteMatrixOrigins(waypoints = getWayPoints()),
+                    destinations = RouteMatrixDestinations(waypoints = getWayPoints()),
+                    travelMode = _travelMode.value.mode
+
+
+                )
+
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
