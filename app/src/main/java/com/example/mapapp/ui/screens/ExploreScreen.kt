@@ -32,6 +32,7 @@ import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PinConfig
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -143,6 +144,7 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
 fun MapScreen(exploreViewModel: ExploreViewModel) {
 
     val userLocation = exploreViewModel.userLocation.collectAsState()
+    val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
 
@@ -177,26 +179,42 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                 if (userLocation.value != null) {
                     Marker(
                         state = rememberUpdatedMarkerState(position = userLocation.value!!),
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                         title = "Your location",
                         snippet = "Your current location"
                     )
                 }
                 if (nearbyLocations.value != null) {
                     for (place in nearbyLocations.value) {
-                        Marker(
-                            state = rememberUpdatedMarkerState(position = place.location),
-                            title = place.displayName.text,
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                            tag = place,
-                            onClick =
-                                {
-                                    exploreViewModel.addRouteStop(place)
-                                    false
-                                }
-                        )
+                        if(!routeStops.value.contains(place)){
+                            Marker(
+                                state = rememberUpdatedMarkerState(position = place.location),
+                                title = place.displayName.text,
+                                icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
+                                    ?: BitmapDescriptorFactory.HUE_RED),
+                                tag = place,
+                                onClick =
+                                    {
+                                        exploreViewModel.addRouteStop(place)
+                                        false
+                                    }
+                            )
+                        }
                     }
                 }
-
+                for(place in routeStops.value){
+                    Marker(
+                        state = rememberUpdatedMarkerState(position = place.location),
+                        title = place.displayName.text,
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                        tag = place,
+                        onClick =
+                            {
+                                exploreViewModel.removeRouteStop(place)
+                                false
+                            }
+                    )
+                }
 
                 polyline.value?.let { encoded ->
                     val path = PolyUtil.decode(encoded)
