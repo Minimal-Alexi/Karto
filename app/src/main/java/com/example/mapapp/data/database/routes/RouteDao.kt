@@ -18,6 +18,18 @@ interface RouteDao {
     @Query("SELECT * FROM routes WHERE id = :id")
     fun getRouteById(id: Int): Flow<RouteEntity?>
 
+    @Query("SELECT * FROM routes WHERE status = :status")
+    fun getSavedroutes(status: RouteStatus = RouteStatus.SAVED): Flow<List<RouteEntity>>
+
+    @Query("SELECT * FROM routes WHERE status = :status")
+    fun getCompletedRoutes(status: RouteStatus = RouteStatus.COMPLETED): Flow<List<RouteEntity>>
+
+    @Query("SELECT * FROM routes WHERE status = :status")
+    fun getCurrentRoute(status: RouteStatus = RouteStatus.CURRENT): Flow<RouteEntity?>
+
+    @Query("DELETE FROM routes WHERE status = :status")
+    suspend fun deleteCurrent(status: RouteStatus = RouteStatus.CURRENT)
+
     @Delete
     suspend fun deleteRoute(route: RouteEntity)
 }

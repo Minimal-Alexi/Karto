@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 class SavedViewModel(application : Application) : AndroidViewModel(application) {
     private val repository = (application as KartoApplication).routeRepository
 
-    val allRoutes: StateFlow<List<RouteEntity>> = repository.getAllRoutes()
+    val allRoutes: StateFlow<List<RouteEntity>> = repository.getSavedRoutes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun deleteRoute(route: RouteEntity) {

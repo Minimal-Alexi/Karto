@@ -167,7 +167,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     fun saveRoute(title: String) {
         val routeEntity = RouteEntity(
             title = title,
-            savedAt = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis()
         )
 
         viewModelScope.launch {
