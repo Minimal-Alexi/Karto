@@ -17,7 +17,7 @@ import com.example.mapapp.viewmodel.SavedViewModel
 @Composable
 fun SavedScreen(onOpenRoute: (Int) -> Unit) {
     val savedViewModel = viewModel<SavedViewModel>()
-    val routes by savedViewModel.allRoutes.collectAsState()
+    val routes by savedViewModel.savedRoutes.collectAsState()
 
     Column(
         modifier = Modifier

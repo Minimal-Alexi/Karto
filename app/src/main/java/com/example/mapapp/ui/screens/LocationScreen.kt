@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mapapp.ui.components.BackButton
+import com.example.mapapp.ui.components.buttons.BackButton
 import com.example.mapapp.viewmodel.LocationScreenViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment

@@ -1,28 +1,28 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.mapapp.data.model.LatLngLiteral
-import com.example.mapapp.data.model.RouteLatLng
-import com.example.mapapp.data.model.RouteLocation
-import com.example.mapapp.data.model.RoutesRequest
-import com.example.mapapp.data.network.RoutesApi
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
+import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Circle
+import com.example.mapapp.data.model.DisplayName
+import com.example.mapapp.data.model.LatLngLiteral
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.RouteLatLng
+import com.example.mapapp.data.model.RouteLocation
+import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
-import com.example.mapapp.data.database.routes.RouteEntity
-import com.example.mapapp.data.model.DisplayName
+import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
@@ -95,9 +95,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun changeTravelMode(newTravelMode: TravelModes){
+    fun changeTravelMode(newTravelMode: TravelModes) {
         _travelMode.value = newTravelMode
     }
+
     fun addRouteStop(placeToToggle: Place) {
         val currentList = _routeStops.value.toMutableList()
         if (!currentList.contains(placeToToggle)) {
@@ -105,14 +106,15 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
         _routeStops.value = currentList
     }
-    fun removeRouteStop(placeToRemove:Place){
+
+    fun removeRouteStop(placeToRemove: Place) {
         val currentList = _routeStops.value.toMutableList()
         currentList.remove(placeToRemove)
         _routeStops.value = currentList
     }
 
-    fun changeDistanceToPlaces(newValue: Double){
-        if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
+    fun changeDistanceToPlaces(newValue: Double) {
+        if (newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
     fun changePlaceType(newPlaceType: TypesOfPlaces) {
@@ -188,7 +190,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val route = RouteEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                savedAt = System.currentTimeMillis()
+                timestamp  = System.currentTimeMillis()
             )
             val stops = routeStops.value.mapIndexed { index, stop ->
                 RouteStopEntity(
@@ -202,7 +204,32 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = stop.typeOfPlace?.name
                 )
             }
+
             routeRepository.saveRoute(route, stops)
+        }
+    }
+
+    fun startRoute() {
+        viewModelScope.launch {
+            val route = RouteEntity(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp  = System.currentTimeMillis()
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
+                )
+            }
+
+            routeRepository.startRoute(route, stops)
         }
     }
 }

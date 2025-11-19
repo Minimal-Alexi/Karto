@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,12 +31,11 @@ fun SettingsScreen() {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(16.dp, 0.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
             Profile()
             Settings()
             RouteHistory()
@@ -48,16 +46,16 @@ fun SettingsScreen() {
 @Composable
 fun Profile() {
     val vm = viewModel<SettingsViewModel>()
-    val uiState by vm.uiState.collectAsState()
+    val user by vm.user.collectAsState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
 
-    val isDataChanged = (firstName != uiState.firstName) || (lastName != uiState.lastName)
+    val isDataChanged = (firstName != user?.firstName) || (lastName != user?.lastName)
 
-    LaunchedEffect(uiState) {
-        firstName = uiState.firstName ?: ""
-        lastName = uiState.lastName ?: ""
+    LaunchedEffect(user) {
+        firstName = user?.firstName ?: ""
+        lastName = user?.lastName ?: ""
     }
     Text("Profile Name", style = MaterialTheme.typography.titleLarge)
 
@@ -115,23 +113,25 @@ fun DarkModeSwitch() {
 
 @Composable
 fun RouteHistory() {
-    val routes = listOf("route 1", "route 2", "route 3")
+    val vm = viewModel<SettingsViewModel>()
+    val routes = vm.completedRoutes.collectAsState().value
 
     Row {
         Text(
             "History", style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(4.dp)
         )
-        Spacer(modifier = Modifier.weight(1f))
-        TextButton(onClick = {}, modifier = Modifier.padding(0.dp)) {
-            Text("View All")
-        }
     }
 
-    Column {
-        HistoryRouteCard(routes[0])
-        HistoryRouteCard(routes[1])
-        HistoryRouteCard(routes[2])
-        Spacer(modifier = Modifier.height(16.dp))
+    if (routes.isNotEmpty()) {
+        Column {
+            for (route in routes) {
+                HistoryRouteCard(route, onDelete = { vm.deleteRouteById(route.id) })
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    } else {
+        Text("When you complete a route, it will appear here!")
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.mapapp.ui.components.buttons.DeleteIconButton
 
 @Composable
 fun SelectedStopItem(
@@ -151,18 +152,10 @@ fun SelectedStopItem(
                     )
                 }
 
-                // "Delete the route stop" button
-                IconButton(
+                DeleteIconButton(
                     onClick = deleteOnClick,
                     modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Delete,
-                        contentDescription = "Delete the route stop",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+                )
             }
 
         }
