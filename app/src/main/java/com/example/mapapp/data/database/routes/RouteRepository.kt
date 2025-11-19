@@ -1,6 +1,5 @@
 package com.example.mapapp.data.database.routes
 
-import android.util.Log
 import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import kotlinx.coroutines.flow.Flow
@@ -9,9 +8,9 @@ class RouteRepository(
     private val routeDao: RouteDao,
     private val routeStopDao: RouteStopDao
 ) {
-    fun getSavedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getSavedRoutes()
+    fun getSavedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getRoutesByStatus(RouteStatus.SAVED)
 
-    fun getCompletedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getCompletedRoutes()
+    fun getCompletedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getRoutesByStatus(RouteStatus.COMPLETED)
 
     suspend fun getRouteWithStops(routeId: Int): RouteWithStops {
         val route = routeDao.getRouteById(routeId)
@@ -31,6 +30,7 @@ class RouteRepository(
 
     suspend fun startRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
         // ensure only one CURRENT route can exist
+        // TODO: put this behavior behind a disclaimer window
         routeDao.deleteCurrent()
 
         val id = routeDao.insertRoute(route.copy(status = RouteStatus.CURRENT)).toInt()

@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Delete
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,17 +22,7 @@ interface RouteDao {
         GROUP BY r.id
         ORDER BY r.timestamp DESC
     """)
-    fun getSavedRoutes(status: RouteStatus = RouteStatus.SAVED): Flow<List<RouteWithStopCount>>
-
-    @Query("""
-        SELECT r.id, r.title, r.timestamp AS savedAt, COUNT(s.id) AS stopsCount
-        FROM routes r
-        LEFT JOIN route_stops s ON r.id = s.routeId
-        WHERE status = :status
-        GROUP BY r.id
-        ORDER BY r.timestamp DESC
-    """)
-    fun getCompletedRoutes(status: RouteStatus = RouteStatus.COMPLETED): Flow<List<RouteWithStopCount>>
+    fun getRoutesByStatus(status: RouteStatus): Flow<List<RouteWithStopCount>>
 
     @Query("SELECT * FROM routes WHERE status = :status")
     fun getCurrentRoute(status: RouteStatus = RouteStatus.CURRENT): Flow<RouteEntity?>

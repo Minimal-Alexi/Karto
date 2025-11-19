@@ -6,10 +6,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
-import com.example.mapapp.data.database.user.UserDao
-import com.example.mapapp.data.database.user.UserEntity
 import com.example.mapapp.data.database.routes.RouteDao
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.database.user.UserDao
+import com.example.mapapp.data.database.user.UserEntity
 
 @Database(
     entities = [UserEntity::class, RouteEntity::class, RouteStopEntity::class],

@@ -6,14 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
-import com.example.mapapp.data.model.DisplayName
-import com.example.mapapp.data.model.Place
-import com.example.mapapp.data.model.TypesOfPlaces
-import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 

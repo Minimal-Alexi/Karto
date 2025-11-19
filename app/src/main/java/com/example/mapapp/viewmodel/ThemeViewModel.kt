@@ -1,8 +1,6 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
-import androidx.activity.result.launch
-import androidx.compose.animation.core.copy
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope

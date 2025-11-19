@@ -4,9 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
-import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.database.routes.RouteWithStopCount
-import com.example.mapapp.data.database.routes.RouteWithStops
 import com.example.mapapp.data.database.user.UserEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
