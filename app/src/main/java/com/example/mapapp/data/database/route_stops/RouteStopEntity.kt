@@ -13,5 +13,6 @@ data class RouteStopEntity(
     val longitude: Double,
     val stayMinutes: Int,
     val position: Int,
-    val isVisited: Boolean = false
+    val isVisited: Boolean = false,
+    val typeOfPlace: String?
 )

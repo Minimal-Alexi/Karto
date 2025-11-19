@@ -88,7 +88,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 Place(
                     displayName = DisplayName(stop.name),
                     location = LatLng(stop.latitude, stop.longitude),
-                    id = stop.placesId
+                    id = stop.placesId,
+                    typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
             }
         }
@@ -197,7 +198,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     latitude = stop.location.latitude,
                     longitude = stop.location.longitude,
                     stayMinutes = 30,
-                    position = index
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
                 )
             }
             routeRepository.saveRoute(route, stops)
