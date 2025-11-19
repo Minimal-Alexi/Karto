@@ -1,5 +1,6 @@
 package com.example.mapapp.data.database.routes
 
+import android.util.Log
 import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import kotlinx.coroutines.flow.Flow
@@ -11,11 +12,10 @@ class RouteRepository(
     fun getAllRoutes(): Flow<List<RouteEntity>> = routeDao.getAllRoutes()
     suspend fun getRoute(id: Int): RouteEntity? = routeDao.getRouteById(id)
 
-    fun getAllRoutesWithStopCount(): Flow<List<RouteWithStopCount>> =
-        routeDao.getAllRoutesWithStopCount()
+    fun getSavedRoutes(): Flow<List<RouteWithStopCount>> =
+        routeDao.getSavedRoutes()
 
     fun getCurrentRoute(): Flow<RouteEntity?> = routeDao.getCurrentRoute()
-    fun getSavedRoutes(): Flow<List<RouteEntity>> = routeDao.getSavedroutes()
     fun getCompletedRoutes(): Flow<List<RouteEntity>> = routeDao.getCompletedRoutes()
 
     suspend fun getRouteWithStops(routeId: Int): RouteWithStops {
@@ -23,10 +23,6 @@ class RouteRepository(
             ?: throw IllegalStateException("Route with id $routeId does not exist")
         val stops = routeStopDao.getStopsForRoute(routeId)
         return RouteWithStops(route, stops)}
-
-    suspend fun saveRoute(route: RouteEntity) {
-        routeDao.insertRoute(route.copy(status = RouteStatus.SAVED))
-    }
 
     suspend fun setCurrentRoute(route: RouteEntity) {
         routeDao.deleteCurrent()
@@ -39,7 +35,8 @@ class RouteRepository(
     }
 
     suspend fun saveRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
-        val id = routeDao.insertRoute(route).toInt()
+        val id = routeDao.insertRoute(route.copy(status = RouteStatus.SAVED)).toInt()
+        Log.d("SAVEDEBUG", "saveRoute called with id $id")
 
         stops.forEach { stop ->
             routeStopDao.insert(

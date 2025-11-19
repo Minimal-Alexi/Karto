@@ -192,6 +192,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 title = routeTitle.value.ifBlank { "No name route" },
                 timestamp  = System.currentTimeMillis()
             )
+            Log.d("SAVEDEBUG", "Saving route: $route")
+
             val stops = routeStops.value.mapIndexed { index, stop ->
                 RouteStopEntity(
                     routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
@@ -204,6 +206,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = stop.typeOfPlace?.name
                 )
             }
+            Log.d("SAVEDEBUG", "saving stops $stops")
+
             routeRepository.saveRoute(route, stops)
         }
     }

@@ -19,13 +19,11 @@ interface RouteDao {
         SELECT r.id, r.title, r.timestamp AS savedAt, COUNT(s.id) AS stopsCount
         FROM routes r
         LEFT JOIN route_stops s ON r.id = s.routeId
+        WHERE status = :status
         GROUP BY r.id
         ORDER BY r.timestamp DESC
     """)
-    fun getAllRoutesWithStopCount(): Flow<List<RouteWithStopCount>>
-
-    @Query("SELECT * FROM routes WHERE status = :status")
-    fun getSavedroutes(status: RouteStatus = RouteStatus.SAVED): Flow<List<RouteEntity>>
+    fun getSavedRoutes(status: RouteStatus = RouteStatus.SAVED): Flow<List<RouteWithStopCount>>
 
     @Query("SELECT * FROM routes WHERE status = :status")
     fun getCompletedRoutes(status: RouteStatus = RouteStatus.COMPLETED): Flow<List<RouteEntity>>
