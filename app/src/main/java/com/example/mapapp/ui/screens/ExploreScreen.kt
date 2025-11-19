@@ -31,7 +31,6 @@ import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.TravelModeSelector
-import com.example.mapapp.utils.route.fetchRoute
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -43,6 +42,9 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
@@ -91,6 +93,7 @@ fun ExploreScreen(
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
+                exploreViewModel = exploreViewModel
             )
         }
         item { RouteSummarySection(exploreViewModel) }
@@ -161,9 +164,9 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     var destination by remember {
         mutableStateOf(RouteLatLng(0.0, 0.0))
     }
-        /**
-         * Code of route polyline is above
-         */
+    /**
+     * Code of route polyline is above
+     */
 
     // GoogleMap Compose
     Box(
@@ -279,7 +282,10 @@ fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
     deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
     selectedRouteStops: List<com.example.mapapp.data.model.Place>,
+    exploreViewModel: ExploreViewModel,
 ) {
+    val generatedRoute by exploreViewModel.generatedRoute.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -288,7 +294,7 @@ fun SelectedStopsSection(
         )
         Button(
             onClick = {
-                Log.d("AAA", selectedRouteStops.toString())
+                exploreViewModel.runMatrixFlow()
             }
         ) { Text("Calculate route") }
 

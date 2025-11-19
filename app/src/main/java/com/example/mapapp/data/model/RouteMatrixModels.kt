@@ -1,29 +1,25 @@
 package com.example.mapapp.data.model
 
 data class RouteMatrixRequest(
-    val origins: RouteMatrixOrigins,
-    val destinations: String,
+    val origins: List<WayPoint>,
+    val destinations: List<WayPoint>,
     val travelMode: String,
 )
 
-data class RouteMatrixOrigins(
-    val waypoints: List<RouteLocation>
-)
-
-data class RouteMatrixDestinations(
-    val waypoints: List<RouteLocation>
+data class WayPoint(
+    val waypoint: RouteLocation
 )
 
 data class RouteMatrixResponse(
-    val rows: List<RouteMatrixRow>
+    val element: List<RouteMatrixElement>
 )
 
-data class RouteMatrixRow(
+data class RouteMatrixElement(
     val originIndex: Int,
     val destinationIndex: Int,
     val status: String,
-    val distanceMeters: String,
-    val duration: String,
+    val distanceMeters: Int,
+    val duration: Int,
     val condition: String
 )
 
