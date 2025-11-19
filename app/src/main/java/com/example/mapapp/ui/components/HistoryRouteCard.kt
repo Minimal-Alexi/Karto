@@ -24,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.example.mapapp.R
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.database.routes.RouteWithStopCount
+import com.example.mapapp.data.database.routes.RouteWithStops
 import com.example.mapapp.ui.components.buttons.DeleteIconButton
 
 @Composable
 fun HistoryRouteCard(
-    route: RouteEntity, onDelete: () -> Unit
+    route: RouteWithStopCount, onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -65,10 +67,10 @@ fun HistoryRouteCard(
                     text = "Saved ${
                         java.text.SimpleDateFormat(
                             "dd MMM yyyy, HH:mm", java.util.Locale.getDefault()
-                        ).format(java.util.Date(route.timestamp))
+                        ).format(java.util.Date(route.savedAt))
                     }", style = MaterialTheme.typography.bodyMedium
                 )
-                Text(text = "4 locations", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
             }
             Spacer(modifier = Modifier.width(8.dp))
 

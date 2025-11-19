@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
+import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.DisplayName
 import com.example.mapapp.data.model.Place
@@ -26,14 +27,16 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
             initialValue = null
         )
 
-    fun completeRoute() {
-        val routeEntity = RouteEntity(
-            title = currentRoute.value?.title ?: "Default Route Title",
-            timestamp = System.currentTimeMillis()
+    val currentStops : StateFlow<List<RouteStopEntity>?> = routeRepository.getCurrentRouteStops()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
         )
 
+    fun completeRoute() {
         viewModelScope.launch {
-            routeRepository.completeRoute(routeEntity)
+            currentRoute.value?.let { routeRepository.completeRoute(it.id) }
         }
     }
 }

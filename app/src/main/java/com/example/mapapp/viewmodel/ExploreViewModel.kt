@@ -212,9 +212,27 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun startRoute(route: RouteEntity) {
+    fun startRoute() {
         viewModelScope.launch {
-            routeRepository.setCurrentRoute(route)
+            val route = RouteEntity(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp  = System.currentTimeMillis()
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
+                )
+            }
+
+            routeRepository.startRoute(route, stops)
         }
     }
 }

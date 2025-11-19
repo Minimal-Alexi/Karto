@@ -189,7 +189,10 @@ fun MapScreenPlaceholder() {
 fun OnRouteSection(
     navigateToLocationScreen: (String) -> Unit,
 ) {
-    val routeStops = null // TODO: FIGURE IT OUT ASAP
+    val viewModel = viewModel<RouteScreenViewModel>()
+
+    val currentRouteStopsFlow = remember { viewModel.currentStops }
+    val currentStops = currentRouteStopsFlow.collectAsState().value
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -213,17 +216,21 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                //for (location in routeStops.collectAsState().value){
-                    RouteStopItem(
-                        time = "12:05",
-                        locationName = "place",
-                        distance = "2.7 km",
-                        duration = "30 min",
-                        placesID = "holder",
-                        navigateToLocationScreen = navigateToLocationScreen
-                    )
-                    HorizontalDivider(color = Color(0xFFDDDDDD))
-                //}
+                if (currentStops != null) {
+                    for (location in currentStops){
+                        RouteStopItem(
+                            time = "12:05",
+                            locationName = location.name,
+                            distance = "2.7 km",
+                            duration = "30 min",
+                            placesID = "holder",
+                            navigateToLocationScreen = navigateToLocationScreen
+                        )
+                        HorizontalDivider(color = Color(0xFFDDDDDD))
+                    }
+                } else {
+                    Text("No stops on this route!")
+                }
             }
         }
     }

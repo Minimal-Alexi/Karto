@@ -125,9 +125,8 @@ fun RouteHistory() {
 
     if (routes.isNotEmpty()) {
         Column {
-            // reversed so latest is first
-            for (route in routes.reversed()) {
-                HistoryRouteCard(route, onDelete = { vm.deleteRoute(route) })
+            for (route in routes) {
+                HistoryRouteCard(route, onDelete = { vm.deleteRouteById(route.id) })
             }
 
             Spacer(modifier = Modifier.height(16.dp))

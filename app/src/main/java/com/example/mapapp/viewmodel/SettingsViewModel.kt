@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.database.routes.RouteWithStopCount
+import com.example.mapapp.data.database.routes.RouteWithStops
 import com.example.mapapp.data.database.user.UserEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private val userRepository = (app as KartoApplication).userRepository
     private val routeRepository = (app as KartoApplication).routeRepository
 
-    val completedRoutes: StateFlow<List<RouteEntity>> = routeRepository.getCompletedRoutes()
+    val completedRoutes: StateFlow<List<RouteWithStopCount>> = routeRepository.getCompletedRoutes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
 
@@ -53,9 +55,9 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun deleteRoute(route: RouteEntity) {
+    fun deleteRouteById(routeId : Int) {
         viewModelScope.launch {
-            routeRepository.deleteRouteById(route.id)
+            routeRepository.deleteRouteById(routeId)
         }
     }
 }

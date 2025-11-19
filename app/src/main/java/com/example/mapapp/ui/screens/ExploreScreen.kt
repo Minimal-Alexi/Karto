@@ -96,12 +96,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 text = "Start This Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
             ) {
-                exploreViewModel.startRoute(
-                    RouteEntity (
-                        title = exploreViewModel.routeTitle.value,
-                        timestamp = System.currentTimeMillis()
-                    )
-                )
+                exploreViewModel.startRoute()
                 navigateToScreen(ROUTE_SCREEN_ROUTE)
             }
         }
