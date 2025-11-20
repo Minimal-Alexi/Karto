@@ -154,7 +154,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val polylines = exploreViewModel.routePolylines.collectAsState()
+    val polyline = exploreViewModel.routePolyline.collectAsState()
 
     /**
      * Code of route polyline is below
@@ -217,10 +217,12 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     })
             }
 
-            polylines.value.forEach { polyline ->
-                val path = PolyUtil.decode(polyline)
+            if (polyline.value != null) {
+                val points = PolyUtil.decode(polyline.value)
                 Polyline(
-                    points = path, color = Color.Blue, width = 8f
+                    points = points,
+                    color = MaterialTheme.colorScheme.primary,
+                    width = 10f
                 )
             }
         }
@@ -284,8 +286,6 @@ fun SelectedStopsSection(
     selectedRouteStops: List<com.example.mapapp.data.model.Place>,
     exploreViewModel: ExploreViewModel,
 ) {
-    val generatedRoute by exploreViewModel.generatedRoute.collectAsState()
-
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

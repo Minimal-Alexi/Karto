@@ -16,5 +16,5 @@ interface RouteMatrixApiService {
         @Body request: RouteMatrixRequest,
         @Header("X-Goog-Api-Key") apiKey: String = SecretsHolder.apiKey!!,
         @Header("X-Goog-FieldMask") fieldMask: String = "",
-    ): RouteMatrixResponse
+    ): List<RouteMatrixElement>
 }

@@ -18,11 +18,10 @@ object RouteMatrixApi {
             .build()
 
         Retrofit.Builder()
-            .baseUrl(RouteMatrixApi.BASE_URL)
+            .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(RouteMatrixApiService::class.java)
-
     }
 }

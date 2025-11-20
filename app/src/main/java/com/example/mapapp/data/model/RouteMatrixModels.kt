@@ -17,9 +17,8 @@ data class RouteMatrixResponse(
 data class RouteMatrixElement(
     val originIndex: Int,
     val destinationIndex: Int,
-    val status: String,
     val distanceMeters: Int,
-    val duration: Int,
+    val duration: String,
     val condition: String
 )
 
