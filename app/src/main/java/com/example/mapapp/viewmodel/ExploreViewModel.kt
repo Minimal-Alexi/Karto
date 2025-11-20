@@ -264,8 +264,14 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
                 val origin: RouteLatLng =
                     _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
 
-                val destinationIndex = _generatedRoute.value!!.travelPath.last()
-                val destinationPlace = _routeStops.value[destinationIndex-1]
+                val sortedRouteStops: MutableList<Place> = mutableListOf()
+
+                for (i in _generatedRoute.value!!.travelPath.drop(1)) {
+                    sortedRouteStops.add(_routeStops.value[i-1])
+                }
+                _routeStops.value = sortedRouteStops
+
+                val destinationPlace = _routeStops.value.last()
 
                 val destination: RouteLatLng =
                     RouteLatLng(
@@ -278,9 +284,6 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
                 for (place in _routeStops.value) {
                     intermediate.add(RouteLatLng(place.location.latitude, place.location.longitude))
                 }
-
-                Log.d("AAA", "Route generated: $destinationIndex")
-                Log.d("AAA", "destination: $destination")
 
                 fetchRoute(origin, destination, intermediate)
             }
