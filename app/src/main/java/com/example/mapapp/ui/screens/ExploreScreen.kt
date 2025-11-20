@@ -2,9 +2,17 @@ package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,13 +30,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.SelectedStopItem
+import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -40,7 +47,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
@@ -77,17 +83,20 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
         item {
             NearbyPlaceSelector(exploreViewModel)
         }
-        item{
-            TravelModeSelector(exploreViewModel.travelMode.collectAsState().value,
-                exploreViewModel::changeTravelMode)
+        item {
+            TravelModeSelector(
+                exploreViewModel.travelMode.collectAsState().value,
+                exploreViewModel::changeTravelMode
+            )
         }
-        item { MapWrapper(exploreViewModel,mapInteraction) }
-        
+        item { MapWrapper(exploreViewModel, mapInteraction) }
+
         item {
             SelectedStopsSection(
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
+                exploreViewModel = exploreViewModel
             )
         }
         item { RouteSummarySection(exploreViewModel) }
@@ -110,8 +119,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
         }
         item {
             PrimaryButton(
-                text = "Reset This Route",
-                backgroundColor = MaterialTheme.colorScheme.error
+                text = "Reset This Route", backgroundColor = MaterialTheme.colorScheme.error
             ) { /* TODO */ }
         }
         item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -139,8 +147,7 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
                         mapInteraction.value = false
                     }
                 }
-            }
-    ){
+            }) {
         MapScreen(exploreViewModel)
     }
 }
@@ -157,127 +164,96 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
      * Code of route polyline is below
      */
 
-    var origin by remember { mutableStateOf(RouteLatLng(60.1699, 24.9384)) }
+    var origin by remember { mutableStateOf(RouteLatLng(0.0, 0.0)) }
     var destination by remember {
         mutableStateOf(RouteLatLng(0.0, 0.0))
     }
-        /**
-         * Code of route polyline is above
-         */
+    /**
+     * Code of route polyline is above
+     */
 
-        // GoogleMap Compose
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp),
-        ) {
-            GoogleMap(
-                modifier = Modifier
-                    .fillMaxSize(),
-                cameraPositionState = rememberCameraPositionState {
-                    position = CameraPosition.fromLatLngZoom(
-                        LatLng(60.1699, 24.9384),
-                        12f
-                    ) // Helsinki in default
-                }
-            ) {
-                if (userLocation.value != null) {
-                    Marker(
-                        state = rememberUpdatedMarkerState(position = userLocation.value!!),
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                        title = "Your location",
-                        snippet = "Your current location"
-                    )
-                }
-                if (nearbyLocations.value != null) {
-                    for (place in nearbyLocations.value) {
-                        if(!routeStops.value.contains(place)){
-                            Marker(
-                                state = rememberUpdatedMarkerState(position = place.location),
-                                title = place.displayName.text,
-                                icon = BitmapDescriptorFactory.defaultMarker(place.typeOfPlace?.markerColor
-                                    ?: BitmapDescriptorFactory.HUE_RED),
-                                tag = place,
-                                onClick =
-                                    {
-                                        exploreViewModel.addRouteStop(place)
-                                        false
-                                    }
-                            )
-                        }
+    // GoogleMap Compose
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp),
+    ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(), cameraPositionState = rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(
+                    LatLng(60.1699, 24.9384), 12f
+                ) // Helsinki in default
+            }) {
+            if (userLocation.value != null) {
+                Marker(
+                    state = rememberUpdatedMarkerState(position = userLocation.value!!),
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                    title = "Your location",
+                    snippet = "Your current location"
+                )
+            }
+            if (nearbyLocations.value != null) {
+                for (place in nearbyLocations.value) {
+                    if (!routeStops.value.contains(place)) {
+                        Marker(
+                            state = rememberUpdatedMarkerState(position = place.location),
+                            title = place.displayName.text,
+                            icon = BitmapDescriptorFactory.defaultMarker(
+                                place.typeOfPlace?.markerColor ?: BitmapDescriptorFactory.HUE_RED
+                            ),
+                            tag = place,
+                            onClick = {
+                                exploreViewModel.addRouteStop(place)
+                                false
+                            })
                     }
                 }
-                for(place in routeStops.value){
-                    Marker(
-                        state = rememberUpdatedMarkerState(position = place.location),
-                        title = place.displayName.text,
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                        tag = place,
-                        onClick =
-                            {
-                                exploreViewModel.removeRouteStop(place)
-                                false
-                            }
-                    )
-                }
-
-                polyline.value?.let { encoded ->
-                    val path = PolyUtil.decode(encoded)
-                    Polyline(
-                        points = path,
-                        color = Color.Blue,
-                        width = 8f
-                    )
-                }
-
+            }
+            for (place in routeStops.value) {
                 Marker(
-                    state = rememberUpdatedMarkerState(
-                        GmsLatLng(
-                            origin.latitude,
-                            origin.longitude
-                        )
-                    ),
-                    title = "Origin"
-                )
+                    state = rememberUpdatedMarkerState(position = place.location),
+                    title = place.displayName.text,
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                    tag = place,
+                    onClick = {
+                        exploreViewModel.removeRouteStop(place)
+                        false
+                    })
+            }
 
-                Marker(
-                    state = rememberUpdatedMarkerState(
-                        GmsLatLng(
-                            destination.latitude,
-                            destination.longitude
-                        )
-                    ),
-                    title = "Destination"
+            if (polyline.value != null) {
+                val points = PolyUtil.decode(polyline.value)
+                Polyline(
+                    points = points,
+                    color = MaterialTheme.colorScheme.primary,
+                    width = 10f
                 )
             }
         }
     }
+}
 
 @Composable
 fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
     val routeInfo by exploreViewModel.routeInfo.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Summary",
-            style = MaterialTheme.typography.titleLarge
+            text = "Summary", style = MaterialTheme.typography.titleLarge
         )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(16.dp)
+                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
                 )
                 .padding(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = if (routeInfo != null) "$routeInfo" else "",
@@ -287,49 +263,57 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
         }
     }
 }
+
 @Composable
-fun NearbyPlaceSelector(exploreViewModel : ExploreViewModel){
+fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
     Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ){
-            PlaceTypeSelector(exploreViewModel.placeTypeSelector.collectAsState().value,exploreViewModel::changePlaceType)
-            DistanceSlider(exploreViewModel.distanceToPlaces.collectAsState().value,
-                exploreViewModel::changeDistanceToPlaces)
-            PrimaryButton(
-                text = "Check nearby locations",
-                backgroundColor = MaterialTheme.colorScheme.primary
-            ) { exploreViewModel.getNearbyPlaces() }
-        }
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        PlaceTypeSelector(
+            exploreViewModel.placeTypeSelector.collectAsState().value,
+            exploreViewModel::changePlaceType
+        )
+        DistanceSlider(
+            exploreViewModel.distanceToPlaces.collectAsState().value,
+            exploreViewModel::changeDistanceToPlaces
+        )
+        PrimaryButton(
+            text = "Check nearby locations", backgroundColor = MaterialTheme.colorScheme.primary
+        ) { exploreViewModel.getNearbyPlaces() }
+    }
 }
+
 @Composable
 fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
     deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
-    selectedRouteStops: List<com.example.mapapp.data.model.Place>
+    selectedRouteStops: List<com.example.mapapp.data.model.Place>,
+    exploreViewModel: ExploreViewModel,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Selected Route Stops",
-            style = MaterialTheme.typography.titleLarge
+            text = "Selected Route Stops", style = MaterialTheme.typography.titleLarge
         )
+        Button(
+            onClick = {
+                exploreViewModel.runMatrixFlow()
+            }
+        ) { Text("Calculate route") }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(16.dp)
+                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
                 )
                 .padding(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                for(place:com.example.mapapp.data.model.Place in selectedRouteStops){
+                for (place: com.example.mapapp.data.model.Place in selectedRouteStops) {
                     SelectedStopItem(
                         time = "12:05",
                         locationName = place.displayName.text,
@@ -341,8 +325,7 @@ fun SelectedStopsSection(
                             // handle the selected stay time
                             println("Stay time selected: $selectedTime")
                         },
-                        deleteOnClick = { deleteOnClick(place) }
-                    )
+                        deleteOnClick = { deleteOnClick(place) })
                     HorizontalDivider(color = Color(0xFFDDDDDD))
                 }
             }

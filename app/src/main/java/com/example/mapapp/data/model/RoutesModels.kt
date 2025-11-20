@@ -15,6 +15,7 @@ enum class TravelModes(val mode: String, val icon: ImageVector){
 data class RoutesRequest (
     val origin: RouteLocation,
     val destination: RouteLocation,
+    val intermediates: List<RouteLocation>,
     val travelMode: String = "DRIVE",
 )
 

@@ -22,15 +22,21 @@ import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
+import com.example.mapapp.data.model.RouteMatrixRequest
+import com.example.mapapp.data.model.RouteMatrixResponse
+import com.example.mapapp.data.model.WayPoint
+import com.example.mapapp.data.network.RouteMatrixApi
+import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.SecretsHolder
+import com.example.mapapp.utils.TravelRoute
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ExploreViewModel(application: Application) : AndroidViewModel(application) {
+open class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
     var routeTitle = mutableStateOf("Default Title")
 
@@ -62,7 +68,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
     private val _routeInfo = MutableStateFlow<String?>(null)
     val routeInfo: StateFlow<String?> = _routeInfo
-
 
     private val _LocationCallbackUpdate = 10000L
     private val locationClient: LocationClient =
@@ -121,12 +126,28 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _placeTypeSelection.value = newPlaceType
     }
 
-    fun fetchRoute(origin: RouteLatLng, destination: RouteLatLng, travelMode: String = "WALK") {
+    /**
+     * Code of route polyline is below
+     */
+
+    fun fetchRoute(
+        origin: RouteLatLng,
+        destination: RouteLatLng,
+        intermediates: List<RouteLatLng> = listOf(),
+        travelMode: String = "WALK",
+    ) {
         viewModelScope.launch {
             try {
                 val request = RoutesRequest(
                     origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
                     destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
+                    intermediates = intermediates.map {
+                        RouteLocation(
+                            location = LatLngLiteral(
+                                latLng = it
+                            )
+                        )
+                    },
                     travelMode = travelMode
                 )
                 val response = RoutesApi.service.computeRoutes(
@@ -152,6 +173,147 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
+
+    fun getWayPoints(): List<WayPoint> {
+        val waypoints = mutableListOf<WayPoint>()
+        for (place in _routeStops.value) {
+            waypoints.add(
+                WayPoint(
+                    RouteLocation(
+                        location = LatLngLiteral(
+                            latLng = RouteLatLng(
+                                place.location.latitude,
+                                place.location.longitude
+                            )
+                        )
+                    )
+                )
+            )
+        }
+
+        // Get the user location safely to avoid null pointer exception
+        val currentLocation = _userLocation.value
+        if (currentLocation != null) {
+            waypoints.add(
+                WayPoint(
+                    RouteLocation(
+                        location = LatLngLiteral(
+                            latLng = RouteLatLng(
+                                currentLocation.latitude,
+                                currentLocation.longitude
+                            )
+                        )
+                    )
+                )
+            )
+        } else {
+            Log.e("ExploreViewModel", "User location is NULL! Route Matrix will likely fail.")
+        }
+        return waypoints
+    }
+
+    private val _routeMatrixResponse = MutableStateFlow<RouteMatrixResponse?>(null)
+    val routeMatrixResponse: StateFlow<RouteMatrixResponse?> = _routeMatrixResponse
+
+    suspend fun fetchRouteMatrix() {
+        Log.d("AAA", "Fetching route matrix...")
+
+        try {
+            val request = RouteMatrixRequest(
+                origins = getWayPoints(),
+                destinations = getWayPoints(),
+                travelMode = _travelMode.value.mode
+            )
+
+            Log.d("AAA", "Route matrix request: $request")
+
+            val responseList = RouteMatrixApi.service.computeRouteMatrix(
+                request,
+                fieldMask = "originIndex,destinationIndex,duration,distanceMeters,status,condition"
+            )
+
+            Log.d("AAA", "Route matrix response: $responseList")
+
+            _routeMatrixResponse.value = RouteMatrixResponse(element = responseList)
+
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
+    private val _generatedRoute = MutableStateFlow<TravelRoute?>(null)
+    val generatedRoute: StateFlow<TravelRoute?> = _generatedRoute
+
+    fun getTravelCostMatrix(routeMatrixResponse: MutableStateFlow<RouteMatrixResponse?>) {
+        val index = 1 + _routeStops.value.size
+        val matrix: Array<Array<Int>> = Array(index) { Array(index) { 0 } }
+
+        for (item in routeMatrixResponse.value!!.element) {
+            matrix[item.originIndex][item.destinationIndex] = item.distanceMeters
+        }
+
+        for (item in matrix) {
+            Log.d("AAA", item.contentToString())
+        }
+        val routeGenerator = RouteGenerator()
+        val generateRouteGreedy = routeGenerator.generateRoute(matrix)
+        _generatedRoute.value = generateRouteGreedy
+    }
+
+
+    fun runMatrixFlow() {
+        viewModelScope.launch {
+            if (_userLocation.value == null) {
+                Log.e("AAA", "Aborting: User location is null. Please wait for GPS.")
+            } else if (_routeStops.value.isEmpty()) {
+                Log.w(
+                    "AAA",
+                    "Warning: No stops added, calculating matrix only for current location?"
+                )
+
+                _routePolyline.value = ""
+            } else {
+                fetchRouteMatrix()
+                Log.d("AAA", "Matrix fetch success!")
+                getTravelCostMatrix(_routeMatrixResponse)
+
+                // Get polyline
+                val origin: RouteLatLng =
+                    _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
+
+                val sortedRouteStops: MutableList<Place> = mutableListOf()
+
+                for (i in _generatedRoute.value!!.travelPath.drop(1)) {
+                    sortedRouteStops.add(_routeStops.value[i-1])
+                }
+                _routeStops.value = sortedRouteStops
+
+                val destinationPlace = _routeStops.value.last()
+
+                val destination: RouteLatLng =
+                    RouteLatLng(
+                        destinationPlace.location.latitude,
+                        destinationPlace.location.longitude
+                    )
+
+                val intermediate: MutableList<RouteLatLng> = mutableListOf()
+
+                for (place in _routeStops.value) {
+                    intermediate.add(RouteLatLng(place.location.latitude, place.location.longitude))
+                }
+
+                fetchRoute(origin, destination, intermediate)
+            }
+
+        }
+    }
+
+
+    /**
+     * Code of route polyline is above
+     */
 
     fun getNearbyPlaces() {
         viewModelScope.launch {
