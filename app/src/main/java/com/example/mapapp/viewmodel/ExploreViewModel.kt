@@ -1,30 +1,33 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.mapapp.data.model.LatLngLiteral
-import com.example.mapapp.data.model.RouteLatLng
-import com.example.mapapp.data.model.RouteLocation
-import com.example.mapapp.data.model.RoutesRequest
-import com.example.mapapp.data.network.RoutesApi
-import android.util.Log
 import com.example.mapapp.KartoApplication
+import com.example.mapapp.data.database.route_stops.RouteStopEntity
+import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Circle
+import com.example.mapapp.data.model.DisplayName
+import com.example.mapapp.data.model.LatLngLiteral
 import com.example.mapapp.data.model.LocationRestriction
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.RouteLatLng
+import com.example.mapapp.data.model.RouteLocation
+import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
-import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.RouteMatrixRequest
 import com.example.mapapp.data.model.RouteMatrixResponse
 import com.example.mapapp.data.model.WayPoint
 import com.example.mapapp.data.network.RouteMatrixApi
 import com.example.mapapp.utils.RouteGenerator
+import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.example.mapapp.utils.TravelRoute
 import com.google.android.gms.location.LocationServices
@@ -35,13 +38,14 @@ import kotlinx.coroutines.launch
 
 open class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
+    var routeTitle = mutableStateOf("Default Title")
 
     /*
     Nearby Places & Filtering Variables
     */
     private val _nearbyPlaces = MutableStateFlow<List<Place>?>(null)
     val nearbyPlaces: StateFlow<List<Place>?> = _nearbyPlaces
-    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.BEACHES)
+    private val _placeTypeSelection = MutableStateFlow<TypesOfPlaces>(TypesOfPlaces.RESTAURANTS)
     val placeTypeSelector: StateFlow<TypesOfPlaces> = _placeTypeSelection
     private val _distanceToPlaces = MutableStateFlow<Double>(1000.0)
     val distanceToPlaces: StateFlow<Double> = _distanceToPlaces
@@ -78,6 +82,21 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude, location.longitude)
                 }
+        }
+    }
+
+    fun loadSavedRoute(routeId: Int) {
+        viewModelScope.launch {
+            val routeWithStops = routeRepository.getRouteWithStops(routeId)
+            routeTitle.value = routeWithStops.route.title
+            _routeStops.value = routeWithStops.stops.map { stop ->
+                Place(
+                    displayName = DisplayName(stop.name),
+                    location = LatLng(stop.latitude, stop.longitude),
+                    id = stop.placesId,
+                    typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
+                )
+            }
         }
     }
 
@@ -329,14 +348,50 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun saveRoute(title: String) {
-        val routeEntity = RouteEntity(
-            title = title,
-            savedAt = System.currentTimeMillis()
-        )
-
+    fun saveRoute() {
         viewModelScope.launch {
-            routeRepository.saveRoute(routeEntity)
+            val route = RouteEntity(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp  = System.currentTimeMillis()
+            )
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
+                )
+            }
+
+            routeRepository.saveRoute(route, stops)
+        }
+    }
+
+    fun startRoute() {
+        viewModelScope.launch {
+            val route = RouteEntity(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp  = System.currentTimeMillis()
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
+                )
+            }
+
+            routeRepository.startRoute(route, stops)
         }
     }
 }

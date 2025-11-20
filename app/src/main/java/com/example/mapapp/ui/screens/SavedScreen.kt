@@ -15,9 +15,9 @@ import com.example.mapapp.ui.components.SavedRouteCard
 import com.example.mapapp.viewmodel.SavedViewModel
 
 @Composable
-fun SavedScreen() {
+fun SavedScreen(onOpenRoute: (Int) -> Unit) {
     val savedViewModel = viewModel<SavedViewModel>()
-    val routes by savedViewModel.allRoutes.collectAsState()
+    val routes by savedViewModel.savedRoutes.collectAsState()
 
     Column(
         modifier = Modifier
@@ -36,7 +36,8 @@ fun SavedScreen() {
         routes.forEach { route ->
             SavedRouteCard(
                 route = route,
-                onDelete = { savedViewModel.deleteRoute(route) }
+                onOpen = { onOpenRoute(route.id) },
+                onDelete = { savedViewModel.deleteRoute(route.id) }
             )
         }
 

@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.components
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,10 +22,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.ui.components.buttons.SecondaryButton
+import com.example.mapapp.data.database.routes.RouteWithStopCount
 
 @Composable
 fun SavedRouteCard(
-    route: RouteEntity,
+    route: RouteWithStopCount,
+    onOpen: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
@@ -42,13 +46,14 @@ fun SavedRouteCard(
             Icon(
                 painterResource(R.drawable.route_icon),
                 contentDescription = "Route Icon",
-                modifier = Modifier.padding(top = 8.dp).size(40.dp)
+                modifier = Modifier.padding(8.dp).size(42.dp)
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(text = route.title, style = MaterialTheme.typography.titleMedium)
+                Text(text = route.title, style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.basicMarquee())
                 Spacer(modifier = Modifier.height(0.dp))
                 Text(
                     text = "Saved ${
@@ -57,7 +62,7 @@ fun SavedRouteCard(
                     }",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(text = "4 locations (15 km)", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -67,7 +72,7 @@ fun SavedRouteCard(
                         text = "Open",
                         backgroundColor = MaterialTheme.colorScheme.primary
                     ) {
-                        /* TODO: Open route */
+                        onOpen()
                     }
 
                     Spacer(modifier = Modifier.width(12.dp))

@@ -1,9 +1,15 @@
 package com.example.mapapp.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -12,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,43 +28,39 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.PrimaryButton
 import com.example.mapapp.ui.components.SelectedStopItem
+import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PinConfig
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import com.google.android.gms.maps.model.LatLng as GmsLatLng
 
 @Composable
-fun ExploreScreen(
-    navigateToLocationScreen: (String) -> Unit,
-    exploreViewModel: ExploreViewModel = viewModel(),
-    navigateToScreen: (String) -> Unit,
-) {
+fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
+                  exploreViewModel: ExploreViewModel = viewModel(),
+                  navigateToScreen : (String) -> Unit,
+                  openedRouteId: Int? = null) {
 
-    var routeTitle by remember { mutableStateOf("Default Route Title") }
+    LaunchedEffect(openedRouteId) {
+        if (openedRouteId != null) {
+            exploreViewModel.loadSavedRoute(openedRouteId)
+        }
+    }
 
     val mapInteraction = remember { mutableStateOf(false) }
-
 
     LazyColumn(
         modifier = Modifier
@@ -68,8 +71,8 @@ fun ExploreScreen(
     ) {
         item {
             OutlinedTextField(
-                value = routeTitle,
-                onValueChange = { routeTitle = it },
+                value = exploreViewModel.routeTitle.value,
+                onValueChange = { exploreViewModel.routeTitle.value = it },
                 label = { Text("Route Title") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,8 +102,10 @@ fun ExploreScreen(
         item { RouteSummarySection(exploreViewModel) }
         item {
             PrimaryButton(
-                text = "Start This Route", backgroundColor = MaterialTheme.colorScheme.secondary
-            ) { /* TODO: actually make it start the route as well */
+                text = "Start This Route",
+                backgroundColor = MaterialTheme.colorScheme.secondary
+            ) {
+                exploreViewModel.startRoute()
                 navigateToScreen(ROUTE_SCREEN_ROUTE)
             }
         }
@@ -109,8 +114,7 @@ fun ExploreScreen(
                 text = "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
             ) {
-                val titleToSave = routeTitle.ifBlank { "No name route" }
-                exploreViewModel.saveRoute(title = titleToSave)
+                exploreViewModel.saveRoute()
             }
         }
         item {
@@ -315,7 +319,7 @@ fun SelectedStopsSection(
                         locationName = place.displayName.text,
                         distance = "2.7 km",
                         duration = "30 min",
-                        placesID = place.id,
+                        placesId = place.id,
                         navigateToLocationScreen = navigateToLocationScreen,
                         onStayTimeChange = { selectedTime ->
                             // handle the selected stay time
