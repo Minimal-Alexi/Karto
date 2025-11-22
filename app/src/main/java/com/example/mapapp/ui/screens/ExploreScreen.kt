@@ -34,12 +34,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
-import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
-import com.example.mapapp.ui.components.PlaceInfoCard
+import com.example.mapapp.ui.components.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.RouteStopInfoCard
+import com.example.mapapp.ui.components.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
@@ -244,12 +243,12 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
-                if(selectedPlaceIsRouteStop) RouteStopInfoCard(selectedPlace!!,
+                if(selectedPlaceIsRouteStop) MapRouteStopInfoCard(selectedPlace!!,
                     {
                         exploreViewModel.removeRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
-                else PlaceInfoCard(selectedPlace!!,
+                else MapPlaceInfoCard(selectedPlace!!,
                     {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null

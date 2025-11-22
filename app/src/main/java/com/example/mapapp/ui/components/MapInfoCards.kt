@@ -14,7 +14,7 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.buttons.DeleteIconButton
 
 @Composable
-fun PlaceInfoCard(selectedPlace: Place, buttonOnClick: () -> Unit){
+fun MapPlaceInfoCard(selectedPlace: Place, buttonOnClick: () -> Unit){
     Column(Modifier.padding(16.dp)) {
         Text(selectedPlace.displayName.text,
             style = MaterialTheme.typography.titleMedium,
@@ -32,7 +32,7 @@ fun PlaceInfoCard(selectedPlace: Place, buttonOnClick: () -> Unit){
 }
 
 @Composable
-fun RouteStopInfoCard(selectedPlace: Place, buttonOnClick: () -> Unit){
+fun MapRouteStopInfoCard(selectedPlace: Place, buttonOnClick: () -> Unit){
     Column(Modifier.padding(16.dp)) {
         Text(selectedPlace.displayName.text,
             style = MaterialTheme.typography.titleMedium,
