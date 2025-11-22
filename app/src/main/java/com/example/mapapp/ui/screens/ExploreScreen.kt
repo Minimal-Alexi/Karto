@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
@@ -152,9 +156,12 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(exploreViewModel: ExploreViewModel) {
-
+    val sheetState = rememberModalBottomSheetState()
+    var selectedPlace by remember { mutableStateOf<Place?>(null) }
+    var selectedPlaceIsRouteStop by remember {mutableStateOf<Boolean>(false)}
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
@@ -190,6 +197,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                                 place.typeOfPlace?.markerColor ?: BitmapDescriptorFactory.HUE_RED
                             ),
                             tag = place,
+                            onClick = {
+                                selectedPlace = if(place == selectedPlace) null
+                                else {
+                                    selectedPlaceIsRouteStop = false
+                                    place
+                                }
+                                true
+                            }
                             )
                     }
                 }
@@ -200,6 +215,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     title = place.displayName.text,
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                     tag = place,
+                    onClick = {
+                        selectedPlace = if(place == selectedPlace) null
+                        else {
+                            selectedPlaceIsRouteStop = true
+                            place
+                        }
+                        true
+                    }
                     )
             }
 
@@ -210,6 +233,25 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     color = MaterialTheme.colorScheme.primary,
                     width = 10f
                 )
+            }
+        }
+    }
+    if(selectedPlace != null){
+        ModalBottomSheet(
+            onDismissRequest = { selectedPlace = null },
+            sheetState = sheetState
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(selectedPlace!!.displayName.text)
+                Spacer(Modifier.height(8.dp))
+
+                Button(onClick = { /* action */ }) {
+                    Text("Add to route")
+                }
+
+                Button(onClick = { /* action */ }) {
+                    Text("Navigate")
+                }
             }
         }
     }
