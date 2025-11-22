@@ -37,6 +37,7 @@ import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
+import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -51,6 +52,7 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 @Composable
 fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                   exploreViewModel: ExploreViewModel = viewModel(),
+                  routeViewModel: RouteViewModel = viewModel(),
                   navigateToScreen : (String) -> Unit,
                   openedRouteId: Int? = null) {
 
@@ -96,7 +98,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
-                exploreViewModel = exploreViewModel
+                routeViewModel = routeViewModel
             )
         }
         item { RouteSummarySection(exploreViewModel) }
@@ -288,7 +290,7 @@ fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
     deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
     selectedRouteStops: List<com.example.mapapp.data.model.Place>,
-    exploreViewModel: ExploreViewModel,
+    routeViewModel: RouteViewModel,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -298,7 +300,7 @@ fun SelectedStopsSection(
         )
         Button(
             onClick = {
-                exploreViewModel.runMatrixFlow()
+                routeViewModel.runMatrixFlow()
             }
         ) { Text("Calculate route") }
 
