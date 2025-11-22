@@ -160,18 +160,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
 
-    /**
-     * Code of route polyline is below
-     */
-
-    var origin by remember { mutableStateOf(RouteLatLng(0.0, 0.0)) }
-    var destination by remember {
-        mutableStateOf(RouteLatLng(0.0, 0.0))
-    }
-    /**
-     * Code of route polyline is above
-     */
-
     // GoogleMap Compose
     Box(
         modifier = Modifier
