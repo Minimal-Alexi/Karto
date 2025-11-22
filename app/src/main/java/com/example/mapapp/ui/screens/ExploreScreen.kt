@@ -43,6 +43,7 @@ import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -160,14 +161,38 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(exploreViewModel: ExploreViewModel) {
+    /*
+    Selected place info card handler
+    */
     val sheetState = rememberModalBottomSheetState()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
     var selectedPlaceIsRouteStop by remember {mutableStateOf<Boolean>(false)}
+    /*
+    Map Logic Values
+    */
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
-
+    /*
+    Camera position value handling
+    */
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(60.1699, 24.9384), 12f
+            // Default to Helsinki
+        )
+    }
+    var hasCentered by remember { mutableStateOf(false) }
+    LaunchedEffect(userLocation.value){
+        val loc = userLocation.value
+        if(loc != null && !hasCentered){
+            hasCentered = true
+            cameraPositionState.animate(
+                update = CameraUpdateFactory.newLatLngZoom(loc,15f)
+            )
+        }
+    }
     // GoogleMap Compose
     Box(
         modifier = Modifier
@@ -175,11 +200,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             .height(400.dp),
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(
-                    LatLng(60.1699, 24.9384), 12f
-                ) // Helsinki in default
-            }) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),
