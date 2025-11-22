@@ -215,10 +215,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     title = place.displayName.text,
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                     tag = place,
-                    onClick = {
-                        exploreViewModel.removeRouteStop(place)
-                        false
-                    })
+                    )
             }
 
             if (polyline.value != null) {
