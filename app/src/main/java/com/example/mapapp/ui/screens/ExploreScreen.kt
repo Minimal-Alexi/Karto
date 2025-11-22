@@ -37,7 +37,9 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
+import com.example.mapapp.ui.components.PlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
+import com.example.mapapp.ui.components.RouteStopInfoCard
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
@@ -242,16 +244,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
-                Text(selectedPlace!!.displayName.text)
-                Spacer(Modifier.height(8.dp))
-
-                Button(onClick = { /* action */ }) {
-                    Text("Add to route")
-                }
-
-                Button(onClick = { /* action */ }) {
-                    Text("Navigate")
-                }
+                if(selectedPlaceIsRouteStop) RouteStopInfoCard(selectedPlace!!)
+                else PlaceInfoCard(selectedPlace!!)
             }
         }
     }
