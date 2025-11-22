@@ -244,8 +244,16 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
-                if(selectedPlaceIsRouteStop) RouteStopInfoCard(selectedPlace!!)
-                else PlaceInfoCard(selectedPlace!!)
+                if(selectedPlaceIsRouteStop) RouteStopInfoCard(selectedPlace!!,
+                    {
+                        exploreViewModel.removeRouteStop(selectedPlace!!)
+                        selectedPlace = null
+                    })
+                else PlaceInfoCard(selectedPlace!!,
+                    {
+                        exploreViewModel.addRouteStop(selectedPlace!!)
+                        selectedPlace = null
+                    })
             }
         }
     }
