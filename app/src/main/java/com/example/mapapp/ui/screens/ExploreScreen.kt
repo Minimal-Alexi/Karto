@@ -202,10 +202,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                                 place.typeOfPlace?.markerColor ?: BitmapDescriptorFactory.HUE_RED
                             ),
                             tag = place,
-                            onClick = {
-                                exploreViewModel.addRouteStop(place)
-                                false
-                            })
+                            )
                     }
                 }
             }
