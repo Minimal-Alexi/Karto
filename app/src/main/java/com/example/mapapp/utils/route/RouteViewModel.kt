@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.model.LatLngLiteral
+import com.example.mapapp.data.model.Leg
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.data.model.RouteLatLng
 import com.example.mapapp.data.model.RouteLocation
@@ -22,58 +23,60 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class RouteViewModel(application: Application) : AndroidViewModel(application) {
-
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
     private val _routeInfo = ExploreViewModelParameterRepository._routeInfo
     private val _routeStops = ExploreViewModelParameterRepository._routeStops
+    private val _routeStopsInfo = MutableStateFlow<List<Leg>>(listOf())
+    val routeStopsInfo: StateFlow<List<Leg>> = _routeStopsInfo
     private val _travelMode = ExploreViewModelParameterRepository._travelMode
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
 
-    fun fetchRoute(
+    suspend fun fetchRoute(
         origin: RouteLatLng,
         destination: RouteLatLng,
         intermediates: List<RouteLatLng> = listOf(),
         travelMode: String = "WALK",
     ) {
-        viewModelScope.launch {
-            try {
-                val request = RoutesRequest(
-                    origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
-                    destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
-                    intermediates = intermediates.map {
-                        RouteLocation(
-                            location = LatLngLiteral(
-                                latLng = it
-                            )
+
+        try {
+            val request = RoutesRequest(
+                origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
+                destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
+                intermediates = intermediates.map {
+                    RouteLocation(
+                        location = LatLngLiteral(
+                            latLng = it
                         )
-                    },
-                    travelMode = travelMode
-                )
-                val response = RoutesApi.service.computeRoutes(
-                    request,
-                    fieldMask = "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
-                )
-                val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
-                _routePolyline.value = polyline
-
-                val routeInfoWalkOrDrive =
-                    Pair(
-                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
-                        response.routes?.firstOrNull()?.duration ?: "No route found"
                     )
+                },
+                travelMode = travelMode
+            )
+            val response = RoutesApi.service.computeRoutes(
+                request,
+                fieldMask = "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.legs.distanceMeters,routes.legs.duration"
+            )
 
-                _routeInfo.value =
-                    "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _routePolyline.value = null
-                _routeInfo.value = "No route found"
+            _routeStopsInfo.value = response.routes?.firstOrNull()?.legs?.dropLast(1) ?: listOf()
 
-            }
+            val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
+            _routePolyline.value = polyline
+
+            val routeInfoWalkOrDrive =
+                Pair(
+                    response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                    response.routes?.firstOrNull()?.duration ?: "No route found"
+                )
+
+            _routeInfo.value =
+                "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _routePolyline.value = null
+            _routeInfo.value = "No route found"
+
         }
+
     }
-
-
 
     fun getWayPoints(): List<WayPoint> {
         val waypoints = mutableListOf<WayPoint>()
@@ -156,13 +159,12 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         for (item in matrix) {
-            Log.d("AAA", item.contentToString())
+            Log.d("AAA", "Matrix: " + item.contentToString())
         }
         val routeGenerator = RouteGenerator()
         val generateRouteGreedy = routeGenerator.generateRoute(matrix)
         _generatedRoute.value = generateRouteGreedy
     }
-
 
     fun runMatrixFlow() {
         viewModelScope.launch {
@@ -177,17 +179,16 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
                 _routePolyline.value = ""
             } else {
                 fetchRouteMatrix()
-                Log.d("AAA", "Matrix fetch success!")
                 getTravelCostMatrix(_routeMatrixResponse)
 
                 // Get polyline
                 val origin: RouteLatLng =
                     _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
 
+                // Sort route stops based on the generated route
                 val sortedRouteStops: MutableList<Place> = mutableListOf()
-
                 for (i in _generatedRoute.value!!.travelPath.drop(1)) {
-                    sortedRouteStops.add(_routeStops.value[i-1])
+                    sortedRouteStops.add(_routeStops.value[i - 1])
                 }
                 _routeStops.value = sortedRouteStops
 
@@ -206,8 +207,8 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 fetchRoute(origin, destination, intermediate)
-            }
 
+            }
         }
     }
 }

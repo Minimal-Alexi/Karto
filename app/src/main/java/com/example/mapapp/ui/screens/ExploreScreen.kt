@@ -37,6 +37,7 @@ import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.TravelModeSelector
+import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -98,6 +99,7 @@ fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
+                routeViewModel.routeStopsInfo.collectAsState().value,
                 routeViewModel = routeViewModel
             )
         }
@@ -285,6 +287,9 @@ fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
     }
 }
 
+/*
+Moved some code to a separate file for readability
+
 @Composable
 fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
@@ -334,3 +339,5 @@ fun SelectedStopsSection(
         }
     }
 }
+
+ */
