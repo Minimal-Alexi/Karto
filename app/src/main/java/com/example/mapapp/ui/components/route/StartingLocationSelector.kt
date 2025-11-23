@@ -15,6 +15,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +49,7 @@ fun StartingLocationSelector() {
             if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
         },
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text("Enter Starting Location") },
+        placeholder = { Text("Your Current Location") },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Place,
@@ -90,7 +91,6 @@ fun StartingLocationSelector() {
                 }
                 .padding(8.dp)
         )
-
 
         Spacer(modifier = Modifier.height(2.dp))
     }

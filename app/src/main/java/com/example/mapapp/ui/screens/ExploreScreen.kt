@@ -50,10 +50,12 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 
 @Composable
-fun ExploreScreen(navigateToLocationScreen: (String) -> Unit,
-                  exploreViewModel: ExploreViewModel = viewModel(),
-                  navigateToScreen : (String) -> Unit,
-                  openedRouteId: Int? = null) {
+fun ExploreScreen(
+    navigateToLocationScreen: (String) -> Unit,
+    exploreViewModel: ExploreViewModel = viewModel(),
+    navigateToScreen: (String) -> Unit,
+    openedRouteId: Int? = null
+) {
 
     LaunchedEffect(openedRouteId) {
         if (openedRouteId != null) {
@@ -161,6 +163,26 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
 
+    /** GoogleMap camera position changes with user location */
+    val zoom = 14f
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            /** still defaults to Helsinki */
+            userLocation.value ?: LatLng(60.1699, 24.9384), zoom
+        )
+    }
+
+    LaunchedEffect(userLocation.value) {
+        userLocation.value?.let { newLocation ->
+            cameraPositionState.animate(
+                update = com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(
+                    newLocation,
+                    zoom
+                ), durationMs = 500
+            )
+        }
+    }
+
     /**
      * Code of route polyline is below
      */
@@ -180,11 +202,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             .height(400.dp),
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(
-                    LatLng(60.1699, 24.9384), 12f
-                ) // Helsinki in default
-            }) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState
+        ) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),

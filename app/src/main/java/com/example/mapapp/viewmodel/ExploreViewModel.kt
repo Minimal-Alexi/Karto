@@ -134,6 +134,7 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
 
     fun setLocation(location : LatLng) {
         customLocation.value = location
+        _userLocation.value = location
     }
 
     /**
