@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -30,15 +33,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mapapp.data.model.RouteLatLng
+import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
+import com.example.mapapp.ui.components.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
+import com.example.mapapp.ui.components.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -155,46 +161,40 @@ fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(exploreViewModel: ExploreViewModel) {
-
+    /*
+    Selected place info card handler
+    */
+    val sheetState = rememberModalBottomSheetState()
+    var selectedPlace by remember { mutableStateOf<Place?>(null) }
+    var selectedPlaceIsRouteStop by remember {mutableStateOf<Boolean>(false)}
+    /*
+    Map Logic Values
+    */
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
-
-    /** GoogleMap camera position changes with user location */
-    val zoom = 14f
+    /*
+    Camera position value handling
+    */
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
-            /** still defaults to Helsinki */
-            userLocation.value ?: LatLng(60.1699, 24.9384), zoom
+            LatLng(60.1699, 24.9384), 12f
+            // Default to Helsinki
         )
     }
 
-    LaunchedEffect(userLocation.value) {
-        userLocation.value?.let { newLocation ->
+    LaunchedEffect(userLocation.value){
+        val loc = userLocation.value
+        if(loc != null){
             cameraPositionState.animate(
-                update = com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(
-                    newLocation,
-                    zoom
-                ), durationMs = 500
+                update = CameraUpdateFactory.newLatLngZoom(loc,15f)
             )
         }
     }
-
-    /**
-     * Code of route polyline is below
-     */
-
-    var origin by remember { mutableStateOf(RouteLatLng(0.0, 0.0)) }
-    var destination by remember {
-        mutableStateOf(RouteLatLng(0.0, 0.0))
-    }
-    /**
-     * Code of route polyline is above
-     */
-
     // GoogleMap Compose
     Box(
         modifier = Modifier
@@ -202,8 +202,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             .height(400.dp),
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState
-        ) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),
@@ -223,9 +222,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                             ),
                             tag = place,
                             onClick = {
-                                exploreViewModel.addRouteStop(place)
-                                false
-                            })
+                                selectedPlace = if(place == selectedPlace) null
+                                else {
+                                    selectedPlaceIsRouteStop = false
+                                    place
+                                }
+                                true
+                            }
+                            )
                     }
                 }
             }
@@ -236,9 +240,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                     tag = place,
                     onClick = {
-                        exploreViewModel.removeRouteStop(place)
-                        false
-                    })
+                        selectedPlace = if(place == selectedPlace) null
+                        else {
+                            selectedPlaceIsRouteStop = true
+                            place
+                        }
+                        true
+                    }
+                    )
             }
 
             if (polyline.value != null) {
@@ -248,6 +257,25 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     color = MaterialTheme.colorScheme.primary,
                     width = 10f
                 )
+            }
+        }
+    }
+    if(selectedPlace != null){
+        ModalBottomSheet(
+            onDismissRequest = { selectedPlace = null },
+            sheetState = sheetState
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                if(selectedPlaceIsRouteStop) MapRouteStopInfoCard(selectedPlace!!,
+                    {
+                        exploreViewModel.removeRouteStop(selectedPlace!!)
+                        selectedPlace = null
+                    })
+                else MapPlaceInfoCard(selectedPlace!!,
+                    {
+                        exploreViewModel.addRouteStop(selectedPlace!!)
+                        selectedPlace = null
+                    })
             }
         }
     }
