@@ -36,6 +36,7 @@ import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
+import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -269,14 +270,19 @@ fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
         PlaceTypeSelector(
             exploreViewModel.placeTypeSelector.collectAsState().value,
             exploreViewModel::changePlaceType
         )
+
+        StartingLocationSelector()
+
         DistanceSlider(
             exploreViewModel.distanceToPlaces.collectAsState().value,
             exploreViewModel::changeDistanceToPlaces
         )
+
         PrimaryButton(
             text = "Check nearby locations", backgroundColor = MaterialTheme.colorScheme.primary
         ) { exploreViewModel.getNearbyPlaces() }
