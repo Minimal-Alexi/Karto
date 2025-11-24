@@ -217,15 +217,15 @@ fun OnRouteSection(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (currentStops != null) {
-                    for (location in currentStops){
+                    for (routeStop in currentStops){
                         RouteStopItem(
-                            id = location.id,
-                            isVisitedFromDb = location.isVisited,
+                            id = routeStop.id,
+                            isVisitedFromDb = routeStop.isVisited,
                             time = "12:05",
-                            locationName = location.name,
+                            locationName = routeStop.name,
                             distance = "2.7 km",
                             duration = "30 min",
-                            placesID = "holder",
+                            placesID = routeStop.placesId,
                             navigateToLocationScreen = navigateToLocationScreen,
                             onVisit = viewModel::visitStop,
                             onUnvisit = viewModel::unvisitStop
@@ -329,7 +329,7 @@ fun RouteStopItem(
                         text = locationName,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(240.dp)
+                        modifier = Modifier.widthIn(max = 200.dp)
                     )
 
                     closingInfo?.let {
@@ -347,12 +347,12 @@ fun RouteStopItem(
                 onClick = {
                     navigateToLocationScreen(placesID)
                 },
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.MenuBook,
                     contentDescription = "Read more",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxSize()
                 )
             }
