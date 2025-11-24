@@ -372,8 +372,9 @@ fun SelectedStopsSection(
             Column(
                 modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                for (place: com.example.mapapp.data.model.Place in selectedRouteStops) {
+                selectedRouteStops.forEachIndexed { index, place ->
                     SelectedStopItem(
+                        index = index,
                         time = "12:05",
                         locationName = place.displayName.text,
                         distance = "2.7 km",

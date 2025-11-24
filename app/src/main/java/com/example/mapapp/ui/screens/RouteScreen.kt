@@ -217,9 +217,10 @@ fun OnRouteSection(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (currentStops != null) {
-                    for (routeStop in currentStops){
+                    currentStops?.forEachIndexed { index, routeStop ->
                         RouteStopItem(
                             id = routeStop.id,
+                            index = index,
                             isVisitedFromDb = routeStop.isVisited,
                             time = "12:05",
                             locationName = routeStop.name,
@@ -243,6 +244,7 @@ fun OnRouteSection(
 @Composable
 fun RouteStopItem(
     id: Int,
+    index: Int,
     isVisitedFromDb: Boolean,
     time: String,
     locationName: String,
@@ -264,11 +266,22 @@ fun RouteStopItem(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column {
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = distance,
