@@ -224,7 +224,8 @@ fun OnRouteSection(
                             location = location,
                             distance = "2.7 km",
                             duration = "30 min",
-                            navigateToLocationScreen = navigateToLocationScreen
+                            navigateToLocationScreen = navigateToLocationScreen,
+                            markLocationVisit = viewModel::markRouteStopVisit
                         )
                         HorizontalDivider(color = Color(0xFFDDDDDD))
                     }
@@ -243,9 +244,9 @@ fun RouteStopItem(
     distance: String,
     duration: String,
     closingInfo: String? = null,
-    navigateToLocationScreen: (String) -> Unit
+    navigateToLocationScreen: (String) -> Unit,
+    markLocationVisit: (RouteStopEntity) -> Unit
 ) {
-    var isVisited by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -279,24 +280,24 @@ fun RouteStopItem(
                         .size(20.dp)
                         .border(
                             width = 2.dp,
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = 0.5f
                             ),
                             shape = CircleShape
                         )
                         .background(
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            isVisited = !isVisited
+                            markLocationVisit(location)
                         },
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (isVisited) {
+                    if (location.isVisited) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = "Visited",
