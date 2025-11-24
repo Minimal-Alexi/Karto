@@ -1,5 +1,6 @@
 package com.example.mapapp.viewmodel
 
+import android.R
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -37,12 +38,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 object ExploreViewModelParameterRepository {
-    val _routeStops = MutableStateFlow<List<Place>>(listOf())
+    val _routeStops = MutableStateFlow<MutableList<Place>>(mutableListOf())
     val _routePolyline = MutableStateFlow<String?>(null)
     val _routeInfo = MutableStateFlow<String?>(null)
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
     val _userLocation = MutableStateFlow<LatLng?>(null)
-}
+    }
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
@@ -73,7 +74,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     val travelMode: StateFlow<TravelModes> = _travelMode
     // private val _routeStops = MutableStateFlow<List<Place>>(listOf())
     private val _routeStops = ExploreViewModelParameterRepository._routeStops
-    val routeStops: StateFlow<List<Place>> = _routeStops
+    val routeStops: StateFlow<MutableList<Place>> = _routeStops
     // private val _routePolyline = MutableStateFlow<String?>(null)
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
     val routePolyline: StateFlow<String?> = _routePolyline
@@ -109,7 +110,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     id = stop.placesId,
                     typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
-            }
+            } as MutableList<Place>
         }
     }
 

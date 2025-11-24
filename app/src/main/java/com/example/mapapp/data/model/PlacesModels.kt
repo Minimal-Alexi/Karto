@@ -77,7 +77,10 @@ data class Place(
     var typeOfPlace: TypesOfPlaces?,
     val id: String,
     val displayName: DisplayName,
-    val location: LatLng
+    val location: LatLng,
+
+    var travelDistance: String? = "N/A",
+    var travelDuration: String? = "N/A"
 )
 
 data class DisplayName(

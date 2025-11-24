@@ -26,10 +26,11 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
     private val _routeInfo = ExploreViewModelParameterRepository._routeInfo
     private val _routeStops = ExploreViewModelParameterRepository._routeStops
-    private val _routeStopsInfo = MutableStateFlow<List<Leg>>(listOf())
-    val routeStopsInfo: StateFlow<List<Leg>> = _routeStopsInfo
     private val _travelMode = ExploreViewModelParameterRepository._travelMode
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
+
+    // TODO: duplicated parameters, highly possible to case bugs
+    private val _routeStopsInfo = MutableStateFlow<List<Leg>>(listOf())
 
     suspend fun fetchRoute(
         origin: RouteLatLng,
@@ -57,6 +58,12 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             )
 
             _routeStopsInfo.value = response.routes?.firstOrNull()?.legs?.dropLast(1) ?: listOf()
+
+            // Update the distance and duration of each route stop
+            for (i in _routeStopsInfo.value.indices) {
+                _routeStops.value[i].travelDistance = _routeStopsInfo.value[i].distanceMeters.toString()
+                _routeStops.value[i].travelDuration = _routeStopsInfo.value[i].duration.toString()
+            }
 
             val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
             _routePolyline.value = polyline
@@ -152,6 +159,9 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getTravelCostMatrix(routeMatrixResponse: MutableStateFlow<RouteMatrixResponse?>) {
         val index = 1 + _routeStops.value.size
+
+        Log.d("AAA", "Matrix: " + _routeStops.value)
+
         val matrix: Array<Array<Int>> = Array(index) { Array(index) { 0 } }
 
         for (item in routeMatrixResponse.value!!.element) {
@@ -166,6 +176,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
         _generatedRoute.value = generateRouteGreedy
     }
 
+    // sort all routes and fetch the polyline
     fun runMatrixFlow() {
         viewModelScope.launch {
             if (_userLocation.value == null) {
@@ -211,7 +222,42 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-}
 
+    // Just fetch the polyline
+    fun runWithoutSorting(){
+        viewModelScope.launch {
+            if (_userLocation.value == null) {
+                Log.e("AAA", "Aborting: User location is null. Please wait for GPS.")
+            } else if (_routeStops.value.isEmpty()) {
+                Log.w(
+                    "AAA",
+                    "Warning: No stops added, calculating matrix only for current location?"
+                )
+
+                _routePolyline.value = ""
+            } else {
+                // Get polyline
+                val origin: RouteLatLng =
+                    _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
+
+                val destinationPlace = _routeStops.value.last()
+
+                val destination: RouteLatLng =
+                    RouteLatLng(
+                        destinationPlace.location.latitude,
+                        destinationPlace.location.longitude
+                    )
+
+                val intermediate: MutableList<RouteLatLng> = mutableListOf()
+
+                for (place in _routeStops.value) {
+                    intermediate.add(RouteLatLng(place.location.latitude, place.location.longitude))
+                }
+
+                fetchRoute(origin, destination, intermediate)
+            }
+        }
+    }
+}
 
 
