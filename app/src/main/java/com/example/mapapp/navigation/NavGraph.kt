@@ -21,7 +21,6 @@ object Constants {
     const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
     const val EXPLORE_SCREEN_ROUTE = "explore"
     const val ROUTE_SCREEN_ROUTE = "route"
-
     const val SETTINGS_SCREEN_ROUTE = "settings"
 }
 
@@ -52,6 +51,13 @@ fun NavGraph() {
     val openRouteFromSaved: (Int) -> Unit = { routeId ->
         currentRouteId = routeId
         navController.navigate("explore?routeId=$routeId") {
+            launchSingleTop = true
+        }
+    }
+
+    val resetRoute: () -> Unit = {
+        currentRouteId = null
+        navController.navigate("explore") {
             launchSingleTop = true
         }
     }
@@ -90,7 +96,8 @@ fun NavGraph() {
                 ExploreScreen(
                     navigateToLocationScreen = navigateToLocationScreen,
                     navigateToScreen = navigateToScreen,
-                    openedRouteId = routeId
+                    openedRouteId = routeId,
+                    onResetRoute = resetRoute
                 )
             }
             composable("route") {

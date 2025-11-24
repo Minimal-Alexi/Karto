@@ -219,12 +219,16 @@ fun OnRouteSection(
                 if (currentStops != null) {
                     for (location in currentStops){
                         RouteStopItem(
+                            id = location.id,
+                            isVisitedFromDb = location.isVisited,
                             time = "12:05",
                             locationName = location.name,
                             distance = "2.7 km",
                             duration = "30 min",
                             placesID = "holder",
-                            navigateToLocationScreen = navigateToLocationScreen
+                            navigateToLocationScreen = navigateToLocationScreen,
+                            onVisit = viewModel::visitStop,
+                            onUnvisit = viewModel::unvisitStop
                         )
                         HorizontalDivider(color = Color(0xFFDDDDDD))
                     }
@@ -238,15 +242,19 @@ fun OnRouteSection(
 
 @Composable
 fun RouteStopItem(
+    id: Int,
+    isVisitedFromDb: Boolean,
     time: String,
     locationName: String,
     distance: String,
     duration: String,
     closingInfo: String? = null,
     placesID: String,
-    navigateToLocationScreen: (String) -> Unit
+    navigateToLocationScreen: (String) -> Unit,
+    onVisit: (Int) -> Unit,
+    onUnvisit: (Int) -> Unit
 ) {
-    var isVisited by remember { mutableStateOf(false) }
+    var isVisited by remember(isVisitedFromDb) { mutableStateOf(isVisitedFromDb) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -280,13 +288,13 @@ fun RouteStopItem(
                         .size(20.dp)
                         .border(
                             width = 2.dp,
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.5f
-                            ),
+                            color = if (isVisited) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             shape = CircleShape
                         )
                         .background(
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            color = if (isVisited) MaterialTheme.colorScheme.primary
+                                    else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable(
@@ -294,8 +302,14 @@ fun RouteStopItem(
                             indication = null
                         ) {
                             isVisited = !isVisited
+
+                            if (isVisited) {
+                                onVisit(id)
+                            } else {
+                                onUnvisit(id)
+                            }
                         },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     if (isVisited) {
                         Icon(

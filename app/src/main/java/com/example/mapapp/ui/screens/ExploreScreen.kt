@@ -60,7 +60,8 @@ fun ExploreScreen(
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
     navigateToScreen: (String) -> Unit,
-    openedRouteId: Int? = null
+    openedRouteId: Int? = null,
+    onResetRoute: () -> Unit
 ) {
 
     LaunchedEffect(openedRouteId) {
@@ -120,16 +121,21 @@ fun ExploreScreen(
         }
         item {
             PrimaryButton(
-                text = "Save This Route For Later",
+                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
             ) {
+                if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
+                else
                 exploreViewModel.saveRoute()
             }
         }
         item {
             PrimaryButton(
                 text = "Reset This Route", backgroundColor = MaterialTheme.colorScheme.error
-            ) { /* TODO */ }
+            ) {
+                exploreViewModel.resetRoute()
+                onResetRoute()
+            }
         }
         item { Spacer(modifier = Modifier.height(16.dp)) }
     }
