@@ -54,7 +54,9 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
     User Location
     */
     private val _userLocation = MutableStateFlow<LatLng?>(null)
-    val userLocation: StateFlow<LatLng?> = _userLocation
+    val userLocation: MutableStateFlow<LatLng?> = _userLocation
+
+    val customLocation = mutableStateOf<LatLng?>(null)
 
     /*
     Route and Polyline
@@ -80,7 +82,11 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             locationClient.getLocationUpdates(_LocationCallbackUpdate)
                 .collect { location ->
-                    _userLocation.value = LatLng(location.latitude, location.longitude)
+                    if (customLocation.value == null) {
+                        _userLocation.value = LatLng(location.latitude, location.longitude)
+                    } else {
+                        _userLocation.value = customLocation.value
+                    }
                 }
         }
     }
@@ -124,6 +130,11 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
 
     fun changePlaceType(newPlaceType: TypesOfPlaces) {
         _placeTypeSelection.value = newPlaceType
+    }
+
+    fun setLocation(location : LatLng) {
+        customLocation.value = location
+        _userLocation.value = location
     }
 
     /**
