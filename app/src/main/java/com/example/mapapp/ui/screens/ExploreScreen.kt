@@ -29,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +42,8 @@ import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
+import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
+import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -106,7 +107,7 @@ fun ExploreScreen(
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
-                exploreViewModel = exploreViewModel
+                routeViewModel = routeViewModel
             )
         }
         item { RouteSummarySection(exploreViewModel) }
@@ -342,12 +343,15 @@ fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
     }
 }
 
+/*
+Moved some code to a separate file for readability
+
 @Composable
 fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
     deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
     selectedRouteStops: List<com.example.mapapp.data.model.Place>,
-    exploreViewModel: ExploreViewModel,
+    routeViewModel: RouteViewModel,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -357,7 +361,7 @@ fun SelectedStopsSection(
         )
         Button(
             onClick = {
-                exploreViewModel.runMatrixFlow()
+                routeViewModel.runMatrixFlow()
             }
         ) { Text("Calculate route") }
 
@@ -392,3 +396,5 @@ fun SelectedStopsSection(
         }
     }
 }
+
+ */
