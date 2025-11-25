@@ -6,6 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.location.DefaultLocationClient
+import com.example.mapapp.data.location.LocationClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -15,6 +20,31 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
     private val routeRepository = (application as KartoApplication).routeRepository
     private val routeStopRepository = (application as KartoApplication).routeStopRepository
 
+    /*
+    User Location
+    */
+    private val _userLocation = MutableStateFlow<LatLng?>(null)
+    val userLocation: StateFlow<LatLng?> = _userLocation
+
+    private val _LocationCallbackUpdate = 10000L
+    private val locationClient: LocationClient =
+        DefaultLocationClient(
+            application,
+            LocationServices.getFusedLocationProviderClient(application)
+        )
+
+    init {
+        viewModelScope.launch {
+            locationClient.getLocationUpdates(_LocationCallbackUpdate)
+                .collect { location ->
+                    _userLocation.value = LatLng(location.latitude, location.longitude)
+                }
+        }
+    }
+
+    /*
+    Route handling
+    */
     val currentRoute: StateFlow<RouteEntity?> = routeRepository.getCurrentRoute()
         .stateIn(
             scope = viewModelScope,
@@ -44,6 +74,19 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
     fun completeRoute() {
         viewModelScope.launch {
             currentRoute.value?.let { routeRepository.completeRoute(it.id) }
+        }
+    }
+
+    fun markRouteStopVisit(routeStopEntity: RouteStopEntity){
+        viewModelScope.launch {
+            currentStops.value?.let { stops ->
+                if(stops.any{it.id == routeStopEntity.id}){
+                    routeRepository.updateRouteStop(routeStopEntity.copy(
+                        isVisited = !routeStopEntity.isVisited
+                    ))
+                }
+
+            }
         }
     }
 }

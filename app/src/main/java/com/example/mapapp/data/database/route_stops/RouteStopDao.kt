@@ -3,6 +3,7 @@ package com.example.mapapp.data.database.route_stops
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -10,6 +11,8 @@ interface RouteStopDao {
     @Insert
     suspend fun insert(stop: RouteStopEntity)
 
+    @Update
+    suspend fun updateRouteStop(routeStop: RouteStopEntity)
     @Query("SELECT * FROM route_stops WHERE routeId = :routeId")
     suspend fun getStopsForRoute(routeId: Int): List<RouteStopEntity>
 

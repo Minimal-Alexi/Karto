@@ -23,6 +23,9 @@ class RouteRepository(
     fun getCurrentRouteStops(): Flow<List<RouteStopEntity>> {
         return routeStopDao.getStopsForCurrentRoute()
     }
+    suspend fun updateRouteStop(routeStopEntity: RouteStopEntity){
+        routeStopDao.updateRouteStop(routeStopEntity)
+    }
 
     suspend fun completeRoute(routeId: Int) {
         routeDao.updateRouteStatus(routeId, RouteStatus.COMPLETED)
