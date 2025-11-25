@@ -24,6 +24,13 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
     private val _userLocation = MutableStateFlow<LatLng?>(null)
     val userLocation: StateFlow<LatLng?> = _userLocation
 
+    private val _LocationCallbackUpdate = 10000L
+    private val locationClient: LocationClient =
+        DefaultLocationClient(
+            application,
+            LocationServices.getFusedLocationProviderClient(application)
+        )
+
     init {
         viewModelScope.launch {
             locationClient.getLocationUpdates(_LocationCallbackUpdate)
@@ -32,12 +39,6 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
                 }
         }
     }
-    private val _LocationCallbackUpdate = 10000L
-    private val locationClient: LocationClient =
-        DefaultLocationClient(
-            application,
-            LocationServices.getFusedLocationProviderClient(application)
-        )
 
     /*
     Route handling
