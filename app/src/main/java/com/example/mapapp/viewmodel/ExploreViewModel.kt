@@ -66,6 +66,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
     val userLocation: StateFlow<LatLng?> = _userLocation
 
+    val customLocation = mutableStateOf<LatLng?>(null)
+
     /*
     Route and Polyline
      */
@@ -94,7 +96,11 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             locationClient.getLocationUpdates(_LocationCallbackUpdate)
                 .collect { location ->
-                    _userLocation.value = LatLng(location.latitude, location.longitude)
+                    if (customLocation.value == null) {
+                        _userLocation.value = LatLng(location.latitude, location.longitude)
+                    } else {
+                        _userLocation.value = customLocation.value
+                    }
                 }
         }
     }
@@ -139,6 +145,200 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     fun changePlaceType(newPlaceType: TypesOfPlaces) {
         _placeTypeSelection.value = newPlaceType
     }
+
+    fun setLocation(location : LatLng) {
+        customLocation.value = location
+        _userLocation.value = location
+    }
+
+    /**
+     * Code of route polyline is below
+     */
+
+    fun fetchRoute(
+        origin: RouteLatLng,
+        destination: RouteLatLng,
+        intermediates: List<RouteLatLng> = listOf(),
+        travelMode: String = "WALK",
+    ) {
+        viewModelScope.launch {
+            try {
+                val request = RoutesRequest(
+                    origin = RouteLocation(location = LatLngLiteral(latLng = origin)),
+                    destination = RouteLocation(location = LatLngLiteral(latLng = destination)),
+                    intermediates = intermediates.map {
+                        RouteLocation(
+                            location = LatLngLiteral(
+                                latLng = it
+                            )
+                        )
+                    },
+                    travelMode = travelMode
+                )
+                val response = RoutesApi.service.computeRoutes(
+                    request,
+                    fieldMask = "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
+                )
+                val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
+                _routePolyline.value = polyline
+
+                val routeInfoWalkOrDrive =
+                    Pair(
+                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                        response.routes?.firstOrNull()?.duration ?: "No route found"
+                    )
+
+                _routeInfo.value =
+                    "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _routePolyline.value = null
+                _routeInfo.value = "No route found"
+
+            }
+        }
+    }
+
+    fun getWayPoints(): List<WayPoint> {
+        val waypoints = mutableListOf<WayPoint>()
+        for (place in _routeStops.value) {
+            waypoints.add(
+                WayPoint(
+                    RouteLocation(
+                        location = LatLngLiteral(
+                            latLng = RouteLatLng(
+                                place.location.latitude,
+                                place.location.longitude
+                            )
+                        )
+                    )
+                )
+            )
+        }
+
+        // Get the user location safely to avoid null pointer exception
+        val currentLocation = _userLocation.value
+        if (currentLocation != null) {
+            waypoints.add(
+                WayPoint(
+                    RouteLocation(
+                        location = LatLngLiteral(
+                            latLng = RouteLatLng(
+                                currentLocation.latitude,
+                                currentLocation.longitude
+                            )
+                        )
+                    )
+                )
+            )
+        } else {
+            Log.e("ExploreViewModel", "User location is NULL! Route Matrix will likely fail.")
+        }
+        return waypoints
+    }
+
+    private val _routeMatrixResponse = MutableStateFlow<RouteMatrixResponse?>(null)
+    val routeMatrixResponse: StateFlow<RouteMatrixResponse?> = _routeMatrixResponse
+
+    suspend fun fetchRouteMatrix() {
+        Log.d("AAA", "Fetching route matrix...")
+
+        try {
+            val request = RouteMatrixRequest(
+                origins = getWayPoints(),
+                destinations = getWayPoints(),
+                travelMode = _travelMode.value.mode
+            )
+
+            Log.d("AAA", "Route matrix request: $request")
+
+            val responseList = RouteMatrixApi.service.computeRouteMatrix(
+                request,
+                fieldMask = "originIndex,destinationIndex,duration,distanceMeters,status,condition"
+            )
+
+            Log.d("AAA", "Route matrix response: $responseList")
+
+            _routeMatrixResponse.value = RouteMatrixResponse(element = responseList)
+
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
+    private val _generatedRoute = MutableStateFlow<TravelRoute?>(null)
+    val generatedRoute: StateFlow<TravelRoute?> = _generatedRoute
+
+    fun getTravelCostMatrix(routeMatrixResponse: MutableStateFlow<RouteMatrixResponse?>) {
+        val index = 1 + _routeStops.value.size
+        val matrix: Array<Array<Int>> = Array(index) { Array(index) { 0 } }
+
+        for (item in routeMatrixResponse.value!!.element) {
+            matrix[item.originIndex][item.destinationIndex] = item.distanceMeters
+        }
+
+        for (item in matrix) {
+            Log.d("AAA", item.contentToString())
+        }
+        val routeGenerator = RouteGenerator()
+        val generateRouteGreedy = routeGenerator.generateRoute(matrix)
+        _generatedRoute.value = generateRouteGreedy
+    }
+
+
+    fun runMatrixFlow() {
+        viewModelScope.launch {
+            if (_userLocation.value == null) {
+                Log.e("AAA", "Aborting: User location is null. Please wait for GPS.")
+            } else if (_routeStops.value.isEmpty()) {
+                Log.w(
+                    "AAA",
+                    "Warning: No stops added, calculating matrix only for current location?"
+                )
+
+                _routePolyline.value = ""
+            } else {
+                fetchRouteMatrix()
+                Log.d("AAA", "Matrix fetch success!")
+                getTravelCostMatrix(_routeMatrixResponse)
+
+                // Get polyline
+                val origin: RouteLatLng =
+                    _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
+
+                val sortedRouteStops: MutableList<Place> = mutableListOf()
+
+                for (i in _generatedRoute.value!!.travelPath.drop(1)) {
+                    sortedRouteStops.add(_routeStops.value[i-1])
+                }
+                _routeStops.value = sortedRouteStops
+
+                val destinationPlace = _routeStops.value.last()
+
+                val destination: RouteLatLng =
+                    RouteLatLng(
+                        destinationPlace.location.latitude,
+                        destinationPlace.location.longitude
+                    )
+
+                val intermediate: MutableList<RouteLatLng> = mutableListOf()
+
+                for (place in _routeStops.value) {
+                    intermediate.add(RouteLatLng(place.location.latitude, place.location.longitude))
+                }
+
+                fetchRoute(origin, destination, intermediate)
+            }
+
+        }
+    }
+
+
+    /**
+     * Code of route polyline is above
+     */
 
     fun getNearbyPlaces() {
         viewModelScope.launch {
@@ -196,6 +396,32 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun updateSavedRoute(routeId: Int) {
+        viewModelScope.launch {
+            val existingRoute = routeRepository.getRouteWithStops(routeId).route
+
+            val updatedRoute = existingRoute.copy(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp = System.currentTimeMillis()
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = routeId,
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
+                )
+            }
+
+            routeRepository.updateRoute(updatedRoute, stops)
+        }
+    }
+
     fun startRoute() {
         viewModelScope.launch {
             val route = RouteEntity(
@@ -218,5 +444,18 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
             routeRepository.startRoute(route, stops)
         }
+    }
+
+    fun resetRoute() {
+        routeTitle.value = ""
+        _routeStops.value = emptyList()
+        _travelMode.value = TravelModes.WALK
+        _distanceToPlaces.value = 1000.0 // default distance
+        _placeTypeSelection.value = TypesOfPlaces.RESTAURANTS // default type
+        _nearbyPlaces.value = emptyList()
+        _routePolyline.value = null
+        _userLocation.value = null
+        customLocation.value = null
+        _routeInfo.value = null
     }
 }

@@ -6,9 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.mapapp.ui.components.BottomBar
 import com.example.mapapp.ui.screens.HomeScreen
 import com.example.mapapp.ui.screens.ExploreScreen
@@ -21,7 +23,6 @@ object Constants {
     const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
     const val EXPLORE_SCREEN_ROUTE = "explore"
     const val ROUTE_SCREEN_ROUTE = "route"
-
     const val SETTINGS_SCREEN_ROUTE = "settings"
 }
 
@@ -49,25 +50,26 @@ fun NavGraph() {
         }
     }
 
-    val openRouteFromSaved: (Int) -> Unit = { routeId ->
-        currentRouteId = routeId
-        navController.navigate("explore?routeId=$routeId") {
+    fun navigateToExplore(routeId: Int?) {
+        val routeString = routeId?.toString() ?: ""
+        navController.navigate("explore?routeId=$routeString") {
             launchSingleTop = true
         }
     }
 
+    val openRouteFromSaved: (Int) -> Unit = { routeId ->
+        currentRouteId = routeId
+        navigateToExplore(routeId)
+    }
+
+    val resetRoute: () -> Unit = {
+        currentRouteId = null
+        navigateToExplore(null)
+    }
+
     val navigateBottomBar: (String) -> Unit = { screen ->
         if (screen == "explore") {
-            val route = currentRouteId
-            if (route != null) {
-                navController.navigate("explore?routeId=$route") {
-                    launchSingleTop = true
-                }
-            } else {
-                navController.navigate("explore") {
-                    launchSingleTop = true
-                }
-            }
+            navigateToExplore(currentRouteId)
         } else {
             navController.navigate(screen) {
                 launchSingleTop = true
@@ -84,13 +86,23 @@ fun NavGraph() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") { HomeScreen() }
-            composable("explore?routeId={routeId}") { backStackEntry ->
+            composable(
+                route = "explore?routeId={routeId}",
+                arguments = listOf(
+                    navArgument("routeId") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
                 val routeId = backStackEntry.arguments?.getString("routeId")?.toIntOrNull()
                 currentRouteId = routeId
                 ExploreScreen(
                     navigateToLocationScreen = navigateToLocationScreen,
-                    navigateToScreen = navigateToScreen,
-                    openedRouteId = routeId
+                    navigateToScreen = { navController.navigate(it) { launchSingleTop = true } },
+                    openedRouteId = routeId,
+                    onResetRoute = resetRoute
                 )
             }
             composable("route") {

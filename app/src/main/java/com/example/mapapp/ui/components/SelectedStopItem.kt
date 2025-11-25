@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,9 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -35,6 +38,7 @@ import com.example.mapapp.ui.components.buttons.DeleteIconButton
 
 @Composable
 fun SelectedStopItem(
+    index: Int,
     time: String,
     locationName: String,
     distance: String,
@@ -57,12 +61,22 @@ fun SelectedStopItem(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "Location icon",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = distance,

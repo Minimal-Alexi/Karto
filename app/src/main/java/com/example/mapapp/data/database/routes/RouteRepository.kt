@@ -23,6 +23,9 @@ class RouteRepository(
     fun getCurrentRouteStops(): Flow<List<RouteStopEntity>> {
         return routeStopDao.getStopsForCurrentRoute()
     }
+    suspend fun updateRouteStop(routeStopEntity: RouteStopEntity){
+        routeStopDao.updateRouteStop(routeStopEntity)
+    }
 
     suspend fun completeRoute(routeId: Int) {
         routeDao.updateRouteStatus(routeId, RouteStatus.COMPLETED)
@@ -55,6 +58,14 @@ class RouteRepository(
     suspend fun deleteRouteById(routeId: Int) {
         routeDao.deleteRouteById(routeId)
         routeStopDao.deleteStopsByRoute(routeId)
+    }
+
+    suspend fun updateRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
+        routeDao.updateRoute(route)
+        routeStopDao.deleteStopsByRoute(route.id)
+        stops.forEach { stop ->
+            routeStopDao.insert(stop.copy(routeId = route.id))
+        }
     }
 }
 

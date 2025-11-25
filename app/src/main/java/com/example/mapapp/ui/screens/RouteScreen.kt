@@ -43,6 +43,7 @@ import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
+import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
@@ -149,26 +150,8 @@ fun RouteTitleSection(title : String) {
 
 @Composable
 fun MapScreenPlaceholder() {
-    val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val cameraPositionState = rememberCameraPositionState()
     var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
-
-    // Request current location once
-    LaunchedEffect(Unit) {
-        try {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    currentLatLng = LatLng(location.latitude, location.longitude)
-                    cameraPositionState.position =
-                        CameraPosition.fromLatLngZoom(currentLatLng!!, 14f)
-                }
-            }
-        } catch (e: SecurityException) {
-            // Make sure you have location permission granted before calling this
-            e.printStackTrace()
-        }
-    }
 
     GoogleMap(
         modifier = Modifier
@@ -217,14 +200,15 @@ fun OnRouteSection(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (currentStops != null) {
-                    for (location in currentStops){
+                    currentStops?.forEachIndexed { index, routeStop ->
                         RouteStopItem(
-                            time = "12:05",
-                            locationName = location.name,
+                            index = index,
+                            location = routeStop,
                             distance = "2.7 km",
                             duration = "30 min",
-                            placesID = "holder",
-                            navigateToLocationScreen = navigateToLocationScreen
+                            navigateToLocationScreen = navigateToLocationScreen,
+                            onVisit = viewModel::visitStop,
+                            onUnvisit = viewModel::unvisitStop
                         )
                         HorizontalDivider(color = Color(0xFFDDDDDD))
                     }
@@ -238,16 +222,14 @@ fun OnRouteSection(
 
 @Composable
 fun RouteStopItem(
-    time: String,
-    locationName: String,
+    index: Int,
+    location: RouteStopEntity,
     distance: String,
     duration: String,
-    closingInfo: String? = null,
-    placesID: String,
-    navigateToLocationScreen: (String) -> Unit
+    navigateToLocationScreen: (String) -> Unit,
+    onVisit: (Int) -> Unit,
+    onUnvisit: (Int) -> Unit
 ) {
-    var isVisited by remember { mutableStateOf(false) }
-
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -256,11 +238,22 @@ fun RouteStopItem(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column {
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = distance,
@@ -280,24 +273,28 @@ fun RouteStopItem(
                         .size(20.dp)
                         .border(
                             width = 2.dp,
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.5f
-                            ),
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             shape = CircleShape
                         )
                         .background(
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary
+                                    else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            isVisited = !isVisited
+                            if (!location.isVisited) {
+                                onVisit(location.id)
+                            } else {
+                                onUnvisit(location.id)
+                            }
                         },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
-                    if (isVisited) {
+                    if (location.isVisited) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = "Visited",
@@ -312,33 +309,33 @@ fun RouteStopItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = locationName,
+                        text = location.name,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(240.dp)
+                        modifier = Modifier.widthIn(max = 200.dp)
                     )
 
-                    closingInfo?.let {
+                    /*closingInfo?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error
                         )
-                    }
+                    }*/
                 }
             }
 
             // Book icon on the right
             IconButton(
                 onClick = {
-                    navigateToLocationScreen(placesID)
+                    navigateToLocationScreen(location.placesId)
                 },
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.MenuBook,
                     contentDescription = "Read more",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxSize()
                 )
             }
