@@ -150,26 +150,8 @@ fun RouteTitleSection(title : String) {
 
 @Composable
 fun MapScreenPlaceholder() {
-    val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val cameraPositionState = rememberCameraPositionState()
     var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
-
-    // Request current location once
-    LaunchedEffect(Unit) {
-        try {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    currentLatLng = LatLng(location.latitude, location.longitude)
-                    cameraPositionState.position =
-                        CameraPosition.fromLatLngZoom(currentLatLng!!, 14f)
-                }
-            }
-        } catch (e: SecurityException) {
-            // Make sure you have location permission granted before calling this
-            e.printStackTrace()
-        }
-    }
 
     GoogleMap(
         modifier = Modifier
