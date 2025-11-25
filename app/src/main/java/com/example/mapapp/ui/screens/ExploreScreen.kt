@@ -60,7 +60,8 @@ fun ExploreScreen(
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
     navigateToScreen: (String) -> Unit,
-    openedRouteId: Int? = null
+    openedRouteId: Int? = null,
+    onResetRoute: () -> Unit
 ) {
 
     LaunchedEffect(openedRouteId) {
@@ -120,16 +121,21 @@ fun ExploreScreen(
         }
         item {
             PrimaryButton(
-                text = "Save This Route For Later",
+                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
             ) {
+                if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
+                else
                 exploreViewModel.saveRoute()
             }
         }
         item {
             PrimaryButton(
                 text = "Reset This Route", backgroundColor = MaterialTheme.colorScheme.error
-            ) { /* TODO */ }
+            ) {
+                exploreViewModel.resetRoute()
+                onResetRoute()
+            }
         }
         item { Spacer(modifier = Modifier.height(16.dp)) }
     }
@@ -366,8 +372,9 @@ fun SelectedStopsSection(
             Column(
                 modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                for (place: com.example.mapapp.data.model.Place in selectedRouteStops) {
+                selectedRouteStops.forEachIndexed { index, place ->
                     SelectedStopItem(
+                        index = index,
                         time = "12:05",
                         locationName = place.displayName.text,
                         distance = "2.7 km",

@@ -200,14 +200,15 @@ fun OnRouteSection(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (currentStops != null) {
-                    for (location in currentStops){
+                    currentStops?.forEachIndexed { index, routeStop ->
                         RouteStopItem(
-                            time = "12:05",
-                            location = location,
+                            index = index,
+                            location = routeStop,
                             distance = "2.7 km",
                             duration = "30 min",
                             navigateToLocationScreen = navigateToLocationScreen,
-                            markLocationVisit = viewModel::markRouteStopVisit
+                            onVisit = viewModel::visitStop,
+                            onUnvisit = viewModel::unvisitStop
                         )
                         HorizontalDivider(color = Color(0xFFDDDDDD))
                     }
@@ -221,15 +222,14 @@ fun OnRouteSection(
 
 @Composable
 fun RouteStopItem(
-    time: String,
+    index: Int,
     location: RouteStopEntity,
     distance: String,
     duration: String,
-    closingInfo: String? = null,
     navigateToLocationScreen: (String) -> Unit,
-    markLocationVisit: (RouteStopEntity) -> Unit
+    onVisit: (Int) -> Unit,
+    onUnvisit: (Int) -> Unit
 ) {
-
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -238,11 +238,22 @@ fun RouteStopItem(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column {
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = distance,
@@ -262,22 +273,26 @@ fun RouteStopItem(
                         .size(20.dp)
                         .border(
                             width = 2.dp,
-                            color = if (location.isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.5f
-                            ),
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             shape = CircleShape
                         )
                         .background(
-                            color = if (location.isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary
+                                    else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            markLocationVisit(location)
+                            if (!location.isVisited) {
+                                onVisit(location.id)
+                            } else {
+                                onUnvisit(location.id)
+                            }
                         },
-                    contentAlignment = Alignment.Center,
+                    contentAlignment = Alignment.Center
                 ) {
                     if (location.isVisited) {
                         Icon(
@@ -297,16 +312,16 @@ fun RouteStopItem(
                         text = location.name,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(240.dp)
+                        modifier = Modifier.widthIn(max = 200.dp)
                     )
 
-                    closingInfo?.let {
+                    /*closingInfo?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error
                         )
-                    }
+                    }*/
                 }
             }
 
@@ -315,12 +330,12 @@ fun RouteStopItem(
                 onClick = {
                     navigateToLocationScreen(location.placesId)
                 },
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.MenuBook,
                     contentDescription = "Read more",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxSize()
                 )
             }

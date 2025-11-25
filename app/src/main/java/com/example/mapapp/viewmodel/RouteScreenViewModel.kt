@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
 
 class RouteScreenViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
+    private val routeStopRepository = (application as KartoApplication).routeStopRepository
+
     /*
     User Location
     */
@@ -56,6 +58,18 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = null
         )
+
+    fun visitStop(id: Int) {
+        viewModelScope.launch {
+            routeStopRepository.visitStop(id)
+        }
+    }
+
+    fun unvisitStop(id: Int) {
+        viewModelScope.launch {
+            routeStopRepository.unvisitStop(id)
+        }
+    }
 
     fun completeRoute() {
         viewModelScope.launch {

@@ -382,6 +382,32 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun updateSavedRoute(routeId: Int) {
+        viewModelScope.launch {
+            val existingRoute = routeRepository.getRouteWithStops(routeId).route
+
+            val updatedRoute = existingRoute.copy(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp = System.currentTimeMillis()
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = routeId,
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
+                )
+            }
+
+            routeRepository.updateRoute(updatedRoute, stops)
+        }
+    }
+
     fun startRoute() {
         viewModelScope.launch {
             val route = RouteEntity(
@@ -404,5 +430,18 @@ open class ExploreViewModel(application: Application) : AndroidViewModel(applica
 
             routeRepository.startRoute(route, stops)
         }
+    }
+
+    fun resetRoute() {
+        routeTitle.value = ""
+        _routeStops.value = emptyList()
+        _travelMode.value = TravelModes.WALK
+        _distanceToPlaces.value = 1000.0 // default distance
+        _placeTypeSelection.value = TypesOfPlaces.RESTAURANTS // default type
+        _nearbyPlaces.value = emptyList()
+        _routePolyline.value = null
+        _userLocation.value = null
+        customLocation.value = null
+        _routeInfo.value = null
     }
 }
