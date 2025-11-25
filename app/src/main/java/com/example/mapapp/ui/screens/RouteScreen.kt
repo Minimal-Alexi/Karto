@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -42,6 +43,8 @@ import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
 import com.example.mapapp.ui.components.MapWrapper
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
 
 @Composable
 fun RouteScreen(
@@ -155,7 +158,26 @@ fun RouteTitleSection(title : String) {
 
 @Composable
 fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
-    val cameraPositionState = rememberCameraPositionState()
+    val userLocation = routeScreenViewModel.userLocation.collectAsState()
+
+    /*
+    Camera handling
+    */
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(60.1699, 24.9384), 12f
+            // Default to Helsinki
+        )
+    }
+
+    LaunchedEffect(userLocation.value) {
+        val loc = userLocation.value
+        if (loc != null) {
+            cameraPositionState.animate(
+                update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
+            )
+        }
+    }
     var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
 
     GoogleMap(
