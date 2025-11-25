@@ -60,6 +60,7 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 fun ExploreScreen(
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
+    routeViewModel: RouteViewModel = viewModel(),
     navigateToScreen: (String) -> Unit,
     openedRouteId: Int? = null,
     onResetRoute: () -> Unit
@@ -107,6 +108,7 @@ fun ExploreScreen(
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
+                exploreViewModel = exploreViewModel,
                 routeViewModel = routeViewModel
             )
         }

@@ -36,6 +36,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Collections.emptyList
 
 object ExploreViewModelParameterRepository {
     val _routeStops = MutableStateFlow<MutableList<Place>>(mutableListOf())

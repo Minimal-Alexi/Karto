@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,13 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -31,6 +28,7 @@ import androidx.compose.ui.zIndex
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.utils.route.RouteViewModel
+import com.example.mapapp.viewmodel.ExploreViewModel
 import kotlin.math.roundToInt
 
 @Composable
@@ -38,6 +36,7 @@ fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
     deleteOnClick: (Place) -> Unit,
     selectedRouteStops: MutableList<Place>,
+    exploreViewModel: ExploreViewModel,
     routeViewModel: RouteViewModel,
 ) {
     Column(
@@ -70,14 +69,15 @@ fun SelectedStopsSection(
         ) {
             ReorderableColumn(
                 items = selectedRouteStops,
-                onMove = { from, to -> selectedRouteStops.move(from, to) }
-            ) { item ->
+                onMove = { from, to -> selectedRouteStops.move(from, to) },
+            ) { item, index ->
                 SelectedStopItem(
                     time = "12:05",
                     locationName = item.displayName.text,
                     distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
                     duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
                     placesId = item.id,
+                    index = index,
                     navigateToLocationScreen = navigateToLocationScreen,
                     onStayTimeChange = { selectedTime ->
                         // handle the selected stay time
@@ -102,7 +102,7 @@ fun <T> ReorderableColumn(
     items: List<T>,
     onMove: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
-    itemContent: @Composable (T) -> Unit
+    itemContent: @Composable (T, Int) -> Unit
 ) {
     var draggingIndex by remember { mutableStateOf<Int?>(null) }
     var dragOffset by remember { mutableStateOf(0f) }
@@ -164,7 +164,7 @@ fun <T> ReorderableColumn(
                             }
                         }
                 ) {
-                    itemContent(item)
+                    itemContent(item, index)
                 }
             }
         }
