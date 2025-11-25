@@ -96,7 +96,7 @@ fun ExploreScreen(
                 exploreViewModel::changeTravelMode
             )
         }
-        item { MapWrapper(exploreViewModel, mapInteraction) { MapScreen(exploreViewModel) } }
+        item { MapWrapper(exploreViewModel, mapInteraction) { ExploreScreenMap(exploreViewModel) } }
 
         item {
             SelectedStopsSection(
@@ -135,7 +135,7 @@ fun ExploreScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(exploreViewModel: ExploreViewModel) {
+fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
     /*
     Selected place info card handler
     */
