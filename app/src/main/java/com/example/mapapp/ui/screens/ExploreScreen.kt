@@ -1,7 +1,6 @@
 package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
@@ -39,6 +36,7 @@ import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.MapRouteStopInfoCard
+import com.example.mapapp.ui.components.MapWrapper
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
@@ -98,7 +96,7 @@ fun ExploreScreen(
                 exploreViewModel::changeTravelMode
             )
         }
-        item { MapWrapper(exploreViewModel, mapInteraction) }
+        item { MapWrapper(exploreViewModel, mapInteraction){MapScreen(exploreViewModel)} }
 
         item {
             SelectedStopsSection(
@@ -132,32 +130,6 @@ fun ExploreScreen(
             ) { /* TODO */ }
         }
         item { Spacer(modifier = Modifier.height(16.dp)) }
-    }
-}
-
-@Composable
-fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<Boolean>) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp) // fixed height is important
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        // wait for the first down
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        mapInteraction.value = true
-                        // keep reading pointer events until all pointers are up
-                        do {
-                            val event = awaitPointerEvent()
-                            // optional: you can examine event.changes to consume if needed
-                        } while (event.changes.any { it.pressed })
-
-                        mapInteraction.value = false
-                    }
-                }
-            }) {
-        MapScreen(exploreViewModel)
     }
 }
 

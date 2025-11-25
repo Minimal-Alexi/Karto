@@ -12,7 +12,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 
 @Composable
-fun MapWrapper(viewModel: AndroidViewModel, mapInteraction: MutableState<Boolean>) {
+fun MapWrapper(
+    viewModel: AndroidViewModel,
+    mapInteraction: MutableState<Boolean>,
+    composable: @Composable (AndroidViewModel) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,5 +36,7 @@ fun MapWrapper(viewModel: AndroidViewModel, mapInteraction: MutableState<Boolean
                         mapInteraction.value = false
                     }
                 }
-            })
+            }){
+        composable(viewModel)
+    }
 }
