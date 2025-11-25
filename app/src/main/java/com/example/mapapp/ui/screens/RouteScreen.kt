@@ -287,9 +287,9 @@ fun RouteStopItem(
                             indication = null
                         ) {
                             if (!location.isVisited) {
-                                onVisit(id)
+                                onVisit(location.id)
                             } else {
-                                onUnvisit(id)
+                                onUnvisit(location.id)
                             }
                         },
                     contentAlignment = Alignment.Center
@@ -315,13 +315,13 @@ fun RouteStopItem(
                         modifier = Modifier.widthIn(max = 200.dp)
                     )
 
-                    closingInfo?.let {
+                    /*closingInfo?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error
                         )
-                    }
+                    }*/
                 }
             }
 
