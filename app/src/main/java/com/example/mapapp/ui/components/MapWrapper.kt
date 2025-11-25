@@ -25,7 +25,7 @@ fun MapWrapper(
                 awaitPointerEventScope {
                     while (true) {
                         // wait for the first down
-                        val down = awaitFirstDown(requireUnconsumed = false)
+                        awaitFirstDown(requireUnconsumed = false)
                         mapInteraction.value = true
                         // keep reading pointer events until all pointers are up
                         do {
@@ -36,7 +36,7 @@ fun MapWrapper(
                         mapInteraction.value = false
                     }
                 }
-            }){
+            }) {
         composable(viewModel)
     }
 }

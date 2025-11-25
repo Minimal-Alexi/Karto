@@ -96,7 +96,7 @@ fun ExploreScreen(
                 exploreViewModel::changeTravelMode
             )
         }
-        item { MapWrapper(exploreViewModel, mapInteraction){MapScreen(exploreViewModel)} }
+        item { MapWrapper(exploreViewModel, mapInteraction) { MapScreen(exploreViewModel) } }
 
         item {
             SelectedStopsSection(
@@ -141,7 +141,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     */
     val sheetState = rememberModalBottomSheetState()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
-    var selectedPlaceIsRouteStop by remember {mutableStateOf<Boolean>(false)}
+    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }
     /*
     Map Logic Values
     */
@@ -159,11 +159,11 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
         )
     }
 
-    LaunchedEffect(userLocation.value){
+    LaunchedEffect(userLocation.value) {
         val loc = userLocation.value
-        if(loc != null){
+        if (loc != null) {
             cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(loc,15f)
+                update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
     }
@@ -174,7 +174,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             .height(400.dp),
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState
+        ) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),
@@ -194,14 +195,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                             ),
                             tag = place,
                             onClick = {
-                                selectedPlace = if(place == selectedPlace) null
+                                selectedPlace = if (place == selectedPlace) null
                                 else {
                                     selectedPlaceIsRouteStop = false
                                     place
                                 }
                                 true
                             }
-                            )
+                        )
                     }
                 }
             }
@@ -212,14 +213,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                     tag = place,
                     onClick = {
-                        selectedPlace = if(place == selectedPlace) null
+                        selectedPlace = if (place == selectedPlace) null
                         else {
                             selectedPlaceIsRouteStop = true
                             place
                         }
                         true
                     }
-                    )
+                )
             }
 
             if (polyline.value != null) {
@@ -232,18 +233,20 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             }
         }
     }
-    if(selectedPlace != null){
+    if (selectedPlace != null) {
         ModalBottomSheet(
             onDismissRequest = { selectedPlace = null },
             sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
-                if(selectedPlaceIsRouteStop) MapRouteStopInfoCard(selectedPlace!!,
+                if (selectedPlaceIsRouteStop) MapRouteStopInfoCard(
+                    selectedPlace!!,
                     {
                         exploreViewModel.removeRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
-                else MapPlaceInfoCard(selectedPlace!!,
+                else MapPlaceInfoCard(
+                    selectedPlace!!,
                     {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null
