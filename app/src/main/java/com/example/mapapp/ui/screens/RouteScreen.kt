@@ -43,6 +43,7 @@ import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
+import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
@@ -149,26 +150,8 @@ fun RouteTitleSection(title : String) {
 
 @Composable
 fun MapScreenPlaceholder() {
-    val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val cameraPositionState = rememberCameraPositionState()
     var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
-
-    // Request current location once
-    LaunchedEffect(Unit) {
-        try {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    currentLatLng = LatLng(location.latitude, location.longitude)
-                    cameraPositionState.position =
-                        CameraPosition.fromLatLngZoom(currentLatLng!!, 14f)
-                }
-            }
-        } catch (e: SecurityException) {
-            // Make sure you have location permission granted before calling this
-            e.printStackTrace()
-        }
-    }
 
     GoogleMap(
         modifier = Modifier
@@ -220,11 +203,11 @@ fun OnRouteSection(
                     for (location in currentStops){
                         RouteStopItem(
                             time = "12:05",
-                            locationName = location.name,
+                            location = location,
                             distance = "2.7 km",
                             duration = "30 min",
-                            placesID = "holder",
-                            navigateToLocationScreen = navigateToLocationScreen
+                            navigateToLocationScreen = navigateToLocationScreen,
+                            markLocationVisit = viewModel::markRouteStopVisit
                         )
                         HorizontalDivider(color = Color(0xFFDDDDDD))
                     }
@@ -239,14 +222,13 @@ fun OnRouteSection(
 @Composable
 fun RouteStopItem(
     time: String,
-    locationName: String,
+    location: RouteStopEntity,
     distance: String,
     duration: String,
     closingInfo: String? = null,
-    placesID: String,
-    navigateToLocationScreen: (String) -> Unit
+    navigateToLocationScreen: (String) -> Unit,
+    markLocationVisit: (RouteStopEntity) -> Unit
 ) {
-    var isVisited by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -280,24 +262,24 @@ fun RouteStopItem(
                         .size(20.dp)
                         .border(
                             width = 2.dp,
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = 0.5f
                             ),
                             shape = CircleShape
                         )
                         .background(
-                            color = if (isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            color = if (location.isVisited) MaterialTheme.colorScheme.primary else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            isVisited = !isVisited
+                            markLocationVisit(location)
                         },
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (isVisited) {
+                    if (location.isVisited) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = "Visited",
@@ -312,7 +294,7 @@ fun RouteStopItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = locationName,
+                        text = location.name,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.width(240.dp)
@@ -331,7 +313,7 @@ fun RouteStopItem(
             // Book icon on the right
             IconButton(
                 onClick = {
-                    navigateToLocationScreen(placesID)
+                    navigateToLocationScreen(location.placesId)
                 },
                 modifier = Modifier.size(32.dp)
             ) {
