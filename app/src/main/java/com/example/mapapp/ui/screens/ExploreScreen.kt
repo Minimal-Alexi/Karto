@@ -159,9 +159,6 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
     val polyline = exploreViewModel.routePolyline.collectAsState()
-    /**
-     * Code of route polyline is above
-     */
 
     // GoogleMap Compose
     Box(
