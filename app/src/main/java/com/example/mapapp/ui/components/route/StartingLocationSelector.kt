@@ -45,17 +45,23 @@ fun StartingLocationSelector() {
 
     val exploreViewModel = viewModel<ExploreViewModel>()
 
-    var locationText by remember { mutableStateOf("") }
+    var locationFieldText by remember { mutableStateOf("") }
+    val locationText by exploreViewModel.customLocationText.collectAsState()
+
     val predictions by predictionViewModel.originPredictions.collectAsState()
+
+    fun setLocationFieldText(str : String) {
+        locationFieldText = str
+    }
 
     Text("starting from")
 
     Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = locationText,
+            value = locationFieldText,
             onValueChange = {
                 predictionViewModel.clearPredictionsForOrigin()
-                locationText = it
+                locationFieldText = it
                 if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
             },
             modifier = Modifier.fillMaxWidth(),
@@ -100,32 +106,14 @@ fun StartingLocationSelector() {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        val placeId = prediction.placeId
-                                        val placeFields =
-                                            listOf(
-                                                Place.Field.LOCATION,
-                                                Place.Field.DISPLAY_NAME
-                                            )
-                                        val request =
-                                            FetchPlaceRequest.newInstance(placeId, placeFields)
-
-                                        predictionViewModel.placesClient.fetchPlace(request)
-                                            .addOnSuccessListener { response ->
-                                                val place = response.place
-                                                exploreViewModel.setLocation(
-                                                    LatLng(
-                                                        place.location!!.latitude,
-                                                        place.location!!.longitude
-                                                    )
-                                                )
-                                                locationText =
-                                                    place.formattedAddress ?: place.displayName
-                                                            ?: ""
-                                                predictionViewModel.clearPredictionsForOrigin()
-                                            }
+                                        predictionViewModel.fetchPlace(
+                                            prediction.placeId,
+                                            exploreViewModel::setOriginLocation,
+                                            exploreViewModel::setCustomLocationText,
+                                            ::setLocationFieldText
+                                        )
                                     }
                                     .padding(12.dp)
-
                             )
 
                             HorizontalDivider(color = Color(0xFFDDDDDD))

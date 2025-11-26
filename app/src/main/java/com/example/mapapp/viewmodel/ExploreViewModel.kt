@@ -46,6 +46,7 @@ object ExploreViewModelParameterRepository {
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
     val _userLocation = MutableStateFlow<LatLng?>(null)
     val _customLocation = MutableStateFlow<LatLng?>(null)
+    val _customLocationText = MutableStateFlow<String>("")
 }
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
@@ -69,7 +70,11 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
     val userLocation: StateFlow<LatLng?> = _userLocation
     private val _customLocation = ExploreViewModelParameterRepository._customLocation
-    val customLocation : StateFlow<LatLng?> = _customLocation
+    val customLocation: StateFlow<LatLng?> = _customLocation
+
+    private val _customLocationText = ExploreViewModelParameterRepository._customLocationText
+    val customLocationText: StateFlow<String> = _customLocationText
+
 
     /*
     Route and Polyline
@@ -151,9 +156,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _placeTypeSelection.value = newPlaceType
     }
 
-    fun setLocation(location: LatLng) {
+    fun setOriginLocation(location: LatLng) {
         _customLocation.value = location
         _userLocation.value = location
+    }
+
+    fun setCustomLocationText(customLocationText: String) {
+        _customLocationText.value = customLocationText
     }
 
     /**

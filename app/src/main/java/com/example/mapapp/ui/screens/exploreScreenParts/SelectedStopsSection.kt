@@ -30,6 +30,7 @@ import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import kotlin.math.roundToInt
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun SelectedStopsSection(
@@ -58,6 +59,8 @@ fun SelectedStopsSection(
             }
         ) { Text("Calculate route") }
 
+
+        Column { Text("TEST" + exploreViewModel.customLocationText.collectAsState().value) }
 
         Box(
             modifier = Modifier
@@ -143,8 +146,10 @@ fun <T> ReorderableColumn(
                                     val targetIndex = when {
                                         dragOffset > height / 2 && index < items.lastIndex ->
                                             index + 1
+
                                         dragOffset < -height / 2 && index > 0 ->
                                             index - 1
+
                                         else -> null
                                     }
 
