@@ -31,6 +31,7 @@ import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import kotlin.math.roundToInt
 import androidx.compose.runtime.collectAsState
+import com.example.mapapp.ui.components.route.StartingLocationCard
 
 @Composable
 fun SelectedStopsSection(
@@ -59,9 +60,6 @@ fun SelectedStopsSection(
             }
         ) { Text("Calculate route") }
 
-
-        Column { Text("TEST" + exploreViewModel.customLocationText.collectAsState().value) }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,27 +68,30 @@ fun SelectedStopsSection(
                 )
                 .padding(16.dp),
         ) {
-            ReorderableColumn(
-                items = selectedRouteStops,
-                onMove = { from, to -> selectedRouteStops.move(from, to) },
-            ) { item, index ->
-                SelectedStopItem(
-                    time = "12:05",
-                    locationName = item.displayName.text,
-                    distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
-                    duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
-                    placesId = item.id,
-                    index = index,
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    },
-                    deleteOnClick = { deleteOnClick(item) }
+            Column {
+                StartingLocationCard(
+                    exploreViewModel.customLocationText
                 )
+                ReorderableColumn(
+                    items = selectedRouteStops,
+                    onMove = { from, to -> selectedRouteStops.move(from, to) },
+                ) { item, index ->
+                    SelectedStopItem(
+                        time = "12:05",
+                        locationName = item.displayName.text,
+                        distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
+                        duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
+                        placesId = item.id,
+                        index = index,
+                        navigateToLocationScreen = navigateToLocationScreen,
+                        onStayTimeChange = { selectedTime ->
+                            // handle the selected stay time
+                            println("Stay time selected: $selectedTime")
+                        },
+                        deleteOnClick = { deleteOnClick(item) }
+                    )
+                }
             }
-
-
         }
     }
 }
