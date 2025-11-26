@@ -35,6 +35,7 @@ import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.style.TextAlign
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
@@ -60,14 +61,12 @@ fun RouteScreen(
             currentRoute = currentRoute
         )
     } else {
-        EmptyRouteScreen(navigateToScreen)
+        EmptyRouteScreen()
     }
 }
 
 @Composable
-fun EmptyRouteScreen(
-    navigateToScreen: (String) -> Unit
-) {
+fun EmptyRouteScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceAround,
@@ -82,14 +81,9 @@ fun EmptyRouteScreen(
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                text = "Once you start a Route, it will be here.",
-                style = MaterialTheme.typography.titleMedium
+                text = "When you make a Route in the Route-screen and Start it, it will appear here.",
+                textAlign = TextAlign.Center
             )
-
-            SecondaryButton(
-                text = "Make a Route",
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                onClick = { navigateToScreen(EXPLORE_SCREEN_ROUTE) })
         }
     }
 }
@@ -110,19 +104,19 @@ fun CurrentRouteScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         userScrollEnabled = !mapInteraction.value
     ) {
-        item{
+        item {
             RouteTitleSection(currentRoute.title)
         }
-        item{
-            MapWrapper(viewModel,mapInteraction) {RouteScreenMap(viewModel)}
+        item {
+            MapWrapper(viewModel, mapInteraction) { RouteScreenMap(viewModel) }
         }
-        item{
+        item {
             OnRouteSection(navigateToLocationScreen)
         }
-        item{
+        item {
             RouteProgressSection()
         }
-        item{
+        item {
             PrimaryButton(
                 text = "Complete Route",
                 backgroundColor = MaterialTheme.colorScheme.primary
@@ -131,14 +125,14 @@ fun CurrentRouteScreen(
                 navigateToScreen(SETTINGS_SCREEN_ROUTE)
             }
         }
-        item{
+        item {
             Spacer(modifier = Modifier.height(0.dp))
         }
     }
 }
 
 @Composable
-fun RouteTitleSection(title : String) {
+fun RouteTitleSection(title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,8 +181,8 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
         if (userLocation.value != null) {
             UserMarker(userLocation.value!!)
         }
-        if(routeStops.value != null){
-            for(routeStop in routeStops.value){
+        if (routeStops.value != null) {
+            for (routeStop in routeStops.value) {
                 PlaceMarker(routeStop.toPlace())
             }
         }
@@ -302,12 +296,12 @@ fun RouteStopItem(
                         .border(
                             width = 2.dp,
                             color = if (location.isVisited) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             shape = CircleShape
                         )
                         .background(
                             color = if (location.isVisited) MaterialTheme.colorScheme.primary
-                                    else Color.Transparent,
+                            else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable(

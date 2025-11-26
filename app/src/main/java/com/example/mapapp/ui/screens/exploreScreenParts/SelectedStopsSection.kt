@@ -36,6 +36,8 @@ import com.example.mapapp.viewmodel.ExploreViewModel
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
+import androidx.compose.runtime.collectAsState
+import com.example.mapapp.ui.components.route.StartingLocationCard
 
 @Composable
 fun SelectedStopsSection(
@@ -64,7 +66,6 @@ fun SelectedStopsSection(
             }
         ) { Text("Calculate route") }
 
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -73,50 +74,30 @@ fun SelectedStopsSection(
                 )
                 .padding(16.dp),
         ) {
-            ReorderableColumn(
-                items = selectedRouteStops,
-                onMove = { from, to -> selectedRouteStops.move(from, to) },
-            ) { item, index ->
-                SelectedStopItem(
-                    time = "12:05",
-                    locationName = item.displayName.text,
-                    distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
-                    duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
-                    placesId = item.id,
-                    index = index,
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    },
-                    deleteOnClick = { deleteOnClick(item) }
+            Column {
+                StartingLocationCard(
+                    exploreViewModel.customLocationText
                 )
-            }
-
-            /*
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                routeStops.forEachIndexed { index, item ->
-
-                    key(item.id, item.travelDuration, item.travelDistance) {
-                        SelectedStopItem(
-                            index = index,
-                            time = "12:05",
-                            locationName = item.displayName.text,
-                            distance = item.travelDistance + "m",
-                            duration = item.travelDuration + "",
-                            placesId = item.id,
-                            navigateToLocationScreen = navigateToLocationScreen,
-                            onStayTimeChange = { selectedTime ->
-                                // handle the selected stay time
-                                println("Stay time selected: $selectedTime")
-                            },
-                            deleteOnClick = { deleteOnClick(item) })
-                    }
+                ReorderableColumn(
+                    items = selectedRouteStops,
+                    onMove = { from, to -> selectedRouteStops.move(from, to) },
+                ) { item, index ->
+                    SelectedStopItem(
+                        time = "12:05",
+                        locationName = item.displayName.text,
+                        distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
+                        duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
+                        placesId = item.id,
+                        index = index,
+                        navigateToLocationScreen = navigateToLocationScreen,
+                        onStayTimeChange = { selectedTime ->
+                            // handle the selected stay time
+                            println("Stay time selected: $selectedTime")
+                        },
+                        deleteOnClick = { deleteOnClick(item) }
+                    )
                 }
             }
-            */
         }
     }
 }
