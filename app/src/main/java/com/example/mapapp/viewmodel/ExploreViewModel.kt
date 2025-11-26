@@ -31,6 +31,7 @@ import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.example.mapapp.utils.TravelRoute
+import com.example.mapapp.viewmodel.ExploreViewModelParameterRepository
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +45,9 @@ object ExploreViewModelParameterRepository {
     val _routeInfo = MutableStateFlow<String?>(null)
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
     val _userLocation = MutableStateFlow<LatLng?>(null)
-    }
+    val _customLocation = MutableStateFlow<LatLng?>(null)
+    val _customLocationText = MutableStateFlow<String>("")
+}
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
@@ -66,8 +69,12 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     // private val _userLocation = MutableStateFlow<LatLng?>(null)
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
     val userLocation: StateFlow<LatLng?> = _userLocation
+    private val _customLocation = ExploreViewModelParameterRepository._customLocation
+    val customLocation: StateFlow<LatLng?> = _customLocation
 
-    val customLocation = mutableStateOf<LatLng?>(null)
+    private val _customLocationText = ExploreViewModelParameterRepository._customLocationText
+    val customLocationText: StateFlow<String> = _customLocationText
+
 
     /*
     Route and Polyline
@@ -75,9 +82,11 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     // private val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
     private val _travelMode = ExploreViewModelParameterRepository._travelMode
     val travelMode: StateFlow<TravelModes> = _travelMode
+
     // private val _routeStops = MutableStateFlow<List<Place>>(listOf())
     private val _routeStops = ExploreViewModelParameterRepository._routeStops
     val routeStops: StateFlow<MutableList<Place>> = _routeStops
+
     // private val _routePolyline = MutableStateFlow<String?>(null)
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
     val routePolyline: StateFlow<String?> = _routePolyline
@@ -118,6 +127,16 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
             } as MutableList<Place>
+            _userLocation.value = LatLng(
+                routeWithStops.route.startingLatitude,
+                routeWithStops.route.startingLongitude
+            )
+            _customLocation.value = LatLng(
+                routeWithStops.route.startingLatitude,
+                routeWithStops.route.startingLongitude
+            )
+            _customLocationText.value =
+                "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
         }
     }
 
@@ -147,9 +166,20 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _placeTypeSelection.value = newPlaceType
     }
 
-    fun setLocation(location : LatLng) {
-        customLocation.value = location
+    fun setOriginLocation(location: LatLng) {
+        _customLocation.value = location
         _userLocation.value = location
+    }
+
+    /** note: the marker may be updated with a slight delay before the location
+     * client fetches the user location again (see init) */
+    fun nullCustomLocation(){
+        _customLocation.value = null
+        _customLocationText.value = "Your Current Location"
+    }
+
+    fun setCustomLocationText(customLocationText: String) {
+        _customLocationText.value = customLocationText
     }
 
     /**
@@ -312,7 +342,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 val sortedRouteStops: MutableList<Place> = mutableListOf()
 
                 for (i in _generatedRoute.value!!.travelPath.drop(1)) {
-                    sortedRouteStops.add(_routeStops.value[i-1])
+                    sortedRouteStops.add(_routeStops.value[i - 1])
                 }
                 _routeStops.value = sortedRouteStops
 
@@ -378,7 +408,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val route = RouteEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp  = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                startingLatitude = userLocation.value!!.latitude,
+                startingLongitude = userLocation.value!!.longitude
             )
             val stops = routeStops.value.mapIndexed { index, stop ->
                 RouteStopEntity(
@@ -392,18 +424,20 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = stop.typeOfPlace?.name
                 )
             }
-
             routeRepository.saveRoute(route, stops)
         }
     }
 
     fun updateSavedRoute(routeId: Int) {
+
         viewModelScope.launch {
             val existingRoute = routeRepository.getRouteWithStops(routeId).route
 
             val updatedRoute = existingRoute.copy(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                startingLatitude = userLocation.value!!.latitude,
+                startingLongitude = userLocation.value!!.longitude
             )
 
             val stops = routeStops.value.mapIndexed { index, stop ->
@@ -427,7 +461,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val route = RouteEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp  = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                startingLatitude = userLocation.value!!.latitude,
+                startingLongitude = userLocation.value!!.longitude
             )
 
             val stops = routeStops.value.mapIndexed { index, stop ->
@@ -456,7 +492,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _nearbyPlaces.value = emptyList()
         _routePolyline.value = null
         _userLocation.value = null
-        customLocation.value = null
+        _customLocation.value = null
+        _customLocationText.value = ""
         _routeInfo.value = null
     }
 }

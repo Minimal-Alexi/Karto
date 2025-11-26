@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -111,7 +112,8 @@ fun ExploreScreen(
         item {
             PrimaryButton(
                 text = "Start This Route",
-                backgroundColor = MaterialTheme.colorScheme.secondary
+                backgroundColor = MaterialTheme.colorScheme.secondary,
+                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
             ) {
                 exploreViewModel.startRoute()
                 navigateToScreen(ROUTE_SCREEN_ROUTE)
@@ -120,7 +122,8 @@ fun ExploreScreen(
         item {
             PrimaryButton(
                 text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
-                backgroundColor = MaterialTheme.colorScheme.primary
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
             ) {
                 if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
                 else
