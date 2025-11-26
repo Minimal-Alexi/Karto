@@ -171,6 +171,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _userLocation.value = location
     }
 
+    /** note: the marker may be updated with a slight delay before the location
+     * client fetches the user location again (see init) */
+    fun nullCustomLocation(){
+        _customLocation.value = null
+        _customLocationText.value = "Your Current Location"
+    }
+
     fun setCustomLocationText(customLocationText: String) {
         _customLocationText.value = customLocationText
     }

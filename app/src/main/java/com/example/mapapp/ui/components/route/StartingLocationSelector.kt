@@ -62,7 +62,11 @@ fun StartingLocationSelector() {
             onValueChange = {
                 predictionViewModel.clearPredictionsForOrigin()
                 locationFieldText = it
-                if (it.length > 2) predictionViewModel.searchPlacesForOrigin(it)
+                if (it.length > 2) {
+                    predictionViewModel.searchPlacesForOrigin(it)
+                } else {
+                    exploreViewModel.nullCustomLocation()
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Your Current Location") },
