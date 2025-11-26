@@ -115,7 +115,6 @@ fun ExploreScreen(
                 backgroundColor = MaterialTheme.colorScheme.secondary,
                 enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
             ) {
-                Log.d("test", "${exploreViewModel.routeStops.value} ROUTESTOPS VALUE")
                 exploreViewModel.startRoute()
                 navigateToScreen(ROUTE_SCREEN_ROUTE)
             }
