@@ -39,6 +39,7 @@ import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
 import com.example.mapapp.ui.components.map.MapWrapper
+import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -188,9 +189,7 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
         }
         if(routeStops.value != null){
             for(routeStop in routeStops.value){
-                if(routeStop.typeOfPlace != null){
-
-                }
+                PlaceMarker(routeStop.toPlace())
             }
         }
 
