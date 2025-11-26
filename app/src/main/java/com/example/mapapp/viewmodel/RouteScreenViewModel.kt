@@ -1,6 +1,8 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
+import android.location.Location.distanceBetween
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
@@ -26,7 +28,8 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
     private val _userLocation = MutableStateFlow<LatLng?>(null)
     val userLocation: StateFlow<LatLng?> = _userLocation
 
-    private val _LocationCallbackUpdate = 10000L
+    private val _LocationCallbackUpdate = 5000L
+    private val _DistanceToRouteStop = 100f
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -38,6 +41,7 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
             locationClient.getLocationUpdates(_LocationCallbackUpdate)
                 .collect { location ->
                     _userLocation.value = LatLng(location.latitude, location.longitude)
+                    checkDistanceToStops(location.latitude,location.longitude)
                 }
         }
     }
@@ -76,5 +80,21 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
             currentRoute.value?.let { routeRepository.completeRoute(it.id) }
         }
     }
-
+    private fun checkDistanceToStops(userLatitude: Double,userLongitude: Double){
+        if(currentStops.value!= null){
+            for(stop in currentStops.value!!){
+                val distanceResult = FloatArray(1)
+                distanceBetween(
+                    userLatitude,
+                    userLongitude,
+                    stop.latitude,
+                    stop.longitude,
+                    distanceResult
+                )
+                if(distanceResult[0] <= _DistanceToRouteStop){
+                    visitStop(stop.id)
+                }
+            }
+        }
+    }
 }
