@@ -59,6 +59,14 @@ class RouteRepository(
         routeDao.deleteRouteById(routeId)
         routeStopDao.deleteStopsByRoute(routeId)
     }
+
+    suspend fun updateRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
+        routeDao.updateRoute(route)
+        routeStopDao.deleteStopsByRoute(route.id)
+        stops.forEach { stop ->
+            routeStopDao.insert(stop.copy(routeId = route.id))
+        }
+    }
 }
 
 data class RouteWithStops(

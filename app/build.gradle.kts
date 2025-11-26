@@ -61,6 +61,8 @@ dependencies {
 
     implementation("com.google.android.libraries.places:places:3.5.0")
 
+    implementation("sh.calvin.reorderable:reorderable:3.0.0")
+
     implementation(libs.androidx.appcompat)
     implementation(libs.play.services.maps)
     implementation("com.google.maps.android:maps-compose:6.12.1")
@@ -77,6 +79,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
     implementation(libs.places)
+    implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

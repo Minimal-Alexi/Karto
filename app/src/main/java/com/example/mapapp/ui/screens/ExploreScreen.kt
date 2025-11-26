@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,6 +42,8 @@ import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
+import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
+import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -57,8 +60,10 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 fun ExploreScreen(
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
+    routeViewModel: RouteViewModel = viewModel(),
     navigateToScreen: (String) -> Unit,
-    openedRouteId: Int? = null
+    openedRouteId: Int? = null,
+    onResetRoute: () -> Unit
 ) {
 
     LaunchedEffect(openedRouteId) {
@@ -103,7 +108,8 @@ fun ExploreScreen(
                 navigateToLocationScreen,
                 exploreViewModel::removeRouteStop,
                 exploreViewModel.routeStops.collectAsState().value,
-                exploreViewModel = exploreViewModel
+                exploreViewModel = exploreViewModel,
+                routeViewModel = routeViewModel
             )
         }
         item { RouteSummarySection(exploreViewModel) }
@@ -118,16 +124,21 @@ fun ExploreScreen(
         }
         item {
             PrimaryButton(
-                text = "Save This Route For Later",
+                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
                 backgroundColor = MaterialTheme.colorScheme.primary
             ) {
+                if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
+                else
                 exploreViewModel.saveRoute()
             }
         }
         item {
             PrimaryButton(
                 text = "Reset This Route", backgroundColor = MaterialTheme.colorScheme.error
-            ) { /* TODO */ }
+            ) {
+                exploreViewModel.resetRoute()
+                onResetRoute()
+            }
         }
         item { Spacer(modifier = Modifier.height(16.dp)) }
     }
@@ -311,12 +322,15 @@ fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
     }
 }
 
+/*
+Moved some code to a separate file for readability
+
 @Composable
 fun SelectedStopsSection(
     navigateToLocationScreen: (String) -> Unit,
     deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
     selectedRouteStops: List<com.example.mapapp.data.model.Place>,
-    exploreViewModel: ExploreViewModel,
+    routeViewModel: RouteViewModel,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -326,7 +340,7 @@ fun SelectedStopsSection(
         )
         Button(
             onClick = {
-                exploreViewModel.runMatrixFlow()
+                routeViewModel.runMatrixFlow()
             }
         ) { Text("Calculate route") }
 
@@ -341,8 +355,9 @@ fun SelectedStopsSection(
             Column(
                 modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                for (place: com.example.mapapp.data.model.Place in selectedRouteStops) {
+                selectedRouteStops.forEachIndexed { index, place ->
                     SelectedStopItem(
+                        index = index,
                         time = "12:05",
                         locationName = place.displayName.text,
                         distance = "2.7 km",
@@ -360,3 +375,5 @@ fun SelectedStopsSection(
         }
     }
 }
+
+ */

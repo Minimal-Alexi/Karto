@@ -3,6 +3,7 @@ package com.example.mapapp
 import android.app.Application
 import android.content.pm.PackageManager
 import com.example.mapapp.data.database.KartoDatabase
+import com.example.mapapp.data.database.route_stops.RouteStopRepository
 import com.example.mapapp.data.database.user.UserRepository
 import com.example.mapapp.data.database.routes.RouteRepository
 import com.example.mapapp.utils.SecretsHolder
@@ -14,6 +15,7 @@ class KartoApplication : Application() {
         routeDao = database.routeDao(),
         routeStopDao = database.routeStopDao()
     ) }
+    val routeStopRepository by lazy { RouteStopRepository(database.routeStopDao()) }
 
     override fun onCreate() {
         super.onCreate()
