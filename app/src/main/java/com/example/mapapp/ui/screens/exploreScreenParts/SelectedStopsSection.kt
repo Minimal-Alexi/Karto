@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens.exploreScreenParts
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +33,8 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
+import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
 import androidx.compose.runtime.collectAsState
 import com.example.mapapp.ui.components.route.StartingLocationCard
@@ -106,10 +112,10 @@ fun <T> ReorderableColumn(
     items: List<T>,
     onMove: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
-    itemContent: @Composable (T, Int) -> Unit
+    itemContent: @Composable (T, Int) -> Unit,
 ) {
     var draggingIndex by remember { mutableStateOf<Int?>(null) }
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
     val itemHeights = remember { mutableStateMapOf<Int, Int>() }
 
     Box(modifier) {

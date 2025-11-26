@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.R
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.google.android.gms.maps.model.StrokeStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
@@ -44,7 +46,9 @@ import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.CustomCap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -127,7 +131,7 @@ fun ExploreScreen(
             ) {
                 if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
                 else
-                exploreViewModel.saveRoute()
+                    exploreViewModel.saveRoute()
             }
         }
         item {
@@ -236,8 +240,24 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
                 val points = PolyUtil.decode(polyline.value)
                 Polyline(
                     points = points,
-                    color = MaterialTheme.colorScheme.primary,
-                    width = 10f
+                    width = 10f,
+                    geodesic = true, // Follows the curvature of the earth for better directionality
+                    // Add a CustomCap to create an arrow at the end of the line
+                    endCap = CustomCap(
+                        BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
+                        // Note: Replace 'android.R.drawable.arrow_up_float' with your own
+                        // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
+                    ),
+                    spans = listOf(
+                        StyleSpan(
+                            StrokeStyle.gradientBuilder(
+                                MaterialTheme.colorScheme.primary.hashCode(),
+                                MaterialTheme.colorScheme.secondary.hashCode()
+                            ).build(),
+                            1.0 // Apply to 100% of the line
+                        )
+                    ),
+
                 )
             }
         }

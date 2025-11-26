@@ -3,6 +3,7 @@ package com.example.mapapp.viewmodel
 import android.R
 import android.app.Application
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
 import java.util.Collections.emptyList
 
 object ExploreViewModelParameterRepository {
-    val _routeStops = MutableStateFlow<MutableList<Place>>(mutableListOf())
+    val _routeStops = MutableStateFlow<MutableList<Place>>(mutableStateListOf())
     val _routePolyline = MutableStateFlow<String?>(null)
     val _routeInfo = MutableStateFlow<String?>(null)
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
