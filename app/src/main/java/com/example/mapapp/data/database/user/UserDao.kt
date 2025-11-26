@@ -12,4 +12,7 @@ interface UserDao {
 
     @Upsert
     suspend fun upsertUser(user: UserEntity)
+
+    @Query("UPDATE user SET current_route_id = :routeId WHERE id = 1")
+    suspend fun setCurrentRoute(routeId: Int)
 }

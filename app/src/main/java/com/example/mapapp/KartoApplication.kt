@@ -13,7 +13,8 @@ class KartoApplication : Application() {
     val userRepository by lazy { UserRepository(database.userDao()) }
     val routeRepository by lazy { RouteRepository(
         routeDao = database.routeDao(),
-        routeStopDao = database.routeStopDao()
+        routeStopDao = database.routeStopDao(),
+        userDao = database.userDao()
     ) }
     val routeStopRepository by lazy { RouteStopRepository(database.routeStopDao()) }
 

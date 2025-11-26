@@ -2,11 +2,13 @@ package com.example.mapapp.data.database.routes
 
 import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
+import com.example.mapapp.data.database.user.UserDao
 import kotlinx.coroutines.flow.Flow
 
 class RouteRepository(
     private val routeDao: RouteDao,
-    private val routeStopDao: RouteStopDao
+    private val routeStopDao: RouteStopDao,
+    private val userDao: UserDao
 ) {
     fun getSavedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getRoutesByStatus(RouteStatus.SAVED)
 
@@ -32,17 +34,16 @@ class RouteRepository(
     }
 
     suspend fun startRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
-        // ensure only one CURRENT route can exist
         // TODO: put this behavior behind a disclaimer window
-        routeDao.deleteCurrent()
-
-        val id = routeDao.insertRoute(route.copy(status = RouteStatus.CURRENT)).toInt()
+        val id = routeDao.insertRoute(route.copy(status = RouteStatus.DEFAULT)).toInt()
 
         stops.forEach { stop ->
             routeStopDao.insert(
                 stop.copy(routeId = id)
             )
         }
+
+        userDao.setCurrentRoute(id)
     }
 
     suspend fun saveRoute(route: RouteEntity, stops: List<RouteStopEntity>) {

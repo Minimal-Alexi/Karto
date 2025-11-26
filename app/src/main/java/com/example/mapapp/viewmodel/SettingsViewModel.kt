@@ -47,7 +47,8 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
                 UserEntity(
                     firstName = "",
                     lastName = "",
-                    darkThemePreferred = false
+                    darkThemePreferred = false,
+                    currentRouteId = null
                 )
             )
         }

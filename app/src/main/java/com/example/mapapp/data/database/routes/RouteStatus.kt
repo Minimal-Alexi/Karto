@@ -10,9 +10,5 @@ enum class RouteStatus {
     SAVED,
 
     // used in Route History
-    COMPLETED,
-
-    // used when user is currently on the route (pressed "start route")
-    // only one exists at all times
-    CURRENT
+    COMPLETED
 }
