@@ -127,6 +127,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
             } as MutableList<Place>
+            _userLocation.value = LatLng(routeWithStops.route.startingLatitude, routeWithStops.route.startingLongitude)
+            _customLocation.value = LatLng(routeWithStops.route.startingLatitude, routeWithStops.route.startingLongitude)
+            _customLocationText.value = "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
         }
     }
 
@@ -482,6 +485,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _routePolyline.value = null
         _userLocation.value = null
         _customLocation.value = null
+        _customLocationText.value = ""
         _routeInfo.value = null
     }
 }
