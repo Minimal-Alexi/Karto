@@ -43,6 +43,7 @@ import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
 import com.example.mapapp.ui.components.MapWrapper
+import com.example.mapapp.ui.components.UserMarker
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -189,12 +190,7 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
         cameraPositionState = cameraPositionState
     ) {
         if (userLocation.value != null) {
-            Marker(
-                state = rememberUpdatedMarkerState(position = userLocation.value!!),
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                title = "Your location",
-                snippet = "Your current location"
-            )
+            UserMarker(userLocation.value!!)
         }
         if(routeStops.value != null){
             for(routeStop in routeStops.value){
