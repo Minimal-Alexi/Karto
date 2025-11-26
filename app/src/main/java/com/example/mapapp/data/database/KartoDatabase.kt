@@ -13,7 +13,7 @@ import com.example.mapapp.data.database.user.UserEntity
 
 @Database(
     entities = [UserEntity::class, RouteEntity::class, RouteStopEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class KartoDatabase : RoomDatabase() {
