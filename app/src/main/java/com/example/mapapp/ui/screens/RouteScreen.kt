@@ -44,7 +44,9 @@ import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
 import com.example.mapapp.ui.components.MapWrapper
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.rememberUpdatedMarkerState
 
 @Composable
 fun RouteScreen(
@@ -159,6 +161,7 @@ fun RouteTitleSection(title : String) {
 @Composable
 fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
     val userLocation = routeScreenViewModel.userLocation.collectAsState()
+    val routeStops = routeScreenViewModel.currentStops.collectAsState()
 
     /*
     Camera handling
@@ -178,7 +181,6 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
             )
         }
     }
-    var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
 
     GoogleMap(
         modifier = Modifier
@@ -186,12 +188,22 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
             .height(400.dp),
         cameraPositionState = cameraPositionState
     ) {
-        currentLatLng?.let { position ->
+        if (userLocation.value != null) {
             Marker(
-                state = MarkerState(position = position),
-                title = "You are here"
+                state = rememberUpdatedMarkerState(position = userLocation.value!!),
+                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
+                title = "Your location",
+                snippet = "Your current location"
             )
         }
+        if(routeStops.value != null){
+            for(routeStop in routeStops.value){
+                if(routeStop.typeOfPlace != null){
+
+                }
+            }
+        }
+
     }
 }
 
