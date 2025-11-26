@@ -1,7 +1,6 @@
 package com.example.mapapp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -22,23 +19,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
-import com.example.mapapp.ui.components.MapPlaceInfoCard
+import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.MapRouteStopInfoCard
-import com.example.mapapp.ui.components.SelectedStopItem
+import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
+import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
@@ -101,7 +96,7 @@ fun ExploreScreen(
                 exploreViewModel::changeTravelMode
             )
         }
-        item { MapWrapper(exploreViewModel, mapInteraction) }
+        item { MapWrapper(exploreViewModel, mapInteraction) { ExploreScreenMap(exploreViewModel) } }
 
         item {
             SelectedStopsSection(
@@ -144,41 +139,15 @@ fun ExploreScreen(
     }
 }
 
-@Composable
-fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<Boolean>) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp) // fixed height is important
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        // wait for the first down
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        mapInteraction.value = true
-                        // keep reading pointer events until all pointers are up
-                        do {
-                            val event = awaitPointerEvent()
-                            // optional: you can examine event.changes to consume if needed
-                        } while (event.changes.any { it.pressed })
-
-                        mapInteraction.value = false
-                    }
-                }
-            }) {
-        MapScreen(exploreViewModel)
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(exploreViewModel: ExploreViewModel) {
+fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
     /*
     Selected place info card handler
     */
     val sheetState = rememberModalBottomSheetState()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
-    var selectedPlaceIsRouteStop by remember {mutableStateOf<Boolean>(false)}
+    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }
     /*
     Map Logic Values
     */
@@ -196,11 +165,11 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
         )
     }
 
-    LaunchedEffect(userLocation.value){
+    LaunchedEffect(userLocation.value) {
         val loc = userLocation.value
-        if(loc != null){
+        if (loc != null) {
             cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(loc,15f)
+                update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
     }
@@ -211,7 +180,8 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             .height(400.dp),
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState
+        ) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),
@@ -231,14 +201,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                             ),
                             tag = place,
                             onClick = {
-                                selectedPlace = if(place == selectedPlace) null
+                                selectedPlace = if (place == selectedPlace) null
                                 else {
                                     selectedPlaceIsRouteStop = false
                                     place
                                 }
                                 true
                             }
-                            )
+                        )
                     }
                 }
             }
@@ -249,14 +219,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                     tag = place,
                     onClick = {
-                        selectedPlace = if(place == selectedPlace) null
+                        selectedPlace = if (place == selectedPlace) null
                         else {
                             selectedPlaceIsRouteStop = true
                             place
                         }
                         true
                     }
-                    )
+                )
             }
 
             if (polyline.value != null) {
@@ -269,18 +239,20 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             }
         }
     }
-    if(selectedPlace != null){
+    if (selectedPlace != null) {
         ModalBottomSheet(
             onDismissRequest = { selectedPlace = null },
             sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
-                if(selectedPlaceIsRouteStop) MapRouteStopInfoCard(selectedPlace!!,
+                if (selectedPlaceIsRouteStop) MapRouteStopInfoCard(
+                    selectedPlace!!,
                     {
                         exploreViewModel.removeRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
-                else MapPlaceInfoCard(selectedPlace!!,
+                else MapPlaceInfoCard(
+                    selectedPlace!!,
                     {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null

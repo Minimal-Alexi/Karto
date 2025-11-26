@@ -6,10 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Check
@@ -24,17 +23,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,9 +37,12 @@ import com.example.mapapp.viewmodel.RouteScreenViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
-import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
-import kotlinx.coroutines.flow.StateFlow
+import com.example.mapapp.ui.components.map.MapWrapper
+import com.example.mapapp.ui.components.map.PlaceMarker
+import com.example.mapapp.ui.components.map.UserMarker
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
 
 @Composable
 fun RouteScreen(
@@ -106,28 +101,39 @@ fun CurrentRouteScreen(
     currentRoute: RouteEntity,
 ) {
     val viewModel = viewModel<RouteScreenViewModel>()
+    val mapInteraction = remember { mutableStateOf(false) }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp, 0.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        userScrollEnabled = !mapInteraction.value
     ) {
-        RouteTitleSection(currentRoute.title)
-        MapScreenPlaceholder()
-        OnRouteSection(navigateToLocationScreen)
-        RouteProgressSection()
-
-        PrimaryButton(
-            text = "Complete Route",
-            backgroundColor = MaterialTheme.colorScheme.primary
-        ) {
-            viewModel.completeRoute()
-            navigateToScreen(SETTINGS_SCREEN_ROUTE)
+        item{
+            RouteTitleSection(currentRoute.title)
         }
-
-        Spacer(modifier = Modifier.height(0.dp))
+        item{
+            MapWrapper(viewModel,mapInteraction) {RouteScreenMap(viewModel)}
+        }
+        item{
+            OnRouteSection(navigateToLocationScreen)
+        }
+        item{
+            RouteProgressSection()
+        }
+        item{
+            PrimaryButton(
+                text = "Complete Route",
+                backgroundColor = MaterialTheme.colorScheme.primary
+            ) {
+                viewModel.completeRoute()
+                navigateToScreen(SETTINGS_SCREEN_ROUTE)
+            }
+        }
+        item{
+            Spacer(modifier = Modifier.height(0.dp))
+        }
     }
 }
 
@@ -149,9 +155,28 @@ fun RouteTitleSection(title : String) {
 }
 
 @Composable
-fun MapScreenPlaceholder() {
-    val cameraPositionState = rememberCameraPositionState()
-    var currentLatLng by remember { mutableStateOf<LatLng?>(null) }
+fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
+    val userLocation = routeScreenViewModel.userLocation.collectAsState()
+    val routeStops = routeScreenViewModel.currentStops.collectAsState()
+
+    /*
+    Camera handling
+    */
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(60.1699, 24.9384), 12f
+            // Default to Helsinki
+        )
+    }
+
+    LaunchedEffect(userLocation.value) {
+        val loc = userLocation.value
+        if (loc != null) {
+            cameraPositionState.animate(
+                update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
+            )
+        }
+    }
 
     GoogleMap(
         modifier = Modifier
@@ -159,12 +184,15 @@ fun MapScreenPlaceholder() {
             .height(400.dp),
         cameraPositionState = cameraPositionState
     ) {
-        currentLatLng?.let { position ->
-            Marker(
-                state = MarkerState(position = position),
-                title = "You are here"
-            )
+        if (userLocation.value != null) {
+            UserMarker(userLocation.value!!)
         }
+        if(routeStops.value != null){
+            for(routeStop in routeStops.value){
+                PlaceMarker(routeStop.toPlace())
+            }
+        }
+
     }
 }
 
