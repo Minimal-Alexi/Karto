@@ -77,16 +77,4 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    fun markRouteStopVisit(routeStopEntity: RouteStopEntity){
-        viewModelScope.launch {
-            currentStops.value?.let { stops ->
-                if(stops.any{it.id == routeStopEntity.id}){
-                    routeRepository.updateRouteStop(routeStopEntity.copy(
-                        isVisited = !routeStopEntity.isVisited
-                    ))
-                }
-
-            }
-        }
-    }
 }
