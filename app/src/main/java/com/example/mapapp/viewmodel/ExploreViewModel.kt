@@ -127,9 +127,16 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
             } as MutableList<Place>
-            _userLocation.value = LatLng(routeWithStops.route.startingLatitude, routeWithStops.route.startingLongitude)
-            _customLocation.value = LatLng(routeWithStops.route.startingLatitude, routeWithStops.route.startingLongitude)
-            _customLocationText.value = "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
+            _userLocation.value = LatLng(
+                routeWithStops.route.startingLatitude,
+                routeWithStops.route.startingLongitude
+            )
+            _customLocation.value = LatLng(
+                routeWithStops.route.startingLatitude,
+                routeWithStops.route.startingLongitude
+            )
+            _customLocationText.value =
+                "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
         }
     }
 
@@ -391,87 +398,81 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun saveRoute() {
-        if (userLocation.value != null || routeStops.value.isNotEmpty()) {
-            viewModelScope.launch {
-                val route = RouteEntity(
-                    title = routeTitle.value.ifBlank { "No name route" },
-                    timestamp = System.currentTimeMillis(),
-                    startingLatitude = userLocation.value!!.latitude,
-                    startingLongitude = userLocation.value!!.longitude
+        viewModelScope.launch {
+            val route = RouteEntity(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp = System.currentTimeMillis(),
+                startingLatitude = userLocation.value!!.latitude,
+                startingLongitude = userLocation.value!!.longitude
+            )
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
                 )
-                val stops = routeStops.value.mapIndexed { index, stop ->
-                    RouteStopEntity(
-                        routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
-                        placesId = stop.id,
-                        name = stop.displayName.text,
-                        latitude = stop.location.latitude,
-                        longitude = stop.location.longitude,
-                        stayMinutes = 30,
-                        position = index,
-                        typeOfPlace = stop.typeOfPlace?.name
-                    )
-                }
-                routeRepository.saveRoute(route, stops)
             }
+            routeRepository.saveRoute(route, stops)
         }
     }
 
     fun updateSavedRoute(routeId: Int) {
-        if (userLocation.value != null || routeStops.value.isNotEmpty()) {
 
-            viewModelScope.launch {
-                val existingRoute = routeRepository.getRouteWithStops(routeId).route
+        viewModelScope.launch {
+            val existingRoute = routeRepository.getRouteWithStops(routeId).route
 
-                val updatedRoute = existingRoute.copy(
-                    title = routeTitle.value.ifBlank { "No name route" },
-                    timestamp = System.currentTimeMillis(),
-                    startingLatitude = userLocation.value!!.latitude,
-                    startingLongitude = userLocation.value!!.longitude
+            val updatedRoute = existingRoute.copy(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp = System.currentTimeMillis(),
+                startingLatitude = userLocation.value!!.latitude,
+                startingLongitude = userLocation.value!!.longitude
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = routeId,
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
                 )
-
-                val stops = routeStops.value.mapIndexed { index, stop ->
-                    RouteStopEntity(
-                        routeId = routeId,
-                        placesId = stop.id,
-                        name = stop.displayName.text,
-                        latitude = stop.location.latitude,
-                        longitude = stop.location.longitude,
-                        stayMinutes = 30,
-                        position = index,
-                        typeOfPlace = stop.typeOfPlace?.name
-                    )
-                }
-
-                routeRepository.updateRoute(updatedRoute, stops)
             }
+
+            routeRepository.updateRoute(updatedRoute, stops)
         }
     }
 
     fun startRoute() {
-        if (userLocation.value != null || routeStops.value.isNotEmpty()) {
-            viewModelScope.launch {
-                val route = RouteEntity(
-                    title = routeTitle.value.ifBlank { "No name route" },
-                    timestamp = System.currentTimeMillis(),
-                    startingLatitude = userLocation.value!!.latitude,
-                    startingLongitude = userLocation.value!!.longitude
+        viewModelScope.launch {
+            val route = RouteEntity(
+                title = routeTitle.value.ifBlank { "No name route" },
+                timestamp = System.currentTimeMillis(),
+                startingLatitude = userLocation.value!!.latitude,
+                startingLongitude = userLocation.value!!.longitude
+            )
+
+            val stops = routeStops.value.mapIndexed { index, stop ->
+                RouteStopEntity(
+                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                    placesId = stop.id,
+                    name = stop.displayName.text,
+                    latitude = stop.location.latitude,
+                    longitude = stop.location.longitude,
+                    stayMinutes = 30,
+                    position = index,
+                    typeOfPlace = stop.typeOfPlace?.name
                 )
-
-                val stops = routeStops.value.mapIndexed { index, stop ->
-                    RouteStopEntity(
-                        routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
-                        placesId = stop.id,
-                        name = stop.displayName.text,
-                        latitude = stop.location.latitude,
-                        longitude = stop.location.longitude,
-                        stayMinutes = 30,
-                        position = index,
-                        typeOfPlace = stop.typeOfPlace?.name
-                    )
-                }
-
-                routeRepository.startRoute(route, stops)
             }
+
+            routeRepository.startRoute(route, stops)
         }
     }
 
