@@ -1,13 +1,11 @@
-package com.example.mapapp.ui.components
+package com.example.mapapp.ui.components.map
 
 import androidx.compose.runtime.Composable
 import com.example.mapapp.data.model.Place
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun UserMarker(userLocation: LatLng) {

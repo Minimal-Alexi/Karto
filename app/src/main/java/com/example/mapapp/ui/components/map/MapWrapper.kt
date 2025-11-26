@@ -1,4 +1,4 @@
-package com.example.mapapp.ui.components
+package com.example.mapapp.ui.components.map
 
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
