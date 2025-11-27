@@ -30,6 +30,14 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
 
     private val _LocationCallbackUpdate = 5000L
     private val _DistanceToRouteStop = 100f
+
+    /**
+     * Polyline, show be aware of
+     */
+    private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
+    val routePolyline: StateFlow<String?> = _routePolyline
+
+
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,

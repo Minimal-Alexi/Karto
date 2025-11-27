@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,13 +44,19 @@ import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.CustomCap
+import com.google.android.gms.maps.model.StrokeStyle
+import com.google.android.gms.maps.model.StyleSpan
+import com.google.maps.android.PolyUtil
+import com.google.maps.android.compose.Polyline
 
 @Composable
 fun RouteScreen(
     navigateToLocationScreen: (String) -> Unit,
     currentRouteViewModel: RouteScreenViewModel = viewModel(),
-    navigateToScreen: (String) -> Unit
+    navigateToScreen: (String) -> Unit,
 ) {
     val currentRouteFlow = remember { currentRouteViewModel.currentRoute }
     val currentRoute = currentRouteFlow.collectAsState().value
@@ -187,6 +194,34 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
             }
         }
 
+        /**
+         * Show polyline in the screen
+         */
+
+        val polyline = routeScreenViewModel.routePolyline.collectAsState()
+
+        if (polyline.value != null) {
+            val points = PolyUtil.decode(polyline.value)
+            Polyline(
+                points = points,
+                width = 10f,
+                geodesic = true, // Follows the curvature of the earth for better directionality
+                // Add a CustomCap to create an arrow at the end of the line
+                endCap = CustomCap(
+                    BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
+                    // Note: Replace 'android.R.drawable.arrow_up_float' with your own
+                    // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
+                ),
+                spans = listOf(
+                    StyleSpan(
+                        StrokeStyle.gradientBuilder(
+                            MaterialTheme.colorScheme.primary.hashCode(),
+                            MaterialTheme.colorScheme.secondary.hashCode()
+                        ).build(),
+                        1.0 // Apply to 100% of the line
+                    )
+                ),)
+        }
     }
 }
 
@@ -250,7 +285,7 @@ fun RouteStopItem(
     duration: String,
     navigateToLocationScreen: (String) -> Unit,
     onVisit: (Int) -> Unit,
-    onUnvisit: (Int) -> Unit
+    onUnvisit: (Int) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
