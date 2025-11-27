@@ -25,6 +25,9 @@ interface TemplateDao {
         SELECT r.id AS id,
                r.title AS title,
                r.saved_at AS savedAt,
+               r.starting_latitude AS startingLatitude,
+               r.starting_longitude AS startingLongitude,
+               r.category AS category,
                COUNT(s.id) AS stopsCount
         FROM templates AS r
         LEFT JOIN template_stops AS s ON r.id = s.template_id

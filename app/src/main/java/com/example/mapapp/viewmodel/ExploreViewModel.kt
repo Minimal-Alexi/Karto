@@ -130,6 +130,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
             } as MutableList<Place>
+            _placeTypeSelection.value =
+                routeWithStops.route.category
+                    ?.let { name -> TypesOfPlaces.values().find { it.name == name } }
+                    ?: TypesOfPlaces.RESTAURANTS
             _userLocation.value = LatLng(
                 routeWithStops.route.startingLatitude,
                 routeWithStops.route.startingLongitude
@@ -413,7 +417,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 title = routeTitle.value.ifBlank { "No name route" },
                 savedAt  = System.currentTimeMillis(),
                 startingLatitude = userLocation.value!!.latitude,
-                startingLongitude = userLocation.value!!.longitude
+                startingLongitude = userLocation.value!!.longitude,
+                category = placeTypeSelector.value.name
             )
             val stops = routeStops.value.mapIndexed { index, stop ->
                 TemplateStopEntity(
@@ -439,7 +444,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 title = routeTitle.value.ifBlank { "No name route" },
                 savedAt = System.currentTimeMillis(),
                 startingLatitude = userLocation.value!!.latitude,
-                startingLongitude = userLocation.value!!.longitude
+                startingLongitude = userLocation.value!!.longitude,
+                category = placeTypeSelector.value.name
             )
 
             val stops = routeStops.value.mapIndexed { index, stop ->

@@ -66,6 +66,15 @@ fun HistoryRouteCard(
                         ).format(java.util.Date(route.startedAt))
                     }", style = MaterialTheme.typography.bodyMedium
                 )
+                if (route.completedAt != null) {
+                    Text(
+                        text = "Completed ${
+                            java.text.SimpleDateFormat(
+                                "dd MMM yyyy, HH:mm", java.util.Locale.getDefault()
+                            ).format(java.util.Date(route.completedAt))
+                        }", style = MaterialTheme.typography.bodyMedium
+                    )
+                }
                 Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
             }
             Spacer(modifier = Modifier.width(8.dp))

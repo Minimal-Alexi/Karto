@@ -55,5 +55,8 @@ data class TemplateWithStopCount(
     val id: Int,
     val title: String,
     val savedAt: Long,
+    val startingLatitude: Double,
+    val startingLongitude: Double,
+    val category: String?,
     val stopsCount: Int
 )
