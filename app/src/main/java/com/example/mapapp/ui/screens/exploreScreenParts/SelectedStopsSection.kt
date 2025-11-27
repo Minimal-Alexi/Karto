@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens.exploreScreenParts
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +33,11 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
+import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
+import androidx.compose.runtime.collectAsState
+import com.example.mapapp.ui.components.route.StartingLocationCard
 
 @Composable
 fun SelectedStopsSection(
@@ -58,7 +66,6 @@ fun SelectedStopsSection(
             }
         ) { Text("Calculate route") }
 
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -67,27 +74,57 @@ fun SelectedStopsSection(
                 )
                 .padding(16.dp),
         ) {
-            ReorderableColumn(
-                items = selectedRouteStops,
-                onMove = { from, to -> selectedRouteStops.move(from, to) },
-            ) { item, index ->
-                SelectedStopItem(
-                    time = "12:05",
-                    locationName = item.displayName.text,
-                    distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
-                    duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
-                    placesId = item.id,
-                    index = index,
-                    navigateToLocationScreen = navigateToLocationScreen,
-                    onStayTimeChange = { selectedTime ->
-                        // handle the selected stay time
-                        println("Stay time selected: $selectedTime")
-                    },
-                    deleteOnClick = { deleteOnClick(item) }
+            Column {
+                StartingLocationCard(
+                    exploreViewModel.customLocationText
                 )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    selectedRouteStops.forEachIndexed { index, place ->
+                        SelectedStopItem(
+                            index = index,
+                            time = "12:05",
+                            locationName = place.displayName.text,
+                            distance = if (place.travelDistance == null) "N/A" else place.travelDistance + "m",
+                            duration = if (place.travelDuration == null) "N/A" else place.travelDuration + "",
+                            placesId = place.id,
+                            navigateToLocationScreen = navigateToLocationScreen,
+                            onStayTimeChange = { selectedTime ->
+                                // handle the selected stay time
+                                println("Stay time selected: $selectedTime")
+                            },
+                            deleteOnClick = { deleteOnClick(place) },
+                            isFirst = index == 0,
+                            isLast = index == selectedRouteStops.lastIndex,
+                            onMoveUp = { routeViewModel.moveStopUp(index) },
+                            onMoveDown = { routeViewModel.moveStopDown(index) }
+                        )
+                    }
+                }
+                /*
+                ReorderableColumn(
+                    items = selectedRouteStops,
+                    onMove = { from, to -> selectedRouteStops.move(from, to) },
+                ) { item, index ->
+                    SelectedStopItem(
+                        time = "12:05",
+                        locationName = item.displayName.text,
+                        distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
+                        duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
+                        placesId = item.id,
+                        index = index,
+                        navigateToLocationScreen = navigateToLocationScreen,
+                        onStayTimeChange = { selectedTime ->
+                            // handle the selected stay time
+                            println("Stay time selected: $selectedTime")
+                        },
+                        deleteOnClick = { deleteOnClick(item) }
+                    )
+                }
+                 */
             }
-
-
         }
     }
 }
@@ -102,10 +139,10 @@ fun <T> ReorderableColumn(
     items: List<T>,
     onMove: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
-    itemContent: @Composable (T, Int) -> Unit
+    itemContent: @Composable (T, Int) -> Unit,
 ) {
     var draggingIndex by remember { mutableStateOf<Int?>(null) }
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
     val itemHeights = remember { mutableStateMapOf<Int, Int>() }
 
     Box(modifier) {
@@ -143,8 +180,10 @@ fun <T> ReorderableColumn(
                                     val targetIndex = when {
                                         dragOffset > height / 2 && index < items.lastIndex ->
                                             index + 1
+
                                         dragOffset < -height / 2 && index > 0 ->
                                             index - 1
+
                                         else -> null
                                     }
 

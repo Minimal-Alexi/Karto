@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.ui.components.buttons.DeleteIconButton
 
@@ -47,7 +50,11 @@ fun SelectedStopItem(
     placesId: String,
     navigateToLocationScreen: (String) -> Unit,
     onStayTimeChange: (String) -> Unit,
-    deleteOnClick: () -> Unit
+    deleteOnClick: () -> Unit,
+    isFirst: Boolean = false, // New parameter to disable Up button
+    isLast: Boolean = false,  // New parameter to disable Down button
+    onMoveUp: () -> Unit,     // New callback
+    onMoveDown: () -> Unit,   // New callback
 ) {
     var expanded by remember { mutableStateOf(false) }
     val stayTimeOptions: List<String> = listOf("15 min", "30 min", "45 min", "1 h")
@@ -90,7 +97,36 @@ fun SelectedStopItem(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+
+                // REORDER BUTTONS COLUMN
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(
+                        onClick = onMoveUp,
+                        enabled = !isFirst,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "Move Up"
+                        )
+                    }
+                    IconButton(
+                        onClick = onMoveDown,
+                        enabled = !isLast,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Move Down"
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -173,5 +209,55 @@ fun SelectedStopItem(
 
         }
         Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFF5F5F5)
+@Composable
+fun SelectedStopItemPreview() {
+    MaterialTheme {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            // State 1: Normal
+            SelectedStopItem(
+                index = 0,
+                time = "12:00 PM",
+                locationName = "Central Park",
+                distance = "2.5 km",
+                duration = "15 min",
+                closingInfo = null,
+                placesId = "place_1",
+                navigateToLocationScreen = {},
+                onStayTimeChange = {},
+                deleteOnClick = {},
+                isFirst = true,
+                isLast = false,
+                onMoveUp = {},
+                onMoveDown = {},
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // State 2: With Closing Info and Longer Text
+            SelectedStopItem(
+                index = 1,
+                time = "02:30 PM",
+                locationName = "The National Museum of Natural History",
+                distance = "12 km",
+                duration = "45 min",
+                closingInfo = "Closes in 30 mins",
+                placesId = "place_2",
+                navigateToLocationScreen = {},
+                onStayTimeChange = {},
+                deleteOnClick = {},
+                isFirst = false,
+                isLast = true,
+                onMoveUp = {},
+                onMoveDown = {},
+            )
+        }
     }
 }

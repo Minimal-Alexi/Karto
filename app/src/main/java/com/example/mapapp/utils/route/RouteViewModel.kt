@@ -2,6 +2,7 @@ package com.example.mapapp.utils.route
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.model.LatLngLiteral
@@ -29,7 +30,6 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
     private val _travelMode = ExploreViewModelParameterRepository._travelMode
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
 
-    // TODO: duplicated parameters, highly possible to case bugs
     private val _routeStopsInfo = MutableStateFlow<List<Leg>>(listOf())
 
     suspend fun fetchRoute(
@@ -60,10 +60,21 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             _routeStopsInfo.value = response.routes?.firstOrNull()?.legs?.dropLast(1) ?: listOf()
 
             // Update the distance and duration of each route stop
+            val updatedStops = _routeStops.value.toMutableList()
             for (i in _routeStopsInfo.value.indices) {
-                _routeStops.value[i].travelDistance = _routeStopsInfo.value[i].distanceMeters.toString()
-                _routeStops.value[i].travelDuration = _routeStopsInfo.value[i].duration.toString()
+                // Check bounds to prevent crashes if API returns different leg count
+                if (i < updatedStops.size) {
+                    val currentItem = updatedStops[i]
+                    val updatedItem = currentItem.copy(
+                        travelDistance = _routeStopsInfo.value[i].distanceMeters.toString(),
+                        travelDuration = _routeStopsInfo.value[i].duration.toString()
+                    )
+                    updatedStops[i] = updatedItem
+                }
             }
+            _routeStops.value = updatedStops // Emits the new list to the UI
+
+            Log.d("AAA", "fetched route info" + _routeStops.value)
 
             val polyline = response.routes?.firstOrNull()?.polyline?.encodedPolyline
             _routePolyline.value = polyline
@@ -85,7 +96,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    fun getWayPoints(): List<WayPoint> {
+    suspend fun getWayPoints(): List<WayPoint> {
         val waypoints = mutableListOf<WayPoint>()
         for (place in _routeStops.value) {
             waypoints.add(
@@ -154,10 +165,10 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    private val _generatedRoute = MutableStateFlow<TravelRoute?>(null)
+    private var _generatedRoute = MutableStateFlow<TravelRoute?>(null)
     val generatedRoute: StateFlow<TravelRoute?> = _generatedRoute
 
-    fun getTravelCostMatrix(routeMatrixResponse: MutableStateFlow<RouteMatrixResponse?>) {
+    suspend fun getTravelCostMatrix(routeMatrixResponse: MutableStateFlow<RouteMatrixResponse?>) {
         val index = 1 + _routeStops.value.size
 
         Log.d("AAA", "Matrix: " + _routeStops.value)
@@ -236,6 +247,8 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
 
                 _routePolyline.value = ""
             } else {
+                Log.d("AAA", "Matrix: " + _routeStops.value)
+
                 // Get polyline
                 val origin: RouteLatLng =
                     _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
@@ -258,6 +271,32 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    // function to move route stop up and down in list
+    fun moveStopUp(index: Int) {
+        val currentList = _routeStops.value.toMutableList()
+        if (index > 0 && index < currentList.size) {
+            val temp = currentList[index]
+            currentList[index] = currentList[index - 1]
+            currentList[index - 1] = temp
+
+            _routeStops.value = currentList
+            runWithoutSorting()
+        }
+    }
+
+    fun moveStopDown(index: Int) {
+        val currentList = _routeStops.value.toMutableList()
+        if (index >= 0 && index < currentList.size - 1) {
+            val temp = currentList[index]
+            currentList[index] = currentList[index + 1]
+            currentList[index + 1] = temp
+
+            _routeStops.value = currentList
+            runWithoutSorting()
+        }
+    }
+
 }
 
 

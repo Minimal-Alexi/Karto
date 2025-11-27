@@ -1,7 +1,8 @@
 package com.example.mapapp.ui.screens
 
+import android.R
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -22,23 +21,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
+import com.google.android.gms.maps.model.StrokeStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
-import com.example.mapapp.ui.components.MapPlaceInfoCard
+import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.MapRouteStopInfoCard
-import com.example.mapapp.ui.components.SelectedStopItem
+import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
+import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
@@ -48,7 +46,9 @@ import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.CustomCap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
@@ -101,7 +101,7 @@ fun ExploreScreen(
                 exploreViewModel::changeTravelMode
             )
         }
-        item { MapWrapper(exploreViewModel, mapInteraction) }
+        item { MapWrapper(exploreViewModel, mapInteraction) { ExploreScreenMap(exploreViewModel) } }
 
         item {
             SelectedStopsSection(
@@ -116,7 +116,8 @@ fun ExploreScreen(
         item {
             PrimaryButton(
                 text = "Start This Route",
-                backgroundColor = MaterialTheme.colorScheme.secondary
+                backgroundColor = MaterialTheme.colorScheme.secondary,
+                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
             ) {
                 exploreViewModel.startRoute()
                 navigateToScreen(ROUTE_SCREEN_ROUTE)
@@ -125,11 +126,12 @@ fun ExploreScreen(
         item {
             PrimaryButton(
                 text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
-                backgroundColor = MaterialTheme.colorScheme.primary
+                backgroundColor = MaterialTheme.colorScheme.primary,
+                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
             ) {
                 if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
                 else
-                exploreViewModel.saveRoute()
+                    exploreViewModel.saveRoute()
             }
         }
         item {
@@ -144,41 +146,15 @@ fun ExploreScreen(
     }
 }
 
-@Composable
-fun MapWrapper(exploreViewModel: ExploreViewModel, mapInteraction: MutableState<Boolean>) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp) // fixed height is important
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        // wait for the first down
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        mapInteraction.value = true
-                        // keep reading pointer events until all pointers are up
-                        do {
-                            val event = awaitPointerEvent()
-                            // optional: you can examine event.changes to consume if needed
-                        } while (event.changes.any { it.pressed })
-
-                        mapInteraction.value = false
-                    }
-                }
-            }) {
-        MapScreen(exploreViewModel)
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(exploreViewModel: ExploreViewModel) {
+fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
     /*
     Selected place info card handler
     */
     val sheetState = rememberModalBottomSheetState()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
-    var selectedPlaceIsRouteStop by remember {mutableStateOf<Boolean>(false)}
+    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }
     /*
     Map Logic Values
     */
@@ -231,14 +207,14 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                             ),
                             tag = place,
                             onClick = {
-                                selectedPlace = if(place == selectedPlace) null
+                                selectedPlace = if (place == selectedPlace) null
                                 else {
                                     selectedPlaceIsRouteStop = false
                                     place
                                 }
                                 true
                             }
-                            )
+                        )
                     }
                 }
             }
@@ -249,38 +225,56 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                     tag = place,
                     onClick = {
-                        selectedPlace = if(place == selectedPlace) null
+                        selectedPlace = if (place == selectedPlace) null
                         else {
                             selectedPlaceIsRouteStop = true
                             place
                         }
                         true
                     }
-                    )
+                )
             }
 
             if (polyline.value != null) {
                 val points = PolyUtil.decode(polyline.value)
                 Polyline(
                     points = points,
-                    color = MaterialTheme.colorScheme.primary,
-                    width = 10f
+                    width = 10f,
+                    geodesic = true, // Follows the curvature of the earth for better directionality
+                    // Add a CustomCap to create an arrow at the end of the line
+                    endCap = CustomCap(
+                        BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
+                        // Note: Replace 'android.R.drawable.arrow_up_float' with your own
+                        // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
+                    ),
+                    spans = listOf(
+                        StyleSpan(
+                            StrokeStyle.gradientBuilder(
+                                MaterialTheme.colorScheme.primary.hashCode(),
+                                MaterialTheme.colorScheme.secondary.hashCode()
+                            ).build(),
+                            1.0 // Apply to 100% of the line
+                        )
+                    ),
+
                 )
             }
         }
     }
-    if(selectedPlace != null){
+    if (selectedPlace != null) {
         ModalBottomSheet(
             onDismissRequest = { selectedPlace = null },
             sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
-                if(selectedPlaceIsRouteStop) MapRouteStopInfoCard(selectedPlace!!,
+                if (selectedPlaceIsRouteStop) MapRouteStopInfoCard(
+                    selectedPlace!!,
                     {
                         exploreViewModel.removeRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
-                else MapPlaceInfoCard(selectedPlace!!,
+                else MapPlaceInfoCard(
+                    selectedPlace!!,
                     {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null
