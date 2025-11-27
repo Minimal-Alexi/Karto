@@ -2,8 +2,8 @@ package com.example.mapapp.data.database.user
 
 import kotlinx.coroutines.flow.Flow
 
-class UserRepository(private val dao : UserDao) {
-    fun getUser() : Flow<UserEntity?> {
+class UserRepository(private val dao: UserDao) {
+    fun getUser(): Flow<UserEntity?> {
         return dao.getUser()
     }
 

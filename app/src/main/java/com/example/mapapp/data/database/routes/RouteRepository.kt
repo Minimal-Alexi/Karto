@@ -2,15 +2,17 @@ package com.example.mapapp.data.database.routes
 
 import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
+import com.example.mapapp.data.database.user.UserDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
 
 class RouteRepository(
     private val routeDao: RouteDao,
-    private val routeStopDao: RouteStopDao
+    private val routeStopDao: RouteStopDao,
+    private val userDao: UserDao
 ) {
-    fun getSavedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getRoutesByStatus(RouteStatus.SAVED)
-
-    fun getCompletedRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getRoutesByStatus(RouteStatus.COMPLETED)
+    fun getAllRoutes(): Flow<List<RouteWithStopCount>> = routeDao.getAllRoutes()
 
     suspend fun getRouteWithStops(routeId: Int): RouteWithStops {
         val route = routeDao.getRouteById(routeId)
@@ -20,39 +22,27 @@ class RouteRepository(
 
     fun getCurrentRoute(): Flow<RouteEntity?> = routeDao.getCurrentRoute()
 
-    fun getCurrentRouteStops(): Flow<List<RouteStopEntity>> {
-        return routeStopDao.getStopsForCurrentRoute()
-    }
-    suspend fun updateRouteStop(routeStopEntity: RouteStopEntity){
-        routeStopDao.updateRouteStop(routeStopEntity)
-    }
+    fun getCurrentRouteStops(): Flow<List<RouteStopEntity>?> =
+        routeDao.getCurrentRoute().map { route ->
+            if (route == null) null
+            else routeStopDao.getStopsForRoute(route.id)
+        }
 
-    suspend fun completeRoute(routeId: Int) {
-        routeDao.updateRouteStatus(routeId, RouteStatus.COMPLETED)
+    suspend fun completeRoute(routeId: Int, timestamp: Long = System.currentTimeMillis()) {
+        routeDao.completeRoute(routeId, timestamp)
     }
 
     suspend fun startRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
-        // ensure only one CURRENT route can exist
         // TODO: put this behavior behind a disclaimer window
-        routeDao.deleteCurrent()
-
-        val id = routeDao.insertRoute(route.copy(status = RouteStatus.CURRENT)).toInt()
+        val id = routeDao.insertRoute(route.copy()).toInt()
 
         stops.forEach { stop ->
             routeStopDao.insert(
                 stop.copy(routeId = id)
             )
         }
-    }
 
-    suspend fun saveRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
-        val id = routeDao.insertRoute(route.copy(status = RouteStatus.SAVED)).toInt()
-
-        stops.forEach { stop ->
-            routeStopDao.insert(
-                stop.copy(routeId = id)
-            )
-        }
+        userDao.setCurrentRoute(id)
     }
 
     suspend fun deleteRouteById(routeId: Int) {
@@ -60,12 +50,8 @@ class RouteRepository(
         routeStopDao.deleteStopsByRoute(routeId)
     }
 
-    suspend fun updateRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
-        routeDao.updateRoute(route)
-        routeStopDao.deleteStopsByRoute(route.id)
-        stops.forEach { stop ->
-            routeStopDao.insert(stop.copy(routeId = route.id))
-        }
+    suspend fun updateRouteStop(routeStopEntity: RouteStopEntity){
+        routeStopDao.updateRouteStop(routeStopEntity)
     }
 }
 
@@ -77,6 +63,7 @@ data class RouteWithStops(
 data class RouteWithStopCount(
     val id: Int,
     val title: String,
-    val savedAt: Long,
-    val stopsCount: Int
+    val startedAt: Long,
+    val completedAt: Long?,
+    val stopsCount: Int?
 )
