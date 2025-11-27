@@ -78,6 +78,32 @@ fun SelectedStopsSection(
                 StartingLocationCard(
                     exploreViewModel.customLocationText
                 )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    selectedRouteStops.forEachIndexed { index, place ->
+                        SelectedStopItem(
+                            index = index,
+                            time = "12:05",
+                            locationName = place.displayName.text,
+                            distance = if (place.travelDistance == null) "N/A" else place.travelDistance + "m",
+                            duration = if (place.travelDuration == null) "N/A" else place.travelDuration + "",
+                            placesId = place.id,
+                            navigateToLocationScreen = navigateToLocationScreen,
+                            onStayTimeChange = { selectedTime ->
+                                // handle the selected stay time
+                                println("Stay time selected: $selectedTime")
+                            },
+                            deleteOnClick = { deleteOnClick(place) },
+                            isFirst = index == 0,
+                            isLast = index == selectedRouteStops.lastIndex,
+                            onMoveUp = { routeViewModel.moveStopUp(index) },
+                            onMoveDown = { routeViewModel.moveStopDown(index) }
+                        )
+                    }
+                }
+                /*
                 ReorderableColumn(
                     items = selectedRouteStops,
                     onMove = { from, to -> selectedRouteStops.move(from, to) },
@@ -97,6 +123,7 @@ fun SelectedStopsSection(
                         deleteOnClick = { deleteOnClick(item) }
                     )
                 }
+                 */
             }
         }
     }

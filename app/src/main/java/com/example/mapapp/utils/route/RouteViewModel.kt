@@ -271,6 +271,32 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    // function to move route stop up and down in list
+    fun moveStopUp(index: Int) {
+        val currentList = _routeStops.value.toMutableList()
+        if (index > 0 && index < currentList.size) {
+            val temp = currentList[index]
+            currentList[index] = currentList[index - 1]
+            currentList[index - 1] = temp
+
+            _routeStops.value = currentList
+            runWithoutSorting()
+        }
+    }
+
+    fun moveStopDown(index: Int) {
+        val currentList = _routeStops.value.toMutableList()
+        if (index >= 0 && index < currentList.size - 1) {
+            val temp = currentList[index]
+            currentList[index] = currentList[index + 1]
+            currentList[index + 1] = temp
+
+            _routeStops.value = currentList
+            runWithoutSorting()
+        }
+    }
+
 }
 
 
