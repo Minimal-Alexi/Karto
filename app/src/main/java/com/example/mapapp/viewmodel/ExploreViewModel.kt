@@ -120,7 +120,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadTemplate(routeId: Int) {
         viewModelScope.launch {
-            val routeWithStops = routeRepository.getRouteWithStops(routeId)
+            val routeWithStops = templateRepository.getTemplateWithStops(routeId)
             routeTitle.value = routeWithStops.route.title
             _routeStops.value = routeWithStops.stops.map { stop ->
                 Place(
@@ -432,7 +432,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun updateSavedRoute(routeId: Int) {
-
         viewModelScope.launch {
             val existingRoute = templateRepository.getTemplateWithStops(routeId).route
 
@@ -495,7 +494,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _nearbyPlaces.value = emptyList()
         _routePolyline.value = null
         _userLocation.value = null
-        customLocation.value = null
+        _customLocation.value = null
+        _customLocationText.value = ""
         _routeInfo.value = null
     }
 }
