@@ -1,6 +1,5 @@
 package com.example.mapapp.viewmodel
 
-import android.R
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.database.template_stops.TemplateStopEntity
+import com.example.mapapp.data.database.templates.TemplateEntity
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Circle
@@ -48,6 +49,7 @@ object ExploreViewModelParameterRepository {
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
+    private val templateRepository = (application as KartoApplication).templateRepository
     var routeTitle = mutableStateOf("Default Title")
 
     /*
@@ -106,7 +108,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun loadSavedRoute(routeId: Int) {
+    fun loadTemplate(routeId: Int) {
         viewModelScope.launch {
             val routeWithStops = routeRepository.getRouteWithStops(routeId)
             routeTitle.value = routeWithStops.route.title
@@ -376,13 +378,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
     fun saveRoute() {
         viewModelScope.launch {
-            val route = RouteEntity(
+            val template = TemplateEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp  = System.currentTimeMillis()
+                savedAt  = System.currentTimeMillis()
             )
             val stops = routeStops.value.mapIndexed { index, stop ->
-                RouteStopEntity(
-                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                TemplateStopEntity(
+                    templateId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
                     placesId = stop.id,
                     name = stop.displayName.text,
                     latitude = stop.location.latitude,
@@ -393,22 +395,22 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 )
             }
 
-            routeRepository.saveRoute(route, stops)
+            templateRepository.saveTemplate(template, stops)
         }
     }
 
     fun updateSavedRoute(routeId: Int) {
         viewModelScope.launch {
-            val existingRoute = routeRepository.getRouteWithStops(routeId).route
+            val existingRoute = templateRepository.getTemplateWithStops(routeId).route
 
-            val updatedRoute = existingRoute.copy(
+            val updatedTemplate = existingRoute.copy(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp = System.currentTimeMillis()
+                savedAt = System.currentTimeMillis()
             )
 
             val stops = routeStops.value.mapIndexed { index, stop ->
-                RouteStopEntity(
-                    routeId = routeId,
+                TemplateStopEntity(
+                    templateId = routeId,
                     placesId = stop.id,
                     name = stop.displayName.text,
                     latitude = stop.location.latitude,
@@ -419,7 +421,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 )
             }
 
-            routeRepository.updateRoute(updatedRoute, stops)
+            templateRepository.updateTemplate(updatedTemplate, stops)
         }
     }
 
@@ -427,7 +429,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val route = RouteEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp  = System.currentTimeMillis()
+                startedAt = System.currentTimeMillis()
             )
 
             val stops = routeStops.value.mapIndexed { index, stop ->

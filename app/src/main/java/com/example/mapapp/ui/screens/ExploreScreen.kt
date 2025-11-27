@@ -68,7 +68,7 @@ fun ExploreScreen(
 
     LaunchedEffect(openedRouteId) {
         if (openedRouteId != null) {
-            exploreViewModel.loadSavedRoute(openedRouteId)
+            exploreViewModel.loadTemplate(openedRouteId)
         }
     }
 
@@ -195,12 +195,12 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             // Default to Helsinki
         )
     }
-
-    LaunchedEffect(userLocation.value){
+    var mapReady by remember { mutableStateOf(false) }
+    LaunchedEffect(userLocation.value, mapReady) {
         val loc = userLocation.value
-        if(loc != null){
+        if (loc != null && mapReady) {
             cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(loc,15f)
+                CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
     }
@@ -211,7 +211,7 @@ fun MapScreen(exploreViewModel: ExploreViewModel) {
             .height(400.dp),
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState, onMapLoaded = { mapReady = true }) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),

@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class RouteEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "status") val status: RouteStatus = RouteStatus.DEFAULT,
-    @ColumnInfo(name = "timestamp") val timestamp : Long
+    @ColumnInfo(name = "started_at") val startedAt: Long,
+    @ColumnInfo(name = "completed_at") val completedAt: Long? = null
 )

@@ -1,6 +1,5 @@
 package com.example.mapapp.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,11 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.example.mapapp.R
-import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.data.database.routes.RouteWithStopCount
-import com.example.mapapp.data.database.routes.RouteWithStops
 import com.example.mapapp.ui.components.buttons.DeleteIconButton
 
 @Composable
@@ -64,10 +60,10 @@ fun HistoryRouteCard(
                 )
                 Spacer(modifier = Modifier.height(0.dp))
                 Text(
-                    text = "Saved ${
+                    text = "Started ${
                         java.text.SimpleDateFormat(
                             "dd MMM yyyy, HH:mm", java.util.Locale.getDefault()
-                        ).format(java.util.Date(route.savedAt))
+                        ).format(java.util.Date(route.startedAt))
                     }", style = MaterialTheme.typography.bodyMedium
                 )
                 Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)

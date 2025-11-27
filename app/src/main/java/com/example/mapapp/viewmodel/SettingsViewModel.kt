@@ -17,7 +17,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     private val userRepository = (app as KartoApplication).userRepository
     private val routeRepository = (app as KartoApplication).routeRepository
 
-    val completedRoutes: StateFlow<List<RouteWithStopCount>> = routeRepository.getCompletedRoutes()
+    val completedRoutes: StateFlow<List<RouteWithStopCount>> = routeRepository.getAllRoutes()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
 
