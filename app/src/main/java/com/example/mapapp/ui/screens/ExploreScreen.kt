@@ -1,18 +1,20 @@
 package com.example.mapapp.ui.screens
 
 import android.R
-import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -21,26 +23,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.model.StrokeStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
-import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
-import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
-import com.example.mapapp.ui.components.route.TravelModeSelector
-import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -48,6 +49,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.CustomCap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
@@ -55,6 +57,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import java.lang.reflect.Array.set
 
 @Composable
 fun ExploreScreen(
@@ -65,126 +68,132 @@ fun ExploreScreen(
     openedRouteId: Int? = null,
     onResetRoute: () -> Unit
 ) {
-
     LaunchedEffect(openedRouteId) {
         if (openedRouteId != null) {
             exploreViewModel.loadSavedRoute(openedRouteId)
         }
     }
 
-    val mapInteraction = remember { mutableStateOf(false) }
+    val _top = remember { mutableStateOf(true) }
+    val _bottom = remember { mutableStateOf(false) }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        userScrollEnabled = !mapInteraction.value
-    ) {
-        item {
-            OutlinedTextField(
-                value = exploreViewModel.routeTitle.value,
-                onValueChange = { exploreViewModel.routeTitle.value = it },
-                label = { Text("Route Title") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
+    val topShowing = remember {
+        object : MutableState<Boolean> by _top {
+            override var value: Boolean
+                get() = _top.value
+                set(newValue) {
+                    if (newValue) _bottom.value = false
+                    _top.value = newValue
+                }
         }
-
-        item {
-            NearbyPlaceSelector(exploreViewModel)
-        }
-        item {
-            TravelModeSelector(
-                exploreViewModel.travelMode.collectAsState().value,
-                exploreViewModel::changeTravelMode
-            )
-        }
-        item { MapWrapper(exploreViewModel, mapInteraction) { ExploreScreenMap(exploreViewModel) } }
-
-        item {
-            SelectedStopsSection(
-                navigateToLocationScreen,
-                exploreViewModel::removeRouteStop,
-                exploreViewModel.routeStops.collectAsState().value,
-                exploreViewModel = exploreViewModel,
-                routeViewModel = routeViewModel
-            )
-        }
-        item { RouteSummarySection(exploreViewModel) }
-        item {
-            PrimaryButton(
-                text = "Start This Route",
-                backgroundColor = MaterialTheme.colorScheme.secondary,
-                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-            ) {
-                exploreViewModel.startRoute()
-                navigateToScreen(ROUTE_SCREEN_ROUTE)
-            }
-        }
-        item {
-            PrimaryButton(
-                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-            ) {
-                if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
-                else
-                    exploreViewModel.saveRoute()
-            }
-        }
-        item {
-            PrimaryButton(
-                text = "Reset This Route", backgroundColor = MaterialTheme.colorScheme.error
-            ) {
-                exploreViewModel.resetRoute()
-                onResetRoute()
-            }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
+
+    val bottomShowing = remember {
+        object : MutableState<Boolean> by _bottom {
+            override var value: Boolean
+                get() = _bottom.value
+                set(newValue) {
+                    if (newValue) _top.value = false
+                    _bottom.value = newValue
+                }
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        TopMenu(topShowing)
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
+            ExploreScreenMap(exploreViewModel, topShowing, bottomShowing)
+        }
+
+        BottomMenu(bottomShowing)
+    }
+
+/*    Box {
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .zIndex(1f)
+        ) {
+            TopMenu(topShowing)
+        }
+
+        ExploreScreenMap(exploreViewModel, topShowing, bottomShowing)
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(1f)
+        ) {
+            BottomMenu(bottomShowing)
+        }
+    }*/
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
-    /*
+fun ExploreScreenMap(
+    exploreViewModel: ExploreViewModel,
+    topExpanded: MutableState<Boolean>,
+    bottomExpanded: MutableState<Boolean>
+) {/*
     Selected place info card handler
     */
     val sheetState = rememberModalBottomSheetState()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
-    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }
-    /*
+    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }/*
     Map Logic Values
     */
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val polyline = exploreViewModel.routePolyline.collectAsState()
-    /*
+    val polyline = exploreViewModel.routePolyline.collectAsState()/*
     Camera position value handling
     */
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             LatLng(60.1699, 24.9384), 12f
-            // Default to Helsinki
         )
     }
 
-    LaunchedEffect(userLocation.value) {
-        val loc = userLocation.value
-        if (loc != null) {
-            cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
-            )
+    LaunchedEffect(userLocation.value, nearbyLocations.value, routeStops.value) {
+        val user = userLocation.value
+        val nearby = nearbyLocations.value ?: emptyList()
+        val stops = routeStops.value
+
+        if (user != null) {
+            val builder = LatLngBounds.builder()
+
+            builder.include(user)
+
+            nearby.forEach { builder.include(it.location) }
+            stops.forEach { builder.include(it.location) }
+
+            try {
+                if (nearby.isNotEmpty() || stops.isNotEmpty()) {
+                    val bounds = builder.build()
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngBounds(bounds, 150)
+                    )
+                } else {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngZoom(user, 15f)
+                    )
+                }
+            } catch (e: Exception) {
+                // invalid bounds cases
+            }
         }
     }
+
     // GoogleMap Compose
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp),
+        modifier = Modifier.fillMaxSize()
     ) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState
@@ -214,8 +223,7 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
                                     place
                                 }
                                 true
-                            }
-                        )
+                            })
                     }
                 }
             }
@@ -232,8 +240,7 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
                             place
                         }
                         true
-                    }
-                )
+                    })
             }
 
             if (polyline.value != null) {
@@ -253,32 +260,29 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
                             StrokeStyle.gradientBuilder(
                                 MaterialTheme.colorScheme.primary.hashCode(),
                                 MaterialTheme.colorScheme.secondary.hashCode()
-                            ).build(),
-                            1.0 // Apply to 100% of the line
+                            ).build(), 1.0 // Apply to 100% of the line
                         )
                     ),
 
-                )
+                    )
             }
         }
     }
     if (selectedPlace != null) {
         ModalBottomSheet(
-            onDismissRequest = { selectedPlace = null },
-            sheetState = sheetState
+            onDismissRequest = { selectedPlace = null }, sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
                 if (selectedPlaceIsRouteStop) MapRouteStopInfoCard(
-                    selectedPlace!!,
-                    {
+                    selectedPlace!!, {
                         exploreViewModel.removeRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
                 else MapPlaceInfoCard(
-                    selectedPlace!!,
-                    {
+                    selectedPlace!!, {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null
+                        bottomExpanded.value = true
                     })
             }
         }
@@ -286,38 +290,92 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
 }
 
 @Composable
-fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
-    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+fun TopMenu(expanded: MutableState<Boolean>) {
+    val exploreViewModel: ExploreViewModel = viewModel()
 
-    Column(
-        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.surface)
+            .padding(6.dp, 12.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {}
     ) {
-        Text(
-            text = "Summary", style = MaterialTheme.typography.titleLarge
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+            EditableHeading(exploreViewModel.routeTitle)
+
+            if (expanded.value) {
+                NearbyPlaceSelector(expanded)
+            }
+
+            Button(
+                onClick = { expanded.value = !expanded.value }, modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = if (routeInfo != null) "$routeInfo" else "",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                if (expanded.value) {
+                    Text("close")
+                } else {
+                    Text("open")
+                }
             }
         }
     }
 }
 
 @Composable
-fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
+fun BottomMenu(expanded: MutableState<Boolean>) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.surface)
+            .padding(6.dp, 12.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {}
+    ) {
+        LazyColumn {
+            item {
+                Button(
+                    onClick = { expanded.value = !expanded.value },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (expanded.value) {
+                        Text("close")
+                    } else {
+                        Text("open")
+                    }
+                }
+            }
+
+            if (expanded.value) {
+                item {
+                    Text("thanks for expanding me")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EditableHeading(routeTitle: MutableState<String>) {
+    OutlinedTextField(
+        value = routeTitle.value,
+        onValueChange = { routeTitle.value = it },
+        label = { Text("Route Title") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    )
+}
+
+@Composable
+fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
+    val exploreViewModel: ExploreViewModel = viewModel()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -336,62 +394,10 @@ fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
 
         PrimaryButton(
             text = "Check nearby locations", backgroundColor = MaterialTheme.colorScheme.primary
-        ) { exploreViewModel.getNearbyPlaces() }
-    }
-}
-
-/*
-Moved some code to a separate file for readability
-
-@Composable
-fun SelectedStopsSection(
-    navigateToLocationScreen: (String) -> Unit,
-    deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
-    selectedRouteStops: List<com.example.mapapp.data.model.Place>,
-    routeViewModel: RouteViewModel,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "Selected Route Stops", style = MaterialTheme.typography.titleLarge
-        )
-        Button(
-            onClick = {
-                routeViewModel.runMatrixFlow()
-            }
-        ) { Text("Calculate route") }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                selectedRouteStops.forEachIndexed { index, place ->
-                    SelectedStopItem(
-                        index = index,
-                        time = "12:05",
-                        locationName = place.displayName.text,
-                        distance = "2.7 km",
-                        duration = "30 min",
-                        placesId = place.id,
-                        navigateToLocationScreen = navigateToLocationScreen,
-                        onStayTimeChange = { selectedTime ->
-                            // handle the selected stay time
-                            println("Stay time selected: $selectedTime")
-                        },
-                        deleteOnClick = { deleteOnClick(place) })
-                    HorizontalDivider(color = Color(0xFFDDDDDD))
-                }
-            }
+            exploreViewModel.getNearbyPlaces()
+            expanded.value = false
         }
     }
 }
 
- */
