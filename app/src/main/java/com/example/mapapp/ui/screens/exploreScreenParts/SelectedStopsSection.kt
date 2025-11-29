@@ -1,22 +1,20 @@
 package com.example.mapapp.ui.screens.exploreScreenParts
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +31,12 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
-import sh.calvin.reorderable.rememberReorderableLazyColumnState
-import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
-import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationCard
+import com.example.mapapp.utils.getTimeLabel
+import com.example.mapapp.utils.getDistanceLabel
 
 @Composable
 fun SelectedStopsSection(
@@ -48,19 +47,27 @@ fun SelectedStopsSection(
     routeViewModel: RouteViewModel,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Button(
-            onClick = {
-                routeViewModel.runMatrixFlow()
-            }
-        ) { Text("sort route for me") }
+        var checkedAutoSort by remember { mutableStateOf(true) }
 
-        Button(
-            onClick = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = checkedAutoSort,
+                onCheckedChange = { checkedAutoSort = it })
+            Text("Reorder route to be optimal")
+        }
+
+        PrimaryButton(
+            text = "Calculate Route",
+            backgroundColor = MaterialTheme.colorScheme.primary,
+        ) {
+            if (checkedAutoSort) {
+                routeViewModel.runMatrixFlow()
+            } else {
                 routeViewModel.runWithoutSorting()
             }
-        ) { Text("Calculate route") }
+        }
 
         Box(
             modifier = Modifier
@@ -83,8 +90,8 @@ fun SelectedStopsSection(
                             index = index,
                             time = "12:05",
                             locationName = place.displayName.text,
-                            distance = if (place.travelDistance == null) "N/A" else place.travelDistance + "m",
-                            duration = if (place.travelDuration == null) "N/A" else place.travelDuration + "",
+                            distance = getDistanceLabel(place.travelDistance),
+                            duration = getTimeLabel(place.travelDuration),
                             placesId = place.id,
                             navigateToLocationScreen = navigateToLocationScreen,
                             onStayTimeChange = { selectedTime ->
