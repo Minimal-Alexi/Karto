@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
-import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.data.database.routes.RouteWithStopCount
 
@@ -70,19 +69,21 @@ fun SavedRouteCard(
                 ) {
                     SecondaryButton(
                         text = "Open",
-                        backgroundColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        onOpen()
-                    }
+                        backgroundColor = MaterialTheme.colorScheme.primary,
+                        {
+                            onOpen()
+                        }
+                    )
 
                     Spacer(modifier = Modifier.width(12.dp))
 
                     SecondaryButton(
                         text = "Delete",
-                        backgroundColor = MaterialTheme.colorScheme.error
-                    ) {
-                        onDelete()
-                    }
+                        backgroundColor = MaterialTheme.colorScheme.error,
+                        {
+                            onDelete()
+                        }
+                    )
                 }
             }
         }
