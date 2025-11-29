@@ -7,8 +7,11 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -36,12 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
+import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
+import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -107,39 +112,25 @@ fun ExploreScreen(
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            ExploreScreenMap(exploreViewModel, topShowing, bottomShowing)
+            ExploreScreenMap(exploreViewModel)
         }
 
-        BottomMenu(bottomShowing)
+        BottomMenu(
+            expanded = bottomShowing,
+            navigateToLocationScreen = navigateToLocationScreen,
+            exploreViewModel = exploreViewModel,
+            routeViewModel = routeViewModel,
+            navigateToScreen = navigateToScreen,
+            openedRouteId = openedRouteId,
+            onResetRoute = onResetRoute
+        )
     }
-
-/*    Box {
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .zIndex(1f)
-        ) {
-            TopMenu(topShowing)
-        }
-
-        ExploreScreenMap(exploreViewModel, topShowing, bottomShowing)
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .zIndex(1f)
-        ) {
-            BottomMenu(bottomShowing)
-        }
-    }*/
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreenMap(
-    exploreViewModel: ExploreViewModel,
-    topExpanded: MutableState<Boolean>,
-    bottomExpanded: MutableState<Boolean>
+    exploreViewModel: ExploreViewModel
 ) {/*
     Selected place info card handler
     */
@@ -178,7 +169,7 @@ fun ExploreScreenMap(
                 if (nearby.isNotEmpty() || stops.isNotEmpty()) {
                     val bounds = builder.build()
                     cameraPositionState.animate(
-                        CameraUpdateFactory.newLatLngBounds(bounds, 150)
+                        CameraUpdateFactory.newLatLngBounds(bounds, 10)
                     )
                 } else {
                     cameraPositionState.animate(
@@ -202,8 +193,8 @@ fun ExploreScreenMap(
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                    title = "Your location",
-                    snippet = "Your current location"
+                    title = "Route Origin",
+                    snippet = "Your starting location"
                 )
             }
             if (nearbyLocations.value != null) {
@@ -282,7 +273,6 @@ fun ExploreScreenMap(
                     selectedPlace!!, {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null
-                        bottomExpanded.value = true
                     })
             }
         }
@@ -297,7 +287,7 @@ fun TopMenu(expanded: MutableState<Boolean>) {
         modifier = Modifier
             .fillMaxWidth()
             .background(color = MaterialTheme.colorScheme.surface)
-            .padding(6.dp, 12.dp)
+            .padding(12.dp, 14.dp)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
@@ -326,34 +316,91 @@ fun TopMenu(expanded: MutableState<Boolean>) {
 }
 
 @Composable
-fun BottomMenu(expanded: MutableState<Boolean>) {
+fun BottomMenu(
+    expanded: MutableState<Boolean>,
+    navigateToLocationScreen: (String) -> Unit,
+    exploreViewModel: ExploreViewModel = viewModel(),
+    routeViewModel: RouteViewModel = viewModel(),
+    navigateToScreen: (String) -> Unit,
+    openedRouteId: Int? = null,
+    onResetRoute: () -> Unit
+) {
+    val routeStopAmount = exploreViewModel.routeStops.collectAsState().value.size
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(max = 440.dp)
             .background(color = MaterialTheme.colorScheme.surface)
-            .padding(6.dp, 12.dp)
+            .padding(12.dp, 14.dp)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) {}
     ) {
-        LazyColumn {
-            item {
-                Button(
-                    onClick = { expanded.value = !expanded.value },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (expanded.value) {
-                        Text("close")
-                    } else {
-                        Text("open")
-                    }
+        Column {
+            Button(
+                onClick = { expanded.value = !expanded.value },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (expanded.value) {
+                    Text("close")
+                } else {
+                    Text("open")
                 }
             }
 
-            if (expanded.value) {
-                item {
-                    Text("thanks for expanding me")
+            Text(
+                text = "Selected Route Stops${if (routeStopAmount > 0) " (${routeStopAmount})" else ""}",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(0.dp, 12.dp)
+            )
+
+            LazyColumn {
+                if (expanded.value) {
+                    item {
+                        SelectedStopsSection(
+                            navigateToLocationScreen,
+                            exploreViewModel::removeRouteStop,
+                            exploreViewModel.routeStops.collectAsState().value,
+                            exploreViewModel = exploreViewModel,
+                            routeViewModel = routeViewModel
+                        )
+                    }
+                    item { RouteSummarySection(exploreViewModel) }
+                    item {
+                        PrimaryButton(
+                            text = "Start This Route",
+                            backgroundColor = MaterialTheme.colorScheme.secondary,
+                            enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
+                        ) {
+                            exploreViewModel.startRoute()
+                            navigateToScreen(ROUTE_SCREEN_ROUTE)
+                        }
+                    }
+                    item {
+                        PrimaryButton(
+                            text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
+                            backgroundColor = MaterialTheme.colorScheme.primary,
+                            enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
+                        ) {
+                            if (openedRouteId != null) exploreViewModel.updateSavedRoute(
+                                openedRouteId
+                            )
+                            else
+                                exploreViewModel.saveRoute()
+                        }
+                    }
+                    item {
+                        PrimaryButton(
+                            text = "Reset This Route",
+                            backgroundColor = MaterialTheme.colorScheme.error
+                        ) {
+                            exploreViewModel.resetRoute()
+                            onResetRoute()
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
             }
         }
@@ -397,6 +444,37 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
         ) {
             exploreViewModel.getNearbyPlaces()
             expanded.value = false
+        }
+    }
+}
+
+@Composable
+fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
+    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Summary", style = MaterialTheme.typography.titleLarge
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
+                )
+                .padding(16.dp),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = if (routeInfo != null) "$routeInfo" else "",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

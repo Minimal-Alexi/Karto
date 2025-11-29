@@ -50,10 +50,6 @@ fun SelectedStopsSection(
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "Selected Route Stops", style = MaterialTheme.typography.titleLarge
-        )
-
         Button(
             onClick = {
                 routeViewModel.runMatrixFlow()
