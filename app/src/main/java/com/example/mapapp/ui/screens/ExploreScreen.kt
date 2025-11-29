@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import com.google.android.gms.maps.model.StrokeStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -48,6 +49,8 @@ import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.ui.components.route.TravelModeSelector
 import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
+import com.example.mapapp.utils.getDistanceLabel
+import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -74,12 +77,6 @@ fun ExploreScreen(
     openedRouteId: Int? = null,
     onResetRoute: () -> Unit
 ) {
-    LaunchedEffect(openedRouteId) {
-        if (openedRouteId != null) {
-            exploreViewModel.loadSavedRoute(openedRouteId)
-        }
-    }
-
     val _top = remember { mutableStateOf(true) }
     val _bottom = remember { mutableStateOf(false) }
 
@@ -102,6 +99,13 @@ fun ExploreScreen(
                     if (newValue) _top.value = false
                     _bottom.value = newValue
                 }
+        }
+    }
+
+    LaunchedEffect(openedRouteId) {
+        if (openedRouteId != null) {
+            exploreViewModel.loadSavedRoute(openedRouteId)
+            bottomShowing.value = true
         }
     }
 
@@ -266,7 +270,7 @@ fun TopMenu(expanded: MutableState<Boolean>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(12.dp, 14.dp)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -311,7 +315,7 @@ fun BottomMenu(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = 440.dp)
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(12.dp, 14.dp)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -340,57 +344,61 @@ fun BottomMenu(
                 }
 
                 if (expanded.value) {
-                    item {
-                        TravelModeSelector(
-                            exploreViewModel.travelMode.collectAsState().value,
-                            exploreViewModel::changeTravelMode
-                        )
-                    }
-
-                    item {
-                        SelectedStopsSection(
-                            navigateToLocationScreen,
-                            exploreViewModel::removeRouteStop,
-                            exploreViewModel.routeStops.collectAsState().value,
-                            exploreViewModel = exploreViewModel,
-                            routeViewModel = routeViewModel
-                        )
-                    }
-                    item { RouteSummarySection(exploreViewModel) }
-                    item {
-                        PrimaryButton(
-                            text = "Start This Route",
-                            backgroundColor = MaterialTheme.colorScheme.secondary,
-                            enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-                        ) {
-                            exploreViewModel.startRoute()
-                            navigateToScreen(ROUTE_SCREEN_ROUTE)
-                        }
-                    }
-                    item {
-                        PrimaryButton(
-                            text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
-                            backgroundColor = MaterialTheme.colorScheme.primary,
-                            enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-                        ) {
-                            if (openedRouteId != null) exploreViewModel.updateSavedRoute(
-                                openedRouteId
+                    if (routeStopAmount > 0) {
+                        item {
+                            TravelModeSelector(
+                                exploreViewModel.travelMode.collectAsState().value,
+                                exploreViewModel::changeTravelMode
                             )
-                            else
-                                exploreViewModel.saveRoute()
                         }
-                    }
-                    item {
-                        PrimaryButton(
-                            text = "Reset This Route",
-                            backgroundColor = MaterialTheme.colorScheme.error
-                        ) {
-                            exploreViewModel.resetRoute()
-                            onResetRoute()
+
+                        item {
+                            SelectedStopsSection(
+                                navigateToLocationScreen,
+                                exploreViewModel::removeRouteStop,
+                                exploreViewModel.routeStops.collectAsState().value,
+                                exploreViewModel = exploreViewModel,
+                                routeViewModel = routeViewModel
+                            )
                         }
+                        item { RouteSummarySection(exploreViewModel) }
+                        item {
+                            PrimaryButton(
+                                text = "Start This Route",
+                                backgroundColor = MaterialTheme.colorScheme.secondary,
+                                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
+                            ) {
+                                exploreViewModel.startRoute()
+                                navigateToScreen(ROUTE_SCREEN_ROUTE)
+                            }
+                        }
+                        item {
+                            PrimaryButton(
+                                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
+                                backgroundColor = MaterialTheme.colorScheme.primary,
+                                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
+                            ) {
+                                if (openedRouteId != null) exploreViewModel.updateSavedRoute(
+                                    openedRouteId
+                                )
+                                else
+                                    exploreViewModel.saveRoute()
+                            }
+                        }
+                        item {
+                            PrimaryButton(
+                                text = "Reset This Route",
+                                backgroundColor = MaterialTheme.colorScheme.error
+                            ) {
+                                exploreViewModel.resetRoute()
+                                onResetRoute()
+                            }
+                        }
+                    } else {
+                        item { Text("No selected route stops - Add stops from the map!") }
                     }
-                    item { Spacer(modifier = Modifier.height(16.dp)) }
                 }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }
@@ -439,10 +447,16 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
 
 @Composable
 fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
-    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+    val routeTime by exploreViewModel.routeTime.collectAsState()
+    val routeDistance by exploreViewModel.routeDistance.collectAsState()
+
+    /** don't render an empty summary */
+    if (routeTime == null || routeDistance == null) {
+        return
+    }
 
     Column(
-        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = "Summary", style = MaterialTheme.typography.titleLarge
@@ -460,7 +474,15 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
                 modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = if (routeInfo != null) "$routeInfo" else "",
+                    text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = if (routeDistance != null) "Total Travel Distance: ${
+                        getDistanceLabel(
+                            routeDistance
+                        )
+                    }" else "",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
