@@ -106,27 +106,6 @@ fun SelectedStopsSection(
                         )
                     }
                 }
-                /*
-                ReorderableColumn(
-                    items = selectedRouteStops,
-                    onMove = { from, to -> selectedRouteStops.move(from, to) },
-                ) { item, index ->
-                    SelectedStopItem(
-                        time = "12:05",
-                        locationName = item.displayName.text,
-                        distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
-                        duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
-                        placesId = item.id,
-                        index = index,
-                        navigateToLocationScreen = navigateToLocationScreen,
-                        onStayTimeChange = { selectedTime ->
-                            // handle the selected stay time
-                            println("Stay time selected: $selectedTime")
-                        },
-                        deleteOnClick = { deleteOnClick(item) }
-                    )
-                }
-                 */
             }
         }
     }

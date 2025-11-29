@@ -13,12 +13,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -35,15 +40,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.google.android.gms.maps.model.StrokeStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
+import com.example.mapapp.ui.components.BottomMenu
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
+import com.example.mapapp.ui.components.TopMenu
+import com.example.mapapp.ui.components.buttons.ExploreMenuButton
 import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
@@ -67,6 +78,9 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import java.lang.reflect.Array.set
+
+// TODO: ASAP: FIX TRAVEL MODE SELECTOR!!!!!!!!!!!!!!!!!
+// TODO: + heading thing
 
 @Composable
 fun ExploreScreen(
@@ -110,25 +124,30 @@ fun ExploreScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopMenu(topShowing)
+        Box(modifier = Modifier.zIndex(1f)) {
+            TopMenu(topShowing)
+        }
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .zIndex(0f)
         ) {
             ExploreScreenMap(exploreViewModel)
         }
 
-        BottomMenu(
-            expanded = bottomShowing,
-            navigateToLocationScreen = navigateToLocationScreen,
-            exploreViewModel = exploreViewModel,
-            routeViewModel = routeViewModel,
-            navigateToScreen = navigateToScreen,
-            openedRouteId = openedRouteId,
-            onResetRoute = onResetRoute
-        )
+        Box(modifier = Modifier.zIndex(1f)) {
+            BottomMenu(
+                expanded = bottomShowing,
+                navigateToLocationScreen = navigateToLocationScreen,
+                exploreViewModel = exploreViewModel,
+                routeViewModel = routeViewModel,
+                navigateToScreen = navigateToScreen,
+                openedRouteId = openedRouteId,
+                onResetRoute = onResetRoute
+            )
+        }
     }
 }
 
@@ -264,147 +283,6 @@ fun ExploreScreenMap(
 }
 
 @Composable
-fun TopMenu(expanded: MutableState<Boolean>) {
-    val exploreViewModel: ExploreViewModel = viewModel()
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.background)
-            .padding(12.dp, 14.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {}
-    ) {
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        ) {
-            EditableHeading(exploreViewModel.routeTitle)
-
-            if (expanded.value) {
-                NearbyPlaceSelector(expanded)
-            }
-
-            Button(
-                onClick = { expanded.value = !expanded.value }, modifier = Modifier.fillMaxWidth()
-            ) {
-                if (expanded.value) {
-                    Text("close")
-                } else {
-                    Text("open")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun BottomMenu(
-    expanded: MutableState<Boolean>,
-    navigateToLocationScreen: (String) -> Unit,
-    exploreViewModel: ExploreViewModel = viewModel(),
-    routeViewModel: RouteViewModel = viewModel(),
-    navigateToScreen: (String) -> Unit,
-    openedRouteId: Int? = null,
-    onResetRoute: () -> Unit
-) {
-    val routeStopAmount = exploreViewModel.routeStops.collectAsState().value.size
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 440.dp)
-            .background(color = MaterialTheme.colorScheme.background)
-            .padding(12.dp, 14.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {}
-    ) {
-        Column {
-            Button(
-                onClick = { expanded.value = !expanded.value },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (expanded.value) {
-                    Text("close")
-                } else {
-                    Text("open")
-                }
-            }
-
-            LazyColumn {
-                item {
-                    Text(
-                        text = "Selected Route Stops${if (routeStopAmount > 0) " (${routeStopAmount})" else ""}",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(0.dp, 12.dp)
-                    )
-                }
-
-                if (expanded.value) {
-                    if (routeStopAmount > 0) {
-                        item {
-                            TravelModeSelector(
-                                exploreViewModel.travelMode.collectAsState().value,
-                                exploreViewModel::changeTravelMode
-                            )
-                        }
-
-                        item {
-                            SelectedStopsSection(
-                                navigateToLocationScreen,
-                                exploreViewModel::removeRouteStop,
-                                exploreViewModel.routeStops.collectAsState().value,
-                                exploreViewModel = exploreViewModel,
-                                routeViewModel = routeViewModel
-                            )
-                        }
-                        item { RouteSummarySection(exploreViewModel) }
-                        item {
-                            PrimaryButton(
-                                text = "Start This Route",
-                                backgroundColor = MaterialTheme.colorScheme.secondary,
-                                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-                            ) {
-                                exploreViewModel.startRoute()
-                                navigateToScreen(ROUTE_SCREEN_ROUTE)
-                            }
-                        }
-                        item {
-                            PrimaryButton(
-                                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
-                                backgroundColor = MaterialTheme.colorScheme.primary,
-                                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-                            ) {
-                                if (openedRouteId != null) exploreViewModel.updateSavedRoute(
-                                    openedRouteId
-                                )
-                                else
-                                    exploreViewModel.saveRoute()
-                            }
-                        }
-                        item {
-                            PrimaryButton(
-                                text = "Reset This Route",
-                                backgroundColor = MaterialTheme.colorScheme.error
-                            ) {
-                                exploreViewModel.resetRoute()
-                                onResetRoute()
-                            }
-                        }
-                    } else {
-                        item { Text("No selected route stops - Add stops from the map!") }
-                    }
-                }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-            }
-        }
-    }
-}
-
-@Composable
 fun EditableHeading(routeTitle: MutableState<String>) {
     OutlinedTextField(
         value = routeTitle.value,
@@ -421,9 +299,13 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
     val exploreViewModel: ExploreViewModel = viewModel()
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .padding(12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(12.dp)
     ) {
-
         PlaceTypeSelector(
             exploreViewModel.placeTypeSelector.collectAsState().value,
             exploreViewModel::changePlaceType
@@ -459,7 +341,8 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Summary", style = MaterialTheme.typography.titleLarge
+            text = "Summary", style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(0.dp, 0.dp, 12.dp, 0.dp)
         )
 
         Box(
