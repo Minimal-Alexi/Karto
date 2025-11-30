@@ -1,6 +1,5 @@
 package com.example.mapapp.viewmodel
 
-import android.R
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
@@ -10,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
+import com.example.mapapp.data.database.template_stops.TemplateStopEntity
+import com.example.mapapp.data.database.templates.TemplateEntity
 import com.example.mapapp.data.location.DefaultLocationClient
 import com.example.mapapp.data.location.LocationClient
 import com.example.mapapp.data.model.Circle
@@ -52,6 +53,7 @@ object ExploreViewModelParameterRepository {
 
 class ExploreViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
+    private val templateRepository = (application as KartoApplication).templateRepository
     var routeTitle = mutableStateOf("Default Title")
 
     /*
@@ -116,9 +118,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun loadSavedRoute(routeId: Int) {
+    fun loadTemplate(routeId: Int) {
         viewModelScope.launch {
-            val routeWithStops = routeRepository.getRouteWithStops(routeId)
+            val routeWithStops = templateRepository.getTemplateWithStops(routeId)
             routeTitle.value = routeWithStops.route.title
             _routeStops.value = routeWithStops.stops.map { stop ->
                 Place(
@@ -128,6 +130,10 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = TypesOfPlaces.values().find { it.name == stop.typeOfPlace }
                 )
             } as MutableList<Place>
+            _placeTypeSelection.value =
+                routeWithStops.route.category
+                    ?.let { name -> TypesOfPlaces.values().find { it.name == name } }
+                    ?: TypesOfPlaces.RESTAURANTS
             _userLocation.value = LatLng(
                 routeWithStops.route.startingLatitude,
                 routeWithStops.route.startingLongitude
@@ -407,15 +413,16 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
     fun saveRoute() {
         viewModelScope.launch {
-            val route = RouteEntity(
+            val template = TemplateEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp = System.currentTimeMillis(),
+                savedAt  = System.currentTimeMillis(),
                 startingLatitude = userLocation.value!!.latitude,
-                startingLongitude = userLocation.value!!.longitude
+                startingLongitude = userLocation.value!!.longitude,
+                category = placeTypeSelector.value.name
             )
             val stops = routeStops.value.mapIndexed { index, stop ->
-                RouteStopEntity(
-                    routeId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
+                TemplateStopEntity(
+                    templateId = 0, // it's a placeholder that's replaced by real id in routeRepository.saveRoute()
                     placesId = stop.id,
                     name = stop.displayName.text,
                     latitude = stop.location.latitude,
@@ -425,25 +432,25 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     typeOfPlace = stop.typeOfPlace?.name
                 )
             }
-            routeRepository.saveRoute(route, stops)
+            templateRepository.saveTemplate(template, stops)
         }
     }
 
     fun updateSavedRoute(routeId: Int) {
-
         viewModelScope.launch {
-            val existingRoute = routeRepository.getRouteWithStops(routeId).route
+            val existingRoute = templateRepository.getTemplateWithStops(routeId).route
 
-            val updatedRoute = existingRoute.copy(
+            val updatedTemplate = existingRoute.copy(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp = System.currentTimeMillis(),
+                savedAt = System.currentTimeMillis(),
                 startingLatitude = userLocation.value!!.latitude,
-                startingLongitude = userLocation.value!!.longitude
+                startingLongitude = userLocation.value!!.longitude,
+                category = placeTypeSelector.value.name
             )
 
             val stops = routeStops.value.mapIndexed { index, stop ->
-                RouteStopEntity(
-                    routeId = routeId,
+                TemplateStopEntity(
+                    templateId = routeId,
                     placesId = stop.id,
                     name = stop.displayName.text,
                     latitude = stop.location.latitude,
@@ -454,7 +461,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 )
             }
 
-            routeRepository.updateRoute(updatedRoute, stops)
+            templateRepository.updateTemplate(updatedTemplate, stops)
         }
     }
 
@@ -462,7 +469,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val route = RouteEntity(
                 title = routeTitle.value.ifBlank { "No name route" },
-                timestamp = System.currentTimeMillis(),
+                startedAt = System.currentTimeMillis(),
                 startingLatitude = userLocation.value!!.latitude,
                 startingLongitude = userLocation.value!!.longitude
             )

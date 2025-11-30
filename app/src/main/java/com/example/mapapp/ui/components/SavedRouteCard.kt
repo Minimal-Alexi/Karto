@@ -21,13 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
-import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.ui.components.buttons.SecondaryButton
-import com.example.mapapp.data.database.routes.RouteWithStopCount
+import com.example.mapapp.data.database.templates.TemplateWithStopCount
 
 @Composable
 fun SavedRouteCard(
-    route: RouteWithStopCount,
+    template: TemplateWithStopCount,
     onOpen: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -52,17 +51,17 @@ fun SavedRouteCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(text = route.title, style = MaterialTheme.typography.titleMedium,
+                Text(text = template.title, style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.basicMarquee())
                 Spacer(modifier = Modifier.height(0.dp))
                 Text(
                     text = "Saved ${
                         java.text.SimpleDateFormat("dd MMM yyyy, HH:mm", java.util.Locale.getDefault())
-                            .format(java.util.Date(route.savedAt))
+                            .format(java.util.Date(template.savedAt))
                     }",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "${template.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

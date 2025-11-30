@@ -17,7 +17,7 @@ import com.example.mapapp.viewmodel.SavedViewModel
 @Composable
 fun SavedScreen(onOpenRoute: (Int) -> Unit) {
     val savedViewModel = viewModel<SavedViewModel>()
-    val routes by savedViewModel.savedRoutes.collectAsState()
+    val templates by savedViewModel.savedTemplates.collectAsState()
 
     Column(
         modifier = Modifier
@@ -33,11 +33,11 @@ fun SavedScreen(onOpenRoute: (Int) -> Unit) {
             modifier = Modifier.padding(top = 12.dp)
         )
 
-        routes.forEach { route ->
+        templates.forEach { template ->
             SavedRouteCard(
-                route = route,
-                onOpen = { onOpenRoute(route.id) },
-                onDelete = { savedViewModel.deleteRoute(route.id) }
+                template = template,
+                onOpen = { onOpenRoute(template.id) },
+                onDelete = { savedViewModel.deleteTemplate(template.id) }
             )
         }
 

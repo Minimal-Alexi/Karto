@@ -132,6 +132,6 @@ fun RouteHistory() {
             Spacer(modifier = Modifier.height(16.dp))
         }
     } else {
-        Text("When you complete a route, it will appear here!")
+        Text("When you start a route, it will appear here.")
     }
 }
