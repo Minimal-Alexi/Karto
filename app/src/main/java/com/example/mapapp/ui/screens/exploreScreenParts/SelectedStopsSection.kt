@@ -86,10 +86,9 @@ fun SelectedStopsSection(
                         selectedRouteStops.forEachIndexed { index, place ->
                             SelectedStopItem(
                                 index = index,
-                                time = "12:05",
                                 locationName = place.displayName.text,
-                                distance = if (place.travelDistance == null) "N/A" else place.travelDistance + "m",
-                                duration = if (place.travelDuration == null) "N/A" else place.travelDuration + "",
+                                distance = place.travelDistance,
+                                duration = place.travelDuration,
                                 placesId = place.id,
                                 navigateToLocationScreen = navigateToLocationScreen,
                                 onStayTimeChange = { selectedTime ->

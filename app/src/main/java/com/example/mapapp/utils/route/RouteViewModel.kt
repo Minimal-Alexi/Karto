@@ -66,7 +66,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
                 if (i < updatedStops.size) {
                     val currentItem = updatedStops[i]
                     val updatedItem = currentItem.copy(
-                        travelDistance = _routeStopsInfo.value[i].distanceMeters.toString(),
+                        travelDistance = _routeStopsInfo.value[i].distanceMeters,
                         travelDuration = _routeStopsInfo.value[i].duration.toString()
                     )
                     updatedStops[i] = updatedItem
@@ -91,7 +91,6 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             e.printStackTrace()
             _routePolyline.value = null
             _routeInfo.value = "No route found"
-
         }
 
     }

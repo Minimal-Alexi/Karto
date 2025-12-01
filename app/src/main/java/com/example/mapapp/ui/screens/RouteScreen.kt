@@ -255,8 +255,8 @@ fun OnRouteSection(
                         RouteStopItem(
                             index = index,
                             location = routeStop,
-                            distance = "2.7 km",
-                            duration = "30 min",
+                            distance = "${routeStop.distanceTo}m" ?: "",
+                            duration = routeStop.timeTo ?: "",
                             navigateToLocationScreen = navigateToLocationScreen,
                             onVisit = viewModel::visitStop,
                             onUnvisit = viewModel::unvisitStop

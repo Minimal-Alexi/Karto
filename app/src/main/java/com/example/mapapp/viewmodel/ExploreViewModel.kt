@@ -483,7 +483,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     longitude = stop.location.longitude,
                     stayMinutes = 30,
                     position = index,
-                    typeOfPlace = stop.typeOfPlace?.name
+                    typeOfPlace = stop.typeOfPlace?.name,
+                    distanceTo = stop.travelDistance,
+                    timeTo = stop.travelDuration
                 )
             }
 
