@@ -4,10 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -16,11 +18,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -86,7 +94,7 @@ fun BottomMenu(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(10.dp)
-            .heightIn(max = 440.dp)
+            .heightIn(max = 480.dp)
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         Column {
@@ -99,22 +107,55 @@ fun BottomMenu(
             Text(
                 text = "Selected Route Stops${if (routeStopAmount > 0) " (${routeStopAmount})" else ""}",
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(12.dp, 4.dp)
+                modifier = Modifier.padding(16.dp, 4.dp)
             )
 
 
             if (expanded.value) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier
-                        .padding(12.dp)
+                        .padding(16.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
                     if (routeStopAmount > 0) {
-                        TravelModeSelector(
-                            exploreViewModel.travelMode.collectAsState().value,
-                            exploreViewModel::changeTravelMode
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(16.dp)
+                        ) {
+                            TravelModeSelector(
+                                exploreViewModel.travelMode.collectAsState().value,
+                                exploreViewModel::changeTravelMode
+                            )
+
+                            var checkedAutoSort by remember { mutableStateOf(true) }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.offset(x = (-12).dp)
+                            ) {
+                                Checkbox(
+                                    checked = checkedAutoSort,
+                                    onCheckedChange = { checkedAutoSort = it })
+                                Text("Reorder route to be optimal")
+                            }
+
+                            PrimaryButton(
+                                text = "Calculate Route",
+                                backgroundColor = MaterialTheme.colorScheme.primary,
+                            ) {
+                                if (checkedAutoSort) {
+                                    routeViewModel.runMatrixFlow()
+                                } else {
+                                    routeViewModel.runWithoutSorting()
+                                }
+                            }
+                        }
 
                         SelectedStopsSection(
                             navigateToLocationScreen,
@@ -146,22 +187,29 @@ fun BottomMenu(
                         }
 
                         PrimaryButton(
-                            text = "Reset This Route",
+                            text = "Empty All Fields",
                             backgroundColor = MaterialTheme.colorScheme.error
                         ) {
                             exploreViewModel.resetRoute()
                             onResetRoute()
                         }
 
+                        Spacer(Modifier.height(8.dp))
+
                     } else {
-                        Text(
-                            text = "No selected route stops - Add stops from the map!",
+                        Column(
                             modifier = Modifier
-                                .padding(12.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.surface)
-                                .padding(12.dp)
-                        )
+                                .fillMaxWidth()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = "No selected route stops - Add stops from the map!",
+                            )
+                        }
                     }
                 }
             }

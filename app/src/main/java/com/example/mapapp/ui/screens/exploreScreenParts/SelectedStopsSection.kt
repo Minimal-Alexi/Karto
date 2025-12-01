@@ -49,26 +49,6 @@ fun SelectedStopsSection(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        var checkedAutoSort by remember { mutableStateOf(true) }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = checkedAutoSort,
-                onCheckedChange = { checkedAutoSort = it })
-            Text("Reorder route to be optimal")
-        }
-
-        PrimaryButton(
-            text = "Calculate Route",
-            backgroundColor = MaterialTheme.colorScheme.primary,
-        ) {
-            if (checkedAutoSort) {
-                routeViewModel.runMatrixFlow()
-            } else {
-                routeViewModel.runWithoutSorting()
-            }
-        }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()

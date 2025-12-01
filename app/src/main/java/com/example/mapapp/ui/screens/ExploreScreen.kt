@@ -77,10 +77,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import java.lang.reflect.Array.set
-
-// TODO: ASAP: FIX TRAVEL MODE SELECTOR!!!!!!!!!!!!!!!!!
-// TODO: + heading thing
 
 @Composable
 fun ExploreScreen(
@@ -341,7 +337,7 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
     ) {
         Text(
             text = "Summary", style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(0.dp, 0.dp, 12.dp, 0.dp)
+            modifier = Modifier.padding(0.dp, 16.dp)
         )
 
         Box(
