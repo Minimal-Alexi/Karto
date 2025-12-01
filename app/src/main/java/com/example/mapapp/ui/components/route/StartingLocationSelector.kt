@@ -46,7 +46,6 @@ fun StartingLocationSelector() {
     val exploreViewModel = viewModel<ExploreViewModel>()
 
     var locationFieldText by remember { mutableStateOf("") }
-    val locationText by exploreViewModel.customLocationText.collectAsState()
 
     val predictions by predictionViewModel.originPredictions.collectAsState()
 
