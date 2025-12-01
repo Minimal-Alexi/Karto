@@ -237,7 +237,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Just fetch the polyline
-    fun runWithoutSorting() {
+    fun runWithoutSorting(){
         viewModelScope.launch {
             if (_userLocation.value == null) {
                 Log.e("AAA", "Aborting: User location is null. Please wait for GPS.")
