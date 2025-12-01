@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -154,14 +155,19 @@ fun SelectedStopItem(
                             readOnly = true,
                             label = { Text("Stay time") },
                             modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .clickable { expanded = true },
+                                .fillMaxWidth(0.5f),
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.ArrowDropDown,
                                     contentDescription = "Select stay time"
                                 )
                             }
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .clickable { expanded = true }
                         )
 
                         DropdownMenu(
