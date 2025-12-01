@@ -48,6 +48,7 @@ import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.TopMenu
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
+import com.example.mapapp.ui.components.map.MapPolyline
 import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.utils.getDistanceLabel
@@ -152,7 +153,8 @@ fun ExploreScreenMap(
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val polyline = exploreViewModel.routePolyline.collectAsState()/*
+
+    /*
     Camera position value handling
     */
 
@@ -224,98 +226,7 @@ fun ExploreScreenMap(
                     })
             }
 
-            /*
-            if (polyline.value != null) {
-                val points = PolyUtil.decode(polyline.value)
-                Polyline(
-                    points = points,
-                    width = 10f,
-                    geodesic = true, // Follows the curvature of the earth for better directionality
-                    // Add a CustomCap to create an arrow at the end of the line
-                    endCap = CustomCap(
-                        BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
-                        // Note: Replace 'android.R.drawable.arrow_up_float' with your own
-                        // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
-                    ),
-                    spans = listOf(
-                        StyleSpan(
-                            StrokeStyle.gradientBuilder(
-                                MaterialTheme.colorScheme.primary.hashCode(),
-                                MaterialTheme.colorScheme.secondary.hashCode()
-                            ).build(), 1.0 // Apply to 100% of the line
-                        )
-                    ),
-
-                    )
-            }
-            */
-
-            if (polyline.value != null) {
-                val points = PolyUtil.decode(polyline.value)
-
-                // 1. Calculate Arrow Positions and Bearings
-                // We use remember(points) to avoid recalculating on every frame
-                val arrowMarkers = remember(points) {
-                    val markers = mutableListOf<Pair<LatLng, Float>>()
-                    val arrowIntervalMeters = 100.0 // Distance between arrows
-                    var distanceCovered = 0.0
-
-                    if (points.isNotEmpty()) {
-                        var prev = points[0]
-                        // Start slightly ahead so the first arrow isn't exactly on top of the start pin
-                        var nextMarkerDist = arrowIntervalMeters
-
-                        for (i in 1 until points.size) {
-                            val current = points[i]
-                            val segmentDist = SphericalUtil.computeDistanceBetween(prev, current)
-
-                            // While the current segment contains the next marker point
-                            while (distanceCovered + segmentDist >= nextMarkerDist) {
-                                val fraction = (nextMarkerDist - distanceCovered) / segmentDist
-                                val position = SphericalUtil.interpolate(prev, current, fraction)
-                                val heading = SphericalUtil.computeHeading(prev, current)
-
-                                markers.add(position to heading.toFloat())
-                                nextMarkerDist += arrowIntervalMeters
-                            }
-
-                            distanceCovered += segmentDist
-                            prev = current
-                        }
-                    }
-                    markers
-                }
-
-                Polyline(
-                    points = points,
-                    width = 10f,
-                    geodesic = true,
-                    endCap = CustomCap(
-                        BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
-                    ),
-                    spans = listOf(
-                        StyleSpan(
-                            StrokeStyle.gradientBuilder(
-                                MaterialTheme.colorScheme.primary.hashCode(),
-                                MaterialTheme.colorScheme.secondary.hashCode()
-                            ).build(), 1.0
-                        )
-                    )
-                )
-
-                // 2. Render the Arrows
-                arrowMarkers.forEach { (location, bearing) ->
-                    Marker(
-                        state = rememberUpdatedMarkerState(position = location),
-                        icon = BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float), // Use your arrow resource
-                        rotation = bearing, // Rotate to match road direction
-                        flat = true, // Makes the marker rotate with the map
-                        anchor = Offset(0.5f, 0.5f), // Center the arrow on the line
-                        onClick = { true } // Disable click events for these visual markers
-                    )
-                }
-            }
-
+            MapPolyline(exploreViewModel, cameraPositionState.position.zoom)
 
         }
     }
