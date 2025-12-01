@@ -20,8 +20,8 @@ fun getTimeLabel(timeString: String?): String {
     }
 }
 
-fun getDistanceLabel(distanceString: String?): String {
-    val parsed = distanceString?.toIntOrNull() ?: return ""
+fun getDistanceLabel(distanceString: Int?): String {
+    val parsed = distanceString ?: return ""
 
     return if (parsed < 1000) {
         "$parsed m"
