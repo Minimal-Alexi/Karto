@@ -191,7 +191,6 @@ fun MakeYourRouteCard(
 
             StartingLocationSelector(nullifyCustomLocation,setOriginLocation, setCustomLocationText)
             Spacer(modifier = Modifier.height(2.dp))
-            Text("within total walking distance of", style = MaterialTheme.typography.bodyMedium)
 
             var range by remember { mutableStateOf(1.5f..9.0f) }
 

@@ -31,7 +31,7 @@ fun DistanceSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Within total walking distance of", style = MaterialTheme.typography.bodyMedium)
+            Text("Within total distance of", style = MaterialTheme.typography.bodyMedium)
             Text(text = "%.1f m".format(distanceValue))
         }
         Slider(
