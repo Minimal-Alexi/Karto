@@ -69,19 +69,21 @@ fun SavedRouteCard(
                 ) {
                     SecondaryButton(
                         text = "Open",
-                        backgroundColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        onOpen()
-                    }
+                        backgroundColor = MaterialTheme.colorScheme.primary,
+                        {
+                            onOpen()
+                        }
+                    )
 
                     Spacer(modifier = Modifier.width(12.dp))
 
                     SecondaryButton(
                         text = "Delete",
-                        backgroundColor = MaterialTheme.colorScheme.error
-                    ) {
-                        onDelete()
-                    }
+                        backgroundColor = MaterialTheme.colorScheme.error,
+                        {
+                            onDelete()
+                        }
+                    )
                 }
             }
         }
