@@ -37,6 +37,7 @@ import sh.calvin.reorderable.rememberReorderableLazyColumnState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import kotlin.math.roundToInt
 import androidx.compose.runtime.collectAsState
+import com.example.mapapp.ui.components.Placeholder
 import com.example.mapapp.ui.components.route.StartingLocationCard
 
 @Composable
@@ -53,78 +54,81 @@ fun SelectedStopsSection(
         Text(
             text = "Selected Route Stops", style = MaterialTheme.typography.titleLarge
         )
+        if (selectedRouteStops.isNotEmpty()) {
+            Button(
+                onClick = {
+                    routeViewModel.runMatrixFlow()
+                }
+            ) { Text("sort route for me") }
 
-        Button(
-            onClick = {
-                routeViewModel.runMatrixFlow()
-            }
-        ) { Text("sort route for me") }
+            Button(
+                onClick = {
+                    routeViewModel.runWithoutSorting()
+                }
+            ) { Text("Calculate route") }
 
-        Button(
-            onClick = {
-                routeViewModel.runWithoutSorting()
-            }
-        ) { Text("Calculate route") }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
-        ) {
-            Column {
-                StartingLocationCard(
-                    exploreViewModel.customLocationText
-                )
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    selectedRouteStops.forEachIndexed { index, place ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+            ) {
+                Column {
+                    StartingLocationCard(
+                        exploreViewModel.customLocationText
+                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        selectedRouteStops.forEachIndexed { index, place ->
+                            SelectedStopItem(
+                                index = index,
+                                time = "12:05",
+                                locationName = place.displayName.text,
+                                distance = if (place.travelDistance == null) "N/A" else place.travelDistance + "m",
+                                duration = if (place.travelDuration == null) "N/A" else place.travelDuration + "",
+                                placesId = place.id,
+                                navigateToLocationScreen = navigateToLocationScreen,
+                                onStayTimeChange = { selectedTime ->
+                                    // handle the selected stay time
+                                    println("Stay time selected: $selectedTime")
+                                },
+                                deleteOnClick = { deleteOnClick(place) },
+                                isFirst = index == 0,
+                                isLast = index == selectedRouteStops.lastIndex,
+                                onMoveUp = { routeViewModel.moveStopUp(index) },
+                                onMoveDown = { routeViewModel.moveStopDown(index) }
+                            )
+                        }
+                    }
+                    /*
+                    ReorderableColumn(
+                        items = selectedRouteStops,
+                        onMove = { from, to -> selectedRouteStops.move(from, to) },
+                    ) { item, index ->
                         SelectedStopItem(
-                            index = index,
                             time = "12:05",
-                            locationName = place.displayName.text,
-                            distance = if (place.travelDistance == null) "N/A" else place.travelDistance + "m",
-                            duration = if (place.travelDuration == null) "N/A" else place.travelDuration + "",
-                            placesId = place.id,
+                            locationName = item.displayName.text,
+                            distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
+                            duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
+                            placesId = item.id,
+                            index = index,
                             navigateToLocationScreen = navigateToLocationScreen,
                             onStayTimeChange = { selectedTime ->
                                 // handle the selected stay time
                                 println("Stay time selected: $selectedTime")
                             },
-                            deleteOnClick = { deleteOnClick(place) },
-                            isFirst = index == 0,
-                            isLast = index == selectedRouteStops.lastIndex,
-                            onMoveUp = { routeViewModel.moveStopUp(index) },
-                            onMoveDown = { routeViewModel.moveStopDown(index) }
+                            deleteOnClick = { deleteOnClick(item) }
                         )
                     }
+                     */
                 }
-                /*
-                ReorderableColumn(
-                    items = selectedRouteStops,
-                    onMove = { from, to -> selectedRouteStops.move(from, to) },
-                ) { item, index ->
-                    SelectedStopItem(
-                        time = "12:05",
-                        locationName = item.displayName.text,
-                        distance = if (item.travelDistance == null) "N/A" else item.travelDistance + "m",
-                        duration = if (item.travelDuration == null) "N/A" else item.travelDuration + "",
-                        placesId = item.id,
-                        index = index,
-                        navigateToLocationScreen = navigateToLocationScreen,
-                        onStayTimeChange = { selectedTime ->
-                            // handle the selected stay time
-                            println("Stay time selected: $selectedTime")
-                        },
-                        deleteOnClick = { deleteOnClick(item) }
-                    )
-                }
-                 */
             }
+        } else {
+            Placeholder(text = "Your route does not have stops yet. Add stops from the map to build your route.")
         }
     }
 }

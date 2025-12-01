@@ -35,6 +35,7 @@ import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
+import com.example.mapapp.ui.components.Placeholder
 import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.buttons.PrimaryButton
@@ -294,23 +295,26 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
         Text(
             text = "Summary", style = MaterialTheme.typography.titleLarge
         )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+        if (routeInfo != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
             ) {
-                Text(
-                    text = if (routeInfo != null) "$routeInfo" else "",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = if (routeInfo != null) "$routeInfo" else "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
+        } else {
+            Placeholder(text = "No route information yet. Add stops and click the 'Calculate Route' button to get the summary.")
         }
     }
 }
