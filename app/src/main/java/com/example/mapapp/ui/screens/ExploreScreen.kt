@@ -325,8 +325,6 @@ fun EditableHeading(routeTitle: MutableState<String>) {
                     modifier = Modifier.size(24.dp)
                 )
             }
-        } else {
-            Placeholder(text = "No route information yet. Add stops and click the 'Calculate Route' button to get the summary.")
         }
     }
 }
@@ -366,7 +364,8 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
 
 @Composable
 fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
-    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+    val routeTime by exploreViewModel.routeTime.collectAsState()
+    val routeDistance by exploreViewModel.routeDistance.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -374,34 +373,34 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
         Text(
             text = "Summary", style = MaterialTheme.typography.titleLarge
         )
-        if (routeInfo != null) {
-          Box(
-              modifier = Modifier
-                  .fillMaxWidth()
-                  .background(
-                      color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                  )
-                  .padding(16.dp),
-          ) {
-              Column(
-                  modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
-              ) {
-                  Text(
-                      text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
-                      style = MaterialTheme.typography.bodyMedium
-                  )
-                  Text(
-                      text = if (routeDistance != null) "Total Travel Distance: ${
-                          getDistanceLabel(
-                              routeDistance
-                          )
-                      }" else "",
-                      style = MaterialTheme.typography.bodyMedium
-                  )
-              }
-          }
-        } else {
+        if (routeTime == null || routeDistance == null) {
             Placeholder(text = "No route information yet. Add stops and click the 'Calculate Route' button to get the summary.")
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
+                    )
+                .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
+                          style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = if (routeDistance != null) "Total Travel Distance: ${
+                            getDistanceLabel(
+                                routeDistance
+                            )
+                        }" else "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
         }
     }
 }

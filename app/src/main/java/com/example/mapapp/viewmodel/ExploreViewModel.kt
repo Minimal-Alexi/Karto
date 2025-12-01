@@ -43,7 +43,7 @@ import java.util.Collections.emptyList
 object ExploreViewModelParameterRepository {
     val _routeStops = MutableStateFlow<MutableList<Place>>(mutableStateListOf())
     val _routePolyline = MutableStateFlow<String?>(null)
-    val _routeDistance = MutableStateFlow<String?>(null)
+    val _routeDistance = MutableStateFlow<Int?>(null)
     val _routeTime = MutableStateFlow<String?>(null)
 
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
@@ -96,7 +96,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     val routePolyline: StateFlow<String?> = _routePolyline
 
     private val _routeDistance = ExploreViewModelParameterRepository._routeDistance
-    val routeDistance: StateFlow<String?> = _routeDistance
+    val routeDistance: StateFlow<Int?> = _routeDistance
 
     private val _routeTime = ExploreViewModelParameterRepository._routeTime
     val routeTime: StateFlow<String?> = _routeTime
@@ -225,7 +225,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
                 val routeInfoWalkOrDrive =
                     Pair(
-                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                        response.routes?.firstOrNull()?.distanceMeters,
                         response.routes?.firstOrNull()?.duration ?: "No route found"
                     )
 

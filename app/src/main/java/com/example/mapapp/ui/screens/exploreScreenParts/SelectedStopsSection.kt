@@ -53,25 +53,26 @@ fun SelectedStopsSection(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                  if (selectedRouteStops.isNotEmpty()) {
-                    selectedRouteStops.forEachIndexed { index, place ->
-                        SelectedStopItem(
-                            index = index,
-                            locationName = place.displayName.text,
-                            distance = getDistanceLabel(place.travelDistance),
-                            duration = getTimeLabel(place.travelDuration),
-                            placesId = place.id,
-                            navigateToLocationScreen = navigateToLocationScreen,
-                            onStayTimeChange = { selectedTime ->
-                                // handle the selected stay time
-                                println("Stay time selected: $selectedTime")
-                            },
-                            deleteOnClick = { deleteOnClick(place) },
-                            isFirst = index == 0,
-                            isLast = index == selectedRouteStops.lastIndex,
-                            onMoveUp = { routeViewModel.moveStopUp(index) },
-                            onMoveDown = { routeViewModel.moveStopDown(index) }
-                        )
+                    if (selectedRouteStops.isNotEmpty()) {
+                        selectedRouteStops.forEachIndexed { index, place ->
+                            SelectedStopItem(
+                                index = index,
+                                locationName = place.displayName.text,
+                                distance = getDistanceLabel(place.travelDistance),
+                                duration = getTimeLabel(place.travelDuration),
+                                placesId = place.id,
+                                navigateToLocationScreen = navigateToLocationScreen,
+                                onStayTimeChange = { selectedTime ->
+                                    // handle the selected stay time
+                                    println("Stay time selected: $selectedTime")
+                                },
+                                deleteOnClick = { deleteOnClick(place) },
+                                isFirst = index == 0,
+                                isLast = index == selectedRouteStops.lastIndex,
+                                onMoveUp = { routeViewModel.moveStopUp(index) },
+                                onMoveDown = { routeViewModel.moveStopDown(index) }
+                            )
+                        }
                     } else {
                         Placeholder(text = "Your route does not have stops yet. Add stops from the map to build your route.")
                     }

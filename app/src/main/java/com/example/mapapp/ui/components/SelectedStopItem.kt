@@ -37,8 +37,8 @@ import com.example.mapapp.ui.components.buttons.DeleteIconButton
 fun SelectedStopItem(
     index: Int,
     locationName: String,
-    distance: Int?,
-    duration: String?,
+    distance: String,
+    duration: String,
     closingInfo: String? = null,
     placesId: String,
     navigateToLocationScreen: (String) -> Unit,
@@ -186,7 +186,7 @@ fun SelectedStopItemPreview() {
             SelectedStopItem(
                 index = 0,
                 locationName = "Central Park",
-                distance = 2500,
+                distance = "2.5 km",
                 duration = "15s",
                 closingInfo = null,
                 placesId = "place_1",
@@ -205,7 +205,7 @@ fun SelectedStopItemPreview() {
             SelectedStopItem(
                 index = 1,
                 locationName = "The National Museum of Natural History",
-                distance = 12000,
+                distance = "12 km",
                 duration = "450s",
                 closingInfo = "",
                 placesId = "place_2",

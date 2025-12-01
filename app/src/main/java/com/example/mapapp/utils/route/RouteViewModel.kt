@@ -82,7 +82,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
 
             val routeInfoWalkOrDrive =
                 Pair(
-                    response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                    response.routes?.firstOrNull()?.distanceMeters,
                     response.routes?.firstOrNull()?.duration ?: "No route found"
                 )
 
