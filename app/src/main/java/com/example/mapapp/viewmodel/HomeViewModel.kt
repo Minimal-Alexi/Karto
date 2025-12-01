@@ -55,6 +55,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     ))
     val suggestionCardNumber: StateFlow<HashMap<TypesOfPlaces,Int>> = _suggestionCardNumbers
 
+    /*
+
+    */
+    val _customLocation = MutableStateFlow<LatLng?>(null)
+    val _customLocationText = MutableStateFlow<String>("")
+
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -145,5 +151,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
         _greetingLocation.value = stringBuilder.toString()
         Log.d(null,_greetingLocation.value)
+    }
+    fun nullCustomLocation(){
+        _customLocation.value = null
+        _customLocationText.value = "Your Current Location"
+    }
+    fun setCustomLocationText(customLocationText: String) {
+        _customLocationText.value = customLocationText
+    }
+    fun setOriginLocation(location: LatLng) {
+        _customLocation.value = location
     }
 }

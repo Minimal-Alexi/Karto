@@ -41,7 +41,9 @@ import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.buttons.PrimaryButton
+import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.viewmodel.HomeViewModel
+import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
@@ -79,7 +81,10 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
         MakeYourRouteCard(typeOfPlaceToVisit,
             distanceToPlaces,
             homeViewModel::changeDistanceToPlaces,
-            homeViewModel::changePlaceType)
+            homeViewModel::changePlaceType,
+            homeViewModel::nullCustomLocation,
+            homeViewModel::setOriginLocation,
+            homeViewModel::setCustomLocationText)
         SuggestionsSection(suggestionCardNumbers,location)
         Spacer(modifier = Modifier.height(0.dp))
     }
@@ -157,7 +162,11 @@ fun MakeYourRouteCard(
     currentTypesOfPlace: TypesOfPlaces,
     distanceToPlaces: Double,
     distanceSliderOnChange: (Double) -> Unit,
-    onDropdownMenuChange: (TypesOfPlaces) -> Unit) {
+    onDropdownMenuChange: (TypesOfPlaces) -> Unit,
+    nullifyCustomLocation: () -> Unit,
+    setOriginLocation: (LatLng) -> Unit,
+    setCustomLocationText: (String) -> Unit
+    ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -180,29 +189,7 @@ fun MakeYourRouteCard(
 
             Text("starting from", style = MaterialTheme.typography.bodyMedium)
 
-            var location by remember { mutableStateOf("") }
-
-            OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Enter location") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "Location icon"
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
+            StartingLocationSelector(nullifyCustomLocation,setOriginLocation, setCustomLocationText)
             Spacer(modifier = Modifier.height(2.dp))
             Text("within total walking distance of", style = MaterialTheme.typography.bodyMedium)
 
