@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Collections.emptyList
+import kotlin.random.Random
 
 object ExploreViewModelParameterRepository {
     val _routeStops = MutableStateFlow<MutableList<Place>>(mutableStateListOf())
@@ -145,6 +146,26 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             _customLocationText.value =
                 "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
         }
+    }
+
+    fun generateItineraryForUser(placeType: TypesOfPlaces,range : Double, location: LatLng? = null){
+        _travelMode.value = TravelModes.WALK
+        _distanceToPlaces.value = range
+        _placeTypeSelection.value = placeType
+        if(location != null){
+            setOriginLocation(location)
+        }
+        resetRoute()
+        getNearbyPlaces()
+        val numberOfStops = Random.nextInt(4) + 1
+        val selectedPlaces = _nearbyPlaces.value?.take(numberOfStops)
+        if(selectedPlaces != null && !selectedPlaces.isEmpty()){
+            selectedPlaces.forEach { it -> addRouteStop(it)}
+        }
+        else{
+            // TODO: Throw warning.
+        }
+
     }
 
     fun changeTravelMode(newTravelMode: TravelModes) {
