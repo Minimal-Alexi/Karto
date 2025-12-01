@@ -43,6 +43,9 @@ import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.BottomMenu
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
+import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
+import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.TopMenu
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
@@ -322,6 +325,8 @@ fun EditableHeading(routeTitle: MutableState<String>) {
                     modifier = Modifier.size(24.dp)
                 )
             }
+        } else {
+            Placeholder(text = "No route information yet. Add stops and click the 'Calculate Route' button to get the summary.")
         }
     }
 }
@@ -361,46 +366,42 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
 
 @Composable
 fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
-    val routeTime by exploreViewModel.routeTime.collectAsState()
-    val routeDistance by exploreViewModel.routeDistance.collectAsState()
-
-    /** don't render an empty summary */
-    if (routeTime == null || routeDistance == null) {
-        return
-    }
+    val routeInfo by exploreViewModel.routeInfo.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Summary", style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(0.dp, 16.dp)
+            text = "Summary", style = MaterialTheme.typography.titleLarge
         )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = if (routeDistance != null) "Total Travel Distance: ${
-                        getDistanceLabel(
-                            routeDistance
-                        )
-                    }" else "",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+        if (routeInfo != null) {
+          Box(
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .background(
+                      color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
+                  )
+                  .padding(16.dp),
+          ) {
+              Column(
+                  modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+              ) {
+                  Text(
+                      text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
+                      style = MaterialTheme.typography.bodyMedium
+                  )
+                  Text(
+                      text = if (routeDistance != null) "Total Travel Distance: ${
+                          getDistanceLabel(
+                              routeDistance
+                          )
+                      }" else "",
+                      style = MaterialTheme.typography.bodyMedium
+                  )
+              }
+          }
+        } else {
+            Placeholder(text = "No route information yet. Add stops and click the 'Calculate Route' button to get the summary.")
         }
     }
 }

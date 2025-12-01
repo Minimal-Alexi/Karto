@@ -38,13 +38,13 @@ data class RoutesResponse(
 
 data class Route(
     val polyline: Polyline?,
-    val distanceMeters: String?,
+    val distanceMeters: Int?,
     val duration: String?,
     val legs: List<Leg>?,
 )
 
 data class Leg(
-    val distanceMeters: String?,
+    val distanceMeters: Int?,
     val duration: String?,
 )
 

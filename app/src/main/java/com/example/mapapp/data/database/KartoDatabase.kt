@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteDao
@@ -15,6 +14,8 @@ import com.example.mapapp.data.database.templates.TemplateDao
 import com.example.mapapp.data.database.templates.TemplateEntity
 import com.example.mapapp.data.database.user.UserDao
 import com.example.mapapp.data.database.user.UserEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 import kotlinx.coroutines.launch
 
@@ -26,7 +27,7 @@ import kotlinx.coroutines.launch
         TemplateEntity::class,
         TemplateStopEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class KartoDatabase : RoomDatabase() {
@@ -40,6 +41,8 @@ abstract class KartoDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: KartoDatabase? = null
 
+        private val ioScope = CoroutineScope(Dispatchers.IO)
+
         fun getDatabase(context: Context): KartoDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -47,29 +50,26 @@ abstract class KartoDatabase : RoomDatabase() {
                     KartoDatabase::class.java,
                     "karto_database"
                 )
-                .fallbackToDestructiveMigration(true)
-                .addCallback(object : Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        // Insert the default user when the database is created
-                        ioScope.launch {
-                            getDatabase(context).userDao().upsertUser(
-                                UserEntity(
-                                    id = UserEntity.SINGLETON_ID,
-                                    firstName = "",
-                                    lastName = "",
-                                    darkThemePreferred = false,
-                                    currentRouteId = null
-                                )
-                            )
-                        }
-                    }
-                })
-                .build()
+                    .fallbackToDestructiveMigration(true)
+                    .build()
+
                 INSTANCE = instance
+
+                // Insert a default user after DB initiation
+                ioScope.launch {
+                    instance.userDao().upsertUser(
+                        UserEntity(
+                            id = UserEntity.SINGLETON_ID,
+                            firstName = "",
+                            lastName = "",
+                            darkThemePreferred = false,
+                            currentRouteId = null
+                        )
+                    )
+                }
+
                 instance
             }
         }
-        private val ioScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.ui.components.Placeholder
 import com.example.mapapp.ui.components.SavedRouteCard
 import com.example.mapapp.viewmodel.SavedViewModel
 
@@ -33,12 +34,16 @@ fun SavedScreen(onOpenRoute: (Int) -> Unit) {
             modifier = Modifier.padding(top = 12.dp)
         )
 
-        templates.forEach { template ->
-            SavedRouteCard(
-                template = template,
-                onOpen = { onOpenRoute(template.id) },
-                onDelete = { savedViewModel.deleteTemplate(template.id) }
-            )
+        if (templates.isNotEmpty()) {
+            templates.forEach { template ->
+                SavedRouteCard(
+                    template = template,
+                    onOpen = { onOpenRoute(template.id) },
+                    onDelete = { savedViewModel.deleteTemplate(template.id) }
+                )
+            }
+        } else {
+            Placeholder("You don't have any saved routes yet. When you save a route, it will appear here.")
         }
 
         Spacer(modifier = Modifier.height(0.dp))

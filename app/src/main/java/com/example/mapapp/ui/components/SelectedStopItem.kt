@@ -36,10 +36,9 @@ import com.example.mapapp.ui.components.buttons.DeleteIconButton
 @Composable
 fun SelectedStopItem(
     index: Int,
-    time: String,
     locationName: String,
-    distance: String,
-    duration: String,
+    distance: Int?,
+    duration: String?,
     closingInfo: String? = null,
     placesId: String,
     navigateToLocationScreen: (String) -> Unit,
@@ -90,6 +89,16 @@ fun SelectedStopItem(
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (distance == null) "N/A" else "${distance}m",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = if (duration == null) "N/A" else duration,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))
@@ -176,10 +185,9 @@ fun SelectedStopItemPreview() {
             // State 1: Normal
             SelectedStopItem(
                 index = 0,
-                time = "12:00 PM",
                 locationName = "Central Park",
-                distance = "2.5 km",
-                duration = "15 min",
+                distance = 2500,
+                duration = "15s",
                 closingInfo = null,
                 placesId = "place_1",
                 navigateToLocationScreen = {},
@@ -196,10 +204,9 @@ fun SelectedStopItemPreview() {
             // State 2: With Closing Info and Longer Text
             SelectedStopItem(
                 index = 1,
-                time = "02:30 PM",
                 locationName = "The National Museum of Natural History",
-                distance = "12 km",
-                duration = "45 min",
+                distance = 12000,
+                duration = "450s",
                 closingInfo = "",
                 placesId = "place_2",
                 navigateToLocationScreen = {},

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.ui.components.HistoryRouteCard
+import com.example.mapapp.ui.components.Placeholder
 import com.example.mapapp.viewmodel.SettingsViewModel
 import com.example.mapapp.viewmodel.ThemeViewModel
 
@@ -116,13 +117,9 @@ fun RouteHistory() {
     val vm = viewModel<SettingsViewModel>()
     val routes = vm.completedRoutes.collectAsState().value
 
-    Row {
-        Text(
-            "History", style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(4.dp)
-        )
-    }
-
+    Text(
+        "Route History", style = MaterialTheme.typography.titleLarge
+    )
     if (routes.isNotEmpty()) {
         Column {
             for (route in routes) {
@@ -132,6 +129,6 @@ fun RouteHistory() {
             Spacer(modifier = Modifier.height(16.dp))
         }
     } else {
-        Text("When you start a route, it will appear here.")
+        Placeholder("You don't have route history yet. When you start a route, it will appear here.")
     }
 }

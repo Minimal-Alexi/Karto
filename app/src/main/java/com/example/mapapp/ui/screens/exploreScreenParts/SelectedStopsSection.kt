@@ -18,6 +18,13 @@ import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.RouteViewModel
 import com.example.mapapp.viewmodel.ExploreViewModel
+import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
+import kotlin.math.roundToInt
+import androidx.compose.runtime.collectAsState
+import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.ui.components.route.StartingLocationCard
+
 
 @Composable
 fun SelectedStopsSection(
@@ -46,10 +53,10 @@ fun SelectedStopsSection(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                  if (selectedRouteStops.isNotEmpty()) {
                     selectedRouteStops.forEachIndexed { index, place ->
                         SelectedStopItem(
                             index = index,
-                            time = "12:05",
                             locationName = place.displayName.text,
                             distance = getDistanceLabel(place.travelDistance),
                             duration = getTimeLabel(place.travelDuration),
@@ -65,6 +72,8 @@ fun SelectedStopsSection(
                             onMoveUp = { routeViewModel.moveStopUp(index) },
                             onMoveDown = { routeViewModel.moveStopDown(index) }
                         )
+                    } else {
+                        Placeholder(text = "Your route does not have stops yet. Add stops from the map to build your route.")
                     }
                 }
             }

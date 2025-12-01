@@ -12,14 +12,16 @@ import com.google.android.gms.maps.model.LatLng
 data class RouteStopEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name = "route_id") val routeId: Int,
-    val placesId: String,  // this is place unique identifier from the Places API
-    val name: String,
-    val latitude: Double,
-    val longitude: Double,
-    val stayMinutes: Int,
-    val position: Int,
-    val isVisited: Boolean = false,
-    val typeOfPlace: String?
+    @ColumnInfo(name = "place_id") val placesId: String,  // this is place unique identifier from the Places API
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "latitude") val latitude: Double,
+    @ColumnInfo(name = "longitude") val longitude: Double,
+    @ColumnInfo(name = "stay_minutes") val stayMinutes: Int,
+    @ColumnInfo(name = "position") val position: Int,
+    @ColumnInfo(name = "is_visited") val isVisited: Boolean = false,
+    @ColumnInfo(name = "type") val typeOfPlace: String?,
+    @ColumnInfo(name = "distance_to") val distanceTo: Int?,
+    @ColumnInfo(name = "time_to") val timeTo: String?
 ){
     fun toPlace(): Place{
         val typesOfPlaceEnum = TypesOfPlaces.entries.toTypedArray().firstOrNull{
@@ -30,6 +32,8 @@ data class RouteStopEntity(
             id = placesId,
             displayName = DisplayName(name),
             location = LatLng(latitude,longitude),
+            travelDistance = distanceTo,
+            travelDuration = timeTo
         )
     }
 }
