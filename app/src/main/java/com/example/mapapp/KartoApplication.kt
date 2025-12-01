@@ -6,6 +6,7 @@ import com.example.mapapp.data.database.KartoDatabase
 import com.example.mapapp.data.database.route_stops.RouteStopRepository
 import com.example.mapapp.data.database.user.UserRepository
 import com.example.mapapp.data.database.routes.RouteRepository
+import com.example.mapapp.data.database.templates.TemplateRepository
 import com.example.mapapp.utils.SecretsHolder
 
 class KartoApplication : Application() {
@@ -13,9 +14,11 @@ class KartoApplication : Application() {
     val userRepository by lazy { UserRepository(database.userDao()) }
     val routeRepository by lazy { RouteRepository(
         routeDao = database.routeDao(),
-        routeStopDao = database.routeStopDao()
+        routeStopDao = database.routeStopDao(),
+        userDao = database.userDao()
     ) }
     val routeStopRepository by lazy { RouteStopRepository(database.routeStopDao()) }
+    val templateRepository by lazy { TemplateRepository(database.templateDao(), database.templateStopDao()) }
 
     override fun onCreate() {
         super.onCreate()

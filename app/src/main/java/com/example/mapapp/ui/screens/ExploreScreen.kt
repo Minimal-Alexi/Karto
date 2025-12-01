@@ -118,7 +118,7 @@ fun ExploreScreen(
 
     LaunchedEffect(openedRouteId) {
         if (openedRouteId != null) {
-            exploreViewModel.loadSavedRoute(openedRouteId)
+            exploreViewModel.loadTemplate(openedRouteId)
             bottomShowing.value = true
         }
     }
@@ -175,12 +175,12 @@ fun ExploreScreenMap(
             LatLng(60.1699, 24.9384), 12f
         )
     }
-
-    LaunchedEffect(userLocation.value) {
+    var mapReady by remember { mutableStateOf(false) }
+    LaunchedEffect(userLocation.value, mapReady) {
         val loc = userLocation.value
-        if (loc != null) {
+        if (loc != null && mapReady) {
             cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
+                CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
     }
@@ -190,8 +190,7 @@ fun ExploreScreenMap(
         modifier = Modifier.fillMaxSize()
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState
-        ) {
+            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState, onMapLoaded = { mapReady = true }) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),

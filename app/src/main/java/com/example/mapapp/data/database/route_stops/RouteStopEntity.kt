@@ -1,5 +1,6 @@
 package com.example.mapapp.data.database.route_stops
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.mapapp.data.model.DisplayName
@@ -10,7 +11,7 @@ import com.google.android.gms.maps.model.LatLng
 @Entity(tableName = "route_stops")
 data class RouteStopEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val routeId: Int,
+    @ColumnInfo(name = "route_id") val routeId: Int,
     val placesId: String,  // this is place unique identifier from the Places API
     val name: String,
     val latitude: Double,
