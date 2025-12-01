@@ -192,7 +192,6 @@ fun MakeYourRouteCard(
             StartingLocationSelector(nullifyCustomLocation,setOriginLocation, setCustomLocationText)
             Spacer(modifier = Modifier.height(2.dp))
 
-            var range by remember { mutableStateOf(1.5f..9.0f) }
 
             DistanceSlider(
                 distanceValue = distanceToPlaces,
