@@ -196,8 +196,6 @@ fun MakeYourRouteCard(
             PlaceTypeSelector(currentTypesOfPlace,onDropdownMenuChange)
             Spacer(modifier = Modifier.height(1.dp))
 
-            Text("starting from", style = MaterialTheme.typography.bodyMedium)
-
             StartingLocationSelector(nullifyCustomLocation,setOriginLocation, setCustomLocationText)
             Spacer(modifier = Modifier.height(2.dp))
 
