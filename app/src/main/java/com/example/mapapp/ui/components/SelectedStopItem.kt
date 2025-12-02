@@ -1,7 +1,6 @@
 package com.example.mapapp.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,16 +15,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,7 +36,6 @@ import com.example.mapapp.ui.components.buttons.DeleteIconButton
 @Composable
 fun SelectedStopItem(
     index: Int,
-    time: String,
     locationName: String,
     distance: String,
     duration: String,
@@ -68,6 +61,17 @@ fun SelectedStopItem(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column {
+                    Text(
+                        text = distance,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = duration,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
                             .background(
@@ -86,12 +90,12 @@ fun SelectedStopItem(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = distance,
+                        text = if (distance == null) "N/A" else "${distance}m",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = duration,
+                        text = if (duration == null) "N/A" else duration,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -137,49 +141,6 @@ fun SelectedStopItem(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.widthIn(max = 210.dp)
                     )
-
-                    closingInfo?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    // Stay time selector
-                    Box {
-                        OutlinedTextField(
-                            value = selectedStayTime,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Stay time") },
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .clickable { expanded = true },
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select stay time"
-                                )
-                            }
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            stayTimeOptions.forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(option) },
-                                    onClick = {
-                                        selectedStayTime = option
-                                        onStayTimeChange(option)
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
                 }
             }
             Column(
@@ -224,10 +185,9 @@ fun SelectedStopItemPreview() {
             // State 1: Normal
             SelectedStopItem(
                 index = 0,
-                time = "12:00 PM",
                 locationName = "Central Park",
                 distance = "2.5 km",
-                duration = "15 min",
+                duration = "15s",
                 closingInfo = null,
                 placesId = "place_1",
                 navigateToLocationScreen = {},
@@ -244,11 +204,10 @@ fun SelectedStopItemPreview() {
             // State 2: With Closing Info and Longer Text
             SelectedStopItem(
                 index = 1,
-                time = "02:30 PM",
                 locationName = "The National Museum of Natural History",
                 distance = "12 km",
-                duration = "45 min",
-                closingInfo = "Closes in 30 mins",
+                duration = "450s",
+                closingInfo = "",
                 placesId = "place_2",
                 navigateToLocationScreen = {},
                 onStayTimeChange = {},

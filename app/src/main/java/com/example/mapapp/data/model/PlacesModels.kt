@@ -78,8 +78,7 @@ data class Place(
     val id: String,
     val displayName: DisplayName,
     val location: LatLng,
-
-    val travelDistance: String? = null,
+    val travelDistance: Int? = null,
     val travelDuration: String? = null
 )
 

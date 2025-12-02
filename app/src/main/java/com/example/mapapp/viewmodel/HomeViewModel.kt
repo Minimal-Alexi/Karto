@@ -87,7 +87,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun getName(){
         viewModelScope.launch {
             repository.getUser().collectLatest{ user ->
-                if(user?.firstName !=null){
+                if(user?.firstName != null){
                     _firstName.value = "Hello, ${user.firstName}"
                 }
             }

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
+import com.example.mapapp.ui.components.Placeholder
 import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
@@ -80,17 +81,10 @@ fun EmptyRouteScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "You are not on a Route currently!",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = "When you make a Route in the Route-screen and Start it, it will appear here.",
-                textAlign = TextAlign.Center
-            )
+            Placeholder(text = "You are not on a route currently.")
+            Placeholder(text = "When you start a route in the explore tab, it will appear here.")
         }
     }
 }
@@ -261,8 +255,8 @@ fun OnRouteSection(
                         RouteStopItem(
                             index = index,
                             location = routeStop,
-                            distance = "2.7 km",
-                            duration = "30 min",
+                            distance = "${routeStop.distanceTo}m" ?: "",
+                            duration = routeStop.timeTo ?: "",
                             navigateToLocationScreen = navigateToLocationScreen,
                             onVisit = viewModel::visitStop,
                             onUnvisit = viewModel::unvisitStop

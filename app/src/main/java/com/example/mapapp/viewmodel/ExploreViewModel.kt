@@ -33,7 +33,6 @@ import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.SecretsHolder
 import com.example.mapapp.utils.TravelRoute
-import com.example.mapapp.viewmodel.ExploreViewModelParameterRepository
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +44,9 @@ import kotlin.random.Random
 object ExploreViewModelParameterRepository {
     val _routeStops = MutableStateFlow<MutableList<Place>>(mutableStateListOf())
     val _routePolyline = MutableStateFlow<String?>(null)
-    val _routeInfo = MutableStateFlow<String?>(null)
+    val _routeDistance = MutableStateFlow<Int?>(null)
+    val _routeTime = MutableStateFlow<String?>(null)
+
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
     val _userLocation = MutableStateFlow<LatLng?>(null)
     val _customLocation = MutableStateFlow<LatLng?>(null)
@@ -95,9 +96,11 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
     val routePolyline: StateFlow<String?> = _routePolyline
 
-    // private val _routeInfo = MutableStateFlow<String?>(null)
-    private val _routeInfo = ExploreViewModelParameterRepository._routeInfo
-    val routeInfo: StateFlow<String?> = _routeInfo
+    private val _routeDistance = ExploreViewModelParameterRepository._routeDistance
+    val routeDistance: StateFlow<Int?> = _routeDistance
+
+    private val _routeTime = ExploreViewModelParameterRepository._routeTime
+    val routeTime: StateFlow<String?> = _routeTime
 
     private val _LocationCallbackUpdate = 10000L
     private val locationClient: LocationClient =
@@ -245,17 +248,18 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
                 val routeInfoWalkOrDrive =
                     Pair(
-                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                        response.routes?.firstOrNull()?.distanceMeters,
                         response.routes?.firstOrNull()?.duration ?: "No route found"
                     )
 
-                _routeInfo.value =
-                    "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
+                _routeDistance.value = routeInfoWalkOrDrive.first
+                _routeTime.value = routeInfoWalkOrDrive.second
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 _routePolyline.value = null
-                _routeInfo.value = "No route found"
-
+                _routeDistance.value = null
+                _routeTime.value = null
             }
         }
     }
@@ -506,7 +510,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     longitude = stop.location.longitude,
                     stayMinutes = 30,
                     position = index,
-                    typeOfPlace = stop.typeOfPlace?.name
+                    typeOfPlace = stop.typeOfPlace?.name,
+                    distanceTo = stop.travelDistance,
+                    timeTo = stop.travelDuration
                 )
             }
 
@@ -551,6 +557,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _userLocation.value = null
         _customLocation.value = null
         _customLocationText.value = ""
-        _routeInfo.value = null
+        _routeTime.value = null
+        _routeDistance.value = null
     }
 }

@@ -31,8 +31,8 @@ fun DistanceSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Within total distance of", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "%.1f m".format(distanceValue))
+            Text("within the distance of", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "%.1f km".format(distanceValue / 1000))
         }
         Slider(
             value = distanceValue.toFloat(),

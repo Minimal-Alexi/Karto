@@ -25,7 +25,8 @@ import kotlinx.coroutines.launch
 
 class RouteViewModel(application: Application) : AndroidViewModel(application) {
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
-    private val _routeInfo = ExploreViewModelParameterRepository._routeInfo
+    private val _routeDistance = ExploreViewModelParameterRepository._routeDistance
+    private val _routeTime = ExploreViewModelParameterRepository._routeTime
     private val _routeStops = ExploreViewModelParameterRepository._routeStops
     private val _travelMode = ExploreViewModelParameterRepository._travelMode
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
@@ -66,7 +67,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
                 if (i < updatedStops.size) {
                     val currentItem = updatedStops[i]
                     val updatedItem = currentItem.copy(
-                        travelDistance = _routeStopsInfo.value[i].distanceMeters.toString(),
+                        travelDistance = _routeStopsInfo.value[i].distanceMeters,
                         travelDuration = _routeStopsInfo.value[i].duration.toString()
                     )
                     updatedStops[i] = updatedItem
@@ -81,17 +82,18 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
 
             val routeInfoWalkOrDrive =
                 Pair(
-                    response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                    response.routes?.firstOrNull()?.distanceMeters,
                     response.routes?.firstOrNull()?.duration ?: "No route found"
                 )
 
-            _routeInfo.value =
-                "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
+            _routeDistance.value = routeInfoWalkOrDrive.first
+            _routeTime.value = routeInfoWalkOrDrive.second
+
         } catch (e: Exception) {
             e.printStackTrace()
             _routePolyline.value = null
-            _routeInfo.value = "No route found"
-
+            _routeDistance.value = null
+            _routeTime.value = null
         }
 
     }
