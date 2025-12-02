@@ -57,6 +57,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOf
     val customLocation = homeViewModel.customLocation.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
+        /*TODO URGENT!: FIND WAY TO DO LESS API CALLS*/
 //        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
 //        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
 //        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
