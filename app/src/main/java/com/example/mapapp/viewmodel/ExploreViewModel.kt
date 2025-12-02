@@ -149,13 +149,13 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun generateItineraryForUser(placeType: TypesOfPlaces,range : Double, location: LatLng? = null){
+        resetRoute()
         _travelMode.value = TravelModes.WALK
         _distanceToPlaces.value = range
         _placeTypeSelection.value = placeType
         if(location != null){
             setOriginLocation(location)
         }
-        resetRoute()
         getNearbyPlaces()
         val numberOfStops = Random.nextInt(4) + 1
         val selectedPlaces = _nearbyPlaces.value?.take(numberOfStops)
@@ -165,7 +165,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         else{
             // TODO: Throw warning.
         }
-
     }
 
     fun changeTravelMode(newTravelMode: TravelModes) {
