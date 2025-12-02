@@ -148,22 +148,25 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun generateItineraryForUser(placeType: TypesOfPlaces,range : Double, location: LatLng? = null){
-        resetRoute()
-        _travelMode.value = TravelModes.WALK
-        _distanceToPlaces.value = range
-        _placeTypeSelection.value = placeType
-        if(location != null){
+    fun generateItineraryForUser(placeType: TypesOfPlaces,range : Double, location: LatLng){
+        viewModelScope.launch {
+            resetRoute()
+            Log.d(null,"Generating itinerary for: $placeType,$range,$location")
+            _travelMode.value = TravelModes.WALK
+            _distanceToPlaces.value = range
+            _placeTypeSelection.value = placeType
             setOriginLocation(location)
-        }
-        getNearbyPlaces()
-        val numberOfStops = Random.nextInt(4) + 1
-        val selectedPlaces = _nearbyPlaces.value?.take(numberOfStops)
-        if(selectedPlaces != null && !selectedPlaces.isEmpty()){
-            selectedPlaces.forEach { it -> addRouteStop(it)}
-        }
-        else{
-            // TODO: Throw warning.
+            val places = getNearbyPlacesSuspend()
+            val numberOfStops = Random.nextInt(4) + 1
+            val selectedPlaces = places.take(numberOfStops)
+            Log.d(null,"Selected places $selectedPlaces")
+            if(!selectedPlaces.isEmpty()){
+                selectedPlaces.forEach { it -> addRouteStop(it)}
+                Log.d(null, "Route was generated: $selectedPlaces")
+            }
+            else{
+                // TODO: Throw warning.
+            }
         }
     }
 
@@ -508,6 +511,32 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             }
 
             routeRepository.startRoute(route, stops)
+        }
+    }
+
+    suspend fun getNearbyPlacesSuspend(): List<Place> {
+        return try {
+            val userLoc = _userLocation.value ?: return emptyList()
+
+            val placeRequest = PlacesRequest(
+                includedTypes = _placeTypeSelection.value.places,
+                locationRestriction = LocationRestriction(
+                    Circle(userLoc, _distanceToPlaces.value)
+                )
+            )
+
+            val apiKey = SecretsHolder.apiKey ?: return emptyList()
+            val response = PlacesApi.service.getNearbyPlaces(
+                placeRequest,
+                apiKey,
+                "places.displayName,places.location,places.id"
+            )
+
+            response.places.forEach { it.typeOfPlace = _placeTypeSelection.value }
+            response.places
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 
