@@ -46,7 +46,7 @@ import com.example.mapapp.viewmodel.HomeViewModel
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOfPlaces, Double, LatLng?) -> Unit) {
 
     val greeting = homeViewModel.firstName.collectAsState().value
     val location = homeViewModel.greetingLocation.collectAsState().value
@@ -54,6 +54,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
     val typeOfPlaceToVisit = homeViewModel.placeTypeSelector.collectAsState().value
     val suggestionCardNumbers = homeViewModel.suggestionCardNumber.collectAsState().value
+    val customLocation = homeViewModel.customLocation.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
         homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
@@ -84,7 +85,10 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             homeViewModel::changePlaceType,
             homeViewModel::nullCustomLocation,
             homeViewModel::setOriginLocation,
-            homeViewModel::setCustomLocationText)
+            homeViewModel::setCustomLocationText,
+            generateRoute,
+            typeOfPlaceToVisit,
+            customLocation)
         SuggestionsSection(suggestionCardNumbers,location)
         Spacer(modifier = Modifier.height(0.dp))
     }
@@ -165,7 +169,10 @@ fun MakeYourRouteCard(
     onDropdownMenuChange: (TypesOfPlaces) -> Unit,
     nullifyCustomLocation: () -> Unit,
     setOriginLocation: (LatLng) -> Unit,
-    setCustomLocationText: (String) -> Unit
+    setCustomLocationText: (String) -> Unit,
+    generateRoute:(TypesOfPlaces, Double, LatLng?) -> Unit,
+    typesOfPlaces: TypesOfPlaces,
+    customLocation: LatLng?
     ) {
     Box(
         modifier = Modifier
@@ -202,7 +209,7 @@ fun MakeYourRouteCard(
                 text = "Make A Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
             ) {
-                /* TODO: Generate route */
+                generateRoute(typesOfPlaces,distanceToPlaces,customLocation)
             }
         }
     }

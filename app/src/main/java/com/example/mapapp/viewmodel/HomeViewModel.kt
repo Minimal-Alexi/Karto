@@ -58,7 +58,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     /*
 
     */
-    val _customLocation = MutableStateFlow<LatLng?>(null)
+    private val _customLocation = MutableStateFlow<LatLng?>(null)
+    val customLocation: StateFlow<LatLng?> = _customLocation
     val _customLocationText = MutableStateFlow<String>("")
 
     private val locationClient: LocationClient =
