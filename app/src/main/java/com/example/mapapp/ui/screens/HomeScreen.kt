@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -11,11 +12,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,12 +23,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import com.example.mapapp.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material.icons.filled.Nature
 import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.LocalBar
@@ -49,7 +44,8 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.debounce
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOfPlaces, Double, LatLng) -> Unit) {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOfPlaces, Double, LatLng) -> Unit,
+               navigateToLocationScreen: (String) -> Unit) {
 
     val greeting = homeViewModel.firstName.collectAsState().value
     val location = homeViewModel.greetingLocation.collectAsState().value
@@ -57,6 +53,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOf
     val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
     val typeOfPlaceToVisit = homeViewModel.placeTypeSelector.collectAsState().value
     val suggestionCardNumbers = homeViewModel.suggestionCardNumber.collectAsState().value
+    val suggestionsIdMap = homeViewModel.suggestionRecommendations.collectAsState().value
     val customLocation = homeViewModel.customLocation.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
@@ -101,7 +98,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOf
             typeOfPlaceToVisit,
             /* TODO:Extremely unsafe if the user clicks the button before initialization. But this will do.*/
             customLocation?:userCoordinates?: LatLng(0.0,0.0))
-        SuggestionsSection(suggestionCardNumbers,location)
+        SuggestionsSection(suggestionCardNumbers,suggestionsIdMap,navigateToLocationScreen,location)
         Spacer(modifier = Modifier.height(0.dp))
     }
 }
@@ -226,7 +223,9 @@ fun MakeYourRouteCard(
 }
 
 @Composable
-fun SuggestionsSection(suggestionsMap: HashMap<TypesOfPlaces,Int>,
+fun SuggestionsSection(suggestionsNumbersMap: HashMap<TypesOfPlaces,Int>,
+                       suggestionsIdMap: HashMap<TypesOfPlaces,String>,
+                       navigateToLocationScreen: (String) -> Unit,
                        location:String) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -240,25 +239,35 @@ fun SuggestionsSection(suggestionsMap: HashMap<TypesOfPlaces,Int>,
         SuggestionItem(
             icon = Icons.Default.Nature,
             title = "Nature Locations",
-            subtitle = "${suggestionsMap[TypesOfPlaces.NATURAL_FEATURES]} locations found in $location"
+            subtitle = "${suggestionsNumbersMap[TypesOfPlaces.NATURAL_FEATURES]} locations found in $location",
+            placeId = suggestionsIdMap[TypesOfPlaces.NATURAL_FEATURES]!!,
+            navigateToLocationScreen = navigateToLocationScreen,
         )
 
         SuggestionItem(
             icon = Icons.Default.BeachAccess,
             title = "Beaches",
-            subtitle = "${suggestionsMap[TypesOfPlaces.BEACHES]} locations found in $location"
+            subtitle = "${suggestionsNumbersMap[TypesOfPlaces.BEACHES]} locations found in $location",
+            placeId = suggestionsIdMap[TypesOfPlaces.BEACHES]!!,
+            navigateToLocationScreen = navigateToLocationScreen,
         )
 
         SuggestionItem(
             icon = Icons.Default.LocalBar,
             title = "Bars",
-            subtitle = "${suggestionsMap[TypesOfPlaces.RESTAURANTS]} locations found in $location"
+            subtitle = "${suggestionsNumbersMap[TypesOfPlaces.RESTAURANTS]} locations found in $location",
+            placeId = suggestionsIdMap[TypesOfPlaces.RESTAURANTS]!!,
+            navigateToLocationScreen = navigateToLocationScreen,
         )
     }
 }
 
 @Composable
-fun SuggestionItem(icon: ImageVector, title: String, subtitle: String) {
+fun SuggestionItem(icon: ImageVector,
+                   title: String,
+                   subtitle: String,
+                   placeId:String,
+                   navigateToLocationScreen: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,7 +275,8 @@ fun SuggestionItem(icon: ImageVector, title: String, subtitle: String) {
                 color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(16.dp)
             )
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable{navigateToLocationScreen(placeId)},
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

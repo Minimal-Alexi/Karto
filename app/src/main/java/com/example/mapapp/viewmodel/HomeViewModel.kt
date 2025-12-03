@@ -60,6 +60,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         TypesOfPlaces.NATURAL_FEATURES to "",
         TypesOfPlaces.RESTAURANTS to ""
     ))
+    val suggestionRecommendations: StateFlow<HashMap<TypesOfPlaces,String>> = _suggestionRecommendations
 
     /*
 
@@ -131,9 +132,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 e.printStackTrace()
             }
         }
-    }
-    fun getPlaceId(typeOfPlaceToFetch: TypesOfPlaces):String?{
-        return _suggestionRecommendations.value[typeOfPlaceToFetch]
     }
     fun getReverseGeocodedLocation(){
         viewModelScope.launch{
