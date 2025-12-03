@@ -547,7 +547,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun resetRoute() {
-        routeTitle.value = ""
+        routeTitle.value = "Default Title"
         _routeStops.value = emptyList()
         _travelMode.value = TravelModes.WALK
         _distanceToPlaces.value = 1000.0 // default distance
