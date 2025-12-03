@@ -68,7 +68,7 @@ fun StartingLocationCard(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .defaultMinSize(minHeight = 64.dp)
+                    .defaultMinSize(minHeight = 72.dp)
             ) {
                 Text(
                     text = "Starting From"
