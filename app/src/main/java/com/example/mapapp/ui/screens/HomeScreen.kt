@@ -1,5 +1,6 @@
 package com.example.mapapp.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.BeachAccess
 import androidx.compose.material.icons.filled.LocalBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.TypesOfPlaces
@@ -44,6 +46,7 @@ import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.viewmodel.HomeViewModel
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.flow.debounce
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOfPlaces, Double, LatLng) -> Unit) {
@@ -57,11 +60,18 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOf
     val customLocation = homeViewModel.customLocation.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
-        /*TODO URGENT!: FIND WAY TO DO LESS API CALLS*/
-//        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
-//        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
-//        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
     }
+    LaunchedEffect(Unit) {
+        snapshotFlow { userCoordinates }
+            .debounce(3000)
+            .collect { coords ->
+                Log.d(null,"API CALL X3")
+                homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
+                homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
+                homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
+            }
+    }
+
     LaunchedEffect(greeting) {
         homeViewModel.getName()
     }
