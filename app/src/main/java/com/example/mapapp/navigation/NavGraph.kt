@@ -91,8 +91,9 @@ fun NavGraph() {
                 val exploreViewModel: ExploreViewModel = viewModel()
                 HomeScreen(generateRoute = {placeType,range,location ->
                     exploreViewModel.generateItineraryForUser(placeType,range,location)
-                    navigateToScreen(Constants.EXPLORE_SCREEN_ROUTE)
-            }) }
+                    navigateToScreen(Constants.EXPLORE_SCREEN_ROUTE)},
+                    navigateToLocationScreen = navigateToLocationScreen
+                ) }
             composable(
                 route = "explore?routeId={routeId}",
                 arguments = listOf(
