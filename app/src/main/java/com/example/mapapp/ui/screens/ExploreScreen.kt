@@ -157,6 +157,8 @@ fun ExploreScreenMap(
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
 
+    val polyline = exploreViewModel.routePolyline.collectAsState()
+
     /*
     Camera position value handling
     */
@@ -229,7 +231,7 @@ fun ExploreScreenMap(
                     })
             }
 
-            MapPolyline(exploreViewModel, cameraPositionState.position.zoom)
+            MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
 
         }
     }

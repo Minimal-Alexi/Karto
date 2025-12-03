@@ -3,10 +3,9 @@ package com.example.mapapp.ui.components.map
 import android.R
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
-import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CustomCap
 import com.google.android.gms.maps.model.LatLng
@@ -21,11 +20,9 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 
 @Composable
 fun MapPolyline(
-    exploreViewModel: ExploreViewModel,
+    polyline: MutableState<String?>,
     zoomLevel: Float
     ) {
-    val polyline = exploreViewModel.routePolyline.collectAsState()
-
     if (polyline.value != null) {
         val points = PolyUtil.decode(polyline.value)
 

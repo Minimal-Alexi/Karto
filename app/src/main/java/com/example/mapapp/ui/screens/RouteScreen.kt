@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
 import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.ui.components.map.MapPolyline
 import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
@@ -194,28 +196,8 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
 
         val polyline = routeScreenViewModel.routePolyline.collectAsState()
 
-        if (polyline.value != null) {
-            val points = PolyUtil.decode(polyline.value)
-            Polyline(
-                points = points,
-                width = 10f,
-                geodesic = true, // Follows the curvature of the earth for better directionality
-                // Add a CustomCap to create an arrow at the end of the line
-                endCap = CustomCap(
-                    BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
-                    // Note: Replace 'android.R.drawable.arrow_up_float' with your own
-                    // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
-                ),
-                spans = listOf(
-                    StyleSpan(
-                        StrokeStyle.gradientBuilder(
-                            MaterialTheme.colorScheme.primary.hashCode(),
-                            MaterialTheme.colorScheme.secondary.hashCode()
-                        ).build(),
-                        1.0 // Apply to 100% of the line
-                    )
-                ),)
-        }
+        MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
+
     }
 }
 
