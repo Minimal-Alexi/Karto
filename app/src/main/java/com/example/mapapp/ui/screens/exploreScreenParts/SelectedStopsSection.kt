@@ -50,8 +50,7 @@ fun SelectedStopsSection(
                     exploreViewModel.customLocationText
                 )
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     if (selectedRouteStops.isNotEmpty()) {
                         selectedRouteStops.forEachIndexed { index, place ->
