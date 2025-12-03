@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,7 +40,7 @@ import com.example.mapapp.ui.screens.EditableHeading
 import com.example.mapapp.ui.screens.NearbyPlaceSelector
 import com.example.mapapp.ui.screens.RouteSummarySection
 import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
-import com.example.mapapp.utils.route.RouteViewModel
+import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
 
 @Composable
@@ -83,7 +81,7 @@ fun BottomMenu(
     expanded: MutableState<Boolean>,
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
-    routeViewModel: RouteViewModel = viewModel(),
+    exploreViewModelRouteUtil: ExploreViewModelRouteUtil = viewModel(),
     navigateToScreen: (String) -> Unit,
     openedRouteId: Int? = null,
     onResetRoute: () -> Unit
@@ -150,9 +148,9 @@ fun BottomMenu(
                                 backgroundColor = MaterialTheme.colorScheme.primary,
                             ) {
                                 if (checkedAutoSort) {
-                                    routeViewModel.runMatrixFlow()
+                                    exploreViewModelRouteUtil.runMatrixFlow()
                                 } else {
-                                    routeViewModel.runWithoutSorting()
+                                    exploreViewModelRouteUtil.runWithoutSorting()
                                 }
                             }
                         }
@@ -162,7 +160,7 @@ fun BottomMenu(
                             exploreViewModel::removeRouteStop,
                             exploreViewModel.routeStops.collectAsState().value,
                             exploreViewModel = exploreViewModel,
-                            routeViewModel = routeViewModel
+                            exploreViewModelRouteUtil = exploreViewModelRouteUtil
                         )
 
                         RouteSummarySection(exploreViewModel)

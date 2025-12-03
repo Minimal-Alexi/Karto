@@ -2,7 +2,6 @@ package com.example.mapapp.utils.route
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.model.LatLngLiteral
@@ -23,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RouteViewModel(application: Application) : AndroidViewModel(application) {
+class ExploreViewModelRouteUtil(application: Application) : AndroidViewModel(application) {
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
     private val _routeDistance = ExploreViewModelParameterRepository._routeDistance
     private val _routeTime = ExploreViewModelParameterRepository._routeTime

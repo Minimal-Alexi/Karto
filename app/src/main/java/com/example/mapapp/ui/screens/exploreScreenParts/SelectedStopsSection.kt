@@ -16,7 +16,7 @@ import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.StartingLocationCard
 import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
-import com.example.mapapp.utils.route.RouteViewModel
+import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
 import sh.calvin.reorderable.rememberReorderableLazyColumnState
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -32,7 +32,7 @@ fun SelectedStopsSection(
     deleteOnClick: (Place) -> Unit,
     selectedRouteStops: MutableList<Place>,
     exploreViewModel: ExploreViewModel,
-    routeViewModel: RouteViewModel,
+    exploreViewModelRouteUtil: ExploreViewModelRouteUtil,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -69,8 +69,8 @@ fun SelectedStopsSection(
                                 deleteOnClick = { deleteOnClick(place) },
                                 isFirst = index == 0,
                                 isLast = index == selectedRouteStops.lastIndex,
-                                onMoveUp = { routeViewModel.moveStopUp(index) },
-                                onMoveDown = { routeViewModel.moveStopDown(index) }
+                                onMoveUp = { exploreViewModelRouteUtil.moveStopUp(index) },
+                                onMoveDown = { exploreViewModelRouteUtil.moveStopDown(index) }
                             )
                         }
                     } else {

@@ -35,6 +35,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import com.google.maps.android.SphericalUtil
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -49,11 +51,12 @@ import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.TopMenu
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
+import com.example.mapapp.ui.components.map.MapPolyline
 import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
-import com.example.mapapp.utils.route.RouteViewModel
+import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -73,10 +76,10 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 fun ExploreScreen(
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
-    routeViewModel: RouteViewModel = viewModel(),
+    exploreViewModelRouteUtil: ExploreViewModelRouteUtil = viewModel(),
     navigateToScreen: (String) -> Unit,
     openedRouteId: Int? = null,
-    onResetRoute: () -> Unit
+    onResetRoute: () -> Unit,
 ) {
     val _top = remember { mutableStateOf(true) }
     val _bottom = remember { mutableStateOf(false) }
@@ -129,7 +132,7 @@ fun ExploreScreen(
                 expanded = bottomShowing,
                 navigateToLocationScreen = navigateToLocationScreen,
                 exploreViewModel = exploreViewModel,
-                routeViewModel = routeViewModel,
+                exploreViewModelRouteUtil = exploreViewModelRouteUtil,
                 navigateToScreen = navigateToScreen,
                 openedRouteId = openedRouteId,
                 onResetRoute = onResetRoute
@@ -141,7 +144,7 @@ fun ExploreScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreenMap(
-    exploreViewModel: ExploreViewModel
+    exploreViewModel: ExploreViewModel,
 ) {/*
     Selected place info card handler
     */
@@ -153,7 +156,8 @@ fun ExploreScreenMap(
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val polyline = exploreViewModel.routePolyline.collectAsState()/*
+
+    /*
     Camera position value handling
     */
 
@@ -225,29 +229,8 @@ fun ExploreScreenMap(
                     })
             }
 
-            if (polyline.value != null) {
-                val points = PolyUtil.decode(polyline.value)
-                Polyline(
-                    points = points,
-                    width = 10f,
-                    geodesic = true, // Follows the curvature of the earth for better directionality
-                    // Add a CustomCap to create an arrow at the end of the line
-                    endCap = CustomCap(
-                        BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
-                        // Note: Replace 'android.R.drawable.arrow_up_float' with your own
-                        // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
-                    ),
-                    spans = listOf(
-                        StyleSpan(
-                            StrokeStyle.gradientBuilder(
-                                MaterialTheme.colorScheme.primary.hashCode(),
-                                MaterialTheme.colorScheme.secondary.hashCode()
-                            ).build(), 1.0 // Apply to 100% of the line
-                        )
-                    ),
+            MapPolyline(exploreViewModel, cameraPositionState.position.zoom)
 
-                    )
-            }
         }
     }
     if (selectedPlace != null) {
@@ -299,7 +282,8 @@ fun EditableHeading(routeTitle: MutableState<String>) {
             IconButton(
                 onClick = {
                     routeTitle.value = textFieldValue.value
-                    beingEdited.value = false }
+                    beingEdited.value = false
+                }
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Save,
