@@ -1,7 +1,6 @@
 package com.example.mapapp.ui.screens.exploreScreenParts
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,12 +17,7 @@ import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
-import sh.calvin.reorderable.rememberReorderableLazyColumnState
-import sh.calvin.reorderable.rememberReorderableLazyListState
-import kotlin.math.roundToInt
-import androidx.compose.runtime.collectAsState
 import com.example.mapapp.ui.components.Placeholder
-import com.example.mapapp.ui.components.route.StartingLocationCard
 
 
 @Composable

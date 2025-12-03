@@ -68,34 +68,6 @@ fun SelectedStopItem(
                 .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /** reorder buttons */
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(0.1f)
-            ) {
-                IconButton(
-                    onClick = onMoveUp,
-                    enabled = !isFirst,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowUp,
-                        contentDescription = "Move Up"
-                    )
-                }
-                IconButton(
-                    onClick = onMoveDown,
-                    enabled = !isLast,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Move Down"
-                    )
-                }
-            }
-
             /** track line test */
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -165,7 +137,8 @@ fun SelectedStopItem(
             /** buttons */
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.2f)
             ) {
                 // "Read more about the route stop" button
                 IconButton(
@@ -186,6 +159,34 @@ fun SelectedStopItem(
                     onClick = deleteOnClick,
                     modifier = Modifier.size(32.dp)
                 )
+            }
+
+            /** reorder buttons */
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.1f)
+            ) {
+                IconButton(
+                    onClick = onMoveUp,
+                    enabled = !isFirst,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowUp,
+                        contentDescription = "Move Up"
+                    )
+                }
+                IconButton(
+                    onClick = onMoveDown,
+                    enabled = !isLast,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Move Down"
+                    )
+                }
             }
         }
     }
