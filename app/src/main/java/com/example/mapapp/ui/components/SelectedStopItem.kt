@@ -96,12 +96,12 @@ fun SelectedStopItem(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (distance == null) "N/A" else "${distance}m",
+                        text = distance,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = if (duration == null) "N/A" else duration,
+                        text = duration,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )

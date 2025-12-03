@@ -1,5 +1,6 @@
 package com.example.mapapp.viewmodel
 
+import NotificationHelper
 import android.app.Application
 import android.location.Location.distanceBetween
 import android.util.Log
@@ -101,8 +102,40 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
                 )
                 if(distanceResult[0] <= _DistanceToRouteStop){
                     visitStop(stop.id)
+
+                    // Add a arrival notification here
+                    Log.d("RouteScreenViewModel", "Visited stop: ${stop.name}")
+                    showNotification("Arrival Notification", "You have arrived at ${stop.name}")
                 }
             }
         }
+    }
+
+    /**
+     * Code of Notifications
+     */
+    private val notificationHelper = NotificationHelper(application)
+
+    /**
+     * call this function to send a notification
+     */
+    fun showNotification(title: String, message: String) {
+        // call this function on a coroutine
+        viewModelScope.launch {
+            // 发送简单通知
+            notificationHelper.sendSimpleNotification(
+                title = title,
+                message = message,
+                // Option: Specify the Activity to open when the notification is clicked
+                // targetActivityClass = DetailActivity::class.java
+            )
+        }
+    }
+
+    /**
+     * call this function to cancel a notification
+     */
+    fun hideNotification() {
+        notificationHelper.cancelNotification()
     }
 }
