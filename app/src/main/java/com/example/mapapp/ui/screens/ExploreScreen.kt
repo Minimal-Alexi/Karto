@@ -346,7 +346,8 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
             exploreViewModel::changePlaceType
         )
 
-        StartingLocationSelector()
+        StartingLocationSelector(exploreViewModel::nullCustomLocation,
+            exploreViewModel::setOriginLocation,exploreViewModel::setCustomLocationText)
 
         DistanceSlider(
             exploreViewModel.distanceToPlaces.collectAsState().value,

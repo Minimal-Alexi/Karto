@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Collections.emptyList
+import kotlin.random.Random
 
 object ExploreViewModelParameterRepository {
     val _routeStops = MutableStateFlow<MutableList<Place>>(mutableStateListOf())
@@ -147,6 +148,28 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             )
             _customLocationText.value =
                 "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
+        }
+    }
+
+    fun generateItineraryForUser(placeType: TypesOfPlaces,range : Double, location: LatLng){
+        viewModelScope.launch {
+            resetRoute()
+            Log.d(null,"Generating itinerary for: $placeType,$range,$location")
+            _travelMode.value = TravelModes.WALK
+            _distanceToPlaces.value = range
+            _placeTypeSelection.value = placeType
+            setOriginLocation(location)
+            val places = getNearbyPlacesSuspend()
+            val numberOfStops = Random.nextInt(4) + 1
+            val selectedPlaces = places.take(numberOfStops)
+            Log.d(null,"Selected places $selectedPlaces")
+            if(!selectedPlaces.isEmpty()){
+                selectedPlaces.forEach { it -> addRouteStop(it)}
+                Log.d(null, "Route was generated: $selectedPlaces")
+            }
+            else{
+                // TODO: Throw warning.
+            }
         }
     }
 
@@ -494,6 +517,32 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             }
 
             routeRepository.startRoute(route, stops)
+        }
+    }
+
+    suspend fun getNearbyPlacesSuspend(): List<Place> {
+        return try {
+            val userLoc = _userLocation.value ?: return emptyList()
+
+            val placeRequest = PlacesRequest(
+                includedTypes = _placeTypeSelection.value.places,
+                locationRestriction = LocationRestriction(
+                    Circle(userLoc, _distanceToPlaces.value)
+                )
+            )
+
+            val apiKey = SecretsHolder.apiKey ?: return emptyList()
+            val response = PlacesApi.service.getNearbyPlaces(
+                placeRequest,
+                apiKey,
+                "places.displayName,places.location,places.id"
+            )
+
+            response.places.forEach { it.typeOfPlace = _placeTypeSelection.value }
+            response.places
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 

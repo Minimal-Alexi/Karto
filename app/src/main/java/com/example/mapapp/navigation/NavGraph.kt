@@ -5,6 +5,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,6 +19,7 @@ import com.example.mapapp.ui.screens.LocationScreen
 import com.example.mapapp.ui.screens.RouteScreen
 import com.example.mapapp.ui.screens.SavedScreen
 import com.example.mapapp.ui.screens.SettingsScreen
+import com.example.mapapp.viewmodel.ExploreViewModel
 
 object Constants {
     const val LOCATION_SCREEN_ROUTE = "location/{locationID}"
@@ -85,7 +87,12 @@ fun NavGraph() {
             startDestination = "home",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("home") { HomeScreen() }
+            composable("home") {
+                val exploreViewModel: ExploreViewModel = viewModel()
+                HomeScreen(generateRoute = {placeType,range,location ->
+                    exploreViewModel.generateItineraryForUser(placeType,range,location)
+                    navigateToScreen(Constants.EXPLORE_SCREEN_ROUTE)
+            }) }
             composable(
                 route = "explore?routeId={routeId}",
                 arguments = listOf(

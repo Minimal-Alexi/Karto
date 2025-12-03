@@ -41,10 +41,12 @@ import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.buttons.PrimaryButton
+import com.example.mapapp.ui.components.route.StartingLocationSelector
 import com.example.mapapp.viewmodel.HomeViewModel
+import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOfPlaces, Double, LatLng) -> Unit) {
 
     val greeting = homeViewModel.firstName.collectAsState().value
     val location = homeViewModel.greetingLocation.collectAsState().value
@@ -52,11 +54,13 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val distanceToPlaces = homeViewModel.distanceToPlaces.collectAsState().value
     val typeOfPlaceToVisit = homeViewModel.placeTypeSelector.collectAsState().value
     val suggestionCardNumbers = homeViewModel.suggestionCardNumber.collectAsState().value
+    val customLocation = homeViewModel.customLocation.collectAsState().value
     LaunchedEffect(location, userCoordinates){
         homeViewModel.getReverseGeocodedLocation()
-        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
-        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
-        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
+        /*TODO URGENT!: FIND WAY TO DO LESS API CALLS*/
+//        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.BEACHES)
+//        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.NATURAL_FEATURES)
+//        homeViewModel.getNumberOfNearbySuggestions(TypesOfPlaces.RESTAURANTS)
     }
     LaunchedEffect(greeting) {
         homeViewModel.getName()
@@ -79,7 +83,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
         MakeYourRouteCard(typeOfPlaceToVisit,
             distanceToPlaces,
             homeViewModel::changeDistanceToPlaces,
-            homeViewModel::changePlaceType)
+            homeViewModel::changePlaceType,
+            homeViewModel::nullCustomLocation,
+            homeViewModel::setOriginLocation,
+            homeViewModel::setCustomLocationText,
+            generateRoute,
+            typeOfPlaceToVisit,
+            /* TODO:Extremely unsafe if the user clicks the button before initialization. But this will do.*/
+            customLocation?:userCoordinates?: LatLng(0.0,0.0))
         SuggestionsSection(suggestionCardNumbers,location)
         Spacer(modifier = Modifier.height(0.dp))
     }
@@ -157,7 +168,14 @@ fun MakeYourRouteCard(
     currentTypesOfPlace: TypesOfPlaces,
     distanceToPlaces: Double,
     distanceSliderOnChange: (Double) -> Unit,
-    onDropdownMenuChange: (TypesOfPlaces) -> Unit) {
+    onDropdownMenuChange: (TypesOfPlaces) -> Unit,
+    nullifyCustomLocation: () -> Unit,
+    setOriginLocation: (LatLng) -> Unit,
+    setCustomLocationText: (String) -> Unit,
+    generateRoute:(TypesOfPlaces, Double, LatLng) -> Unit,
+    typesOfPlaces: TypesOfPlaces,
+    customLocation: LatLng
+    ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,35 +196,9 @@ fun MakeYourRouteCard(
             PlaceTypeSelector(currentTypesOfPlace,onDropdownMenuChange)
             Spacer(modifier = Modifier.height(1.dp))
 
-            Text("starting from", style = MaterialTheme.typography.bodyMedium)
-
-            var location by remember { mutableStateOf("") }
-
-            OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Enter location") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "Location icon"
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
+            StartingLocationSelector(nullifyCustomLocation,setOriginLocation, setCustomLocationText)
             Spacer(modifier = Modifier.height(2.dp))
-            Text("within total walking distance of", style = MaterialTheme.typography.bodyMedium)
 
-            var range by remember { mutableStateOf(1.5f..9.0f) }
 
             DistanceSlider(
                 distanceValue = distanceToPlaces,
@@ -217,7 +209,7 @@ fun MakeYourRouteCard(
                 text = "Make A Route",
                 backgroundColor = MaterialTheme.colorScheme.secondary
             ) {
-                /* TODO: Generate route */
+                generateRoute(typesOfPlaces,distanceToPlaces,customLocation)
             }
         }
     }
