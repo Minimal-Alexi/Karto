@@ -55,6 +55,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     ))
     val suggestionCardNumber: StateFlow<HashMap<TypesOfPlaces,Int>> = _suggestionCardNumbers
 
+    private val _suggestionRecommendations = MutableStateFlow<HashMap<TypesOfPlaces,String>>(hashMapOf(
+        TypesOfPlaces.BEACHES to "",
+        TypesOfPlaces.NATURAL_FEATURES to "",
+        TypesOfPlaces.RESTAURANTS to ""
+    ))
+
     /*
 
     */
@@ -116,6 +122,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         _suggestionCardNumbers.value.toMutableMap().apply {
                             this[typeOfPlaceToFetch] = response.places.size
                         } as HashMap<TypesOfPlaces, Int>
+                    val takeRandomId = response.places.shuffled().first().id
+                    _suggestionRecommendations.value = _suggestionRecommendations.value.toMutableMap().apply {
+                        this[typeOfPlaceToFetch] = takeRandomId
+                    } as HashMap<TypesOfPlaces,String>
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
