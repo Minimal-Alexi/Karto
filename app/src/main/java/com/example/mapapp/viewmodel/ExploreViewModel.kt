@@ -352,7 +352,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _generatedRoute.value = generateRouteGreedy
     }
 
-
     fun runMatrixFlow() {
         viewModelScope.launch {
             if (_userLocation.value == null) {
@@ -396,7 +395,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
                 fetchRoute(origin, destination, intermediate)
             }
-
         }
     }
 
@@ -404,7 +402,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     /**
      * Code of route polyline is above
      */
-
     fun getNearbyPlaces() {
         viewModelScope.launch {
             try {
