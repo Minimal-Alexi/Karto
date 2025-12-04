@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class RouteScreenViewModel(application: Application) : AndroidViewModel(application) {
+class RouteViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
     private val routeStopRepository = (application as KartoApplication).routeStopRepository
 

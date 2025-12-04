@@ -62,9 +62,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     ))
     val suggestionRecommendations: StateFlow<HashMap<TypesOfPlaces,String>> = _suggestionRecommendations
 
-    /*
-
-    */
     private val _customLocation = MutableStateFlow<LatLng?>(null)
     val customLocation: StateFlow<LatLng?> = _customLocation
     val _customLocationText = MutableStateFlow<String>("")
@@ -91,11 +88,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
-    fun getName(){
+    fun getName() {
         viewModelScope.launch {
-            repository.getUser().collectLatest{ user ->
-                if(user?.firstName != null){
-                    _firstName.value = "Hello, ${user.firstName}"
+            repository.getUser().collectLatest { user ->
+                val name = user?.firstName
+                if (name != null && name.isNotEmpty()) {
+                    _firstName.value = "Hello, $name"
+                } else {
+                    _firstName.value = "Welcome to Karto!"
                 }
             }
         }

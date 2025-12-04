@@ -74,6 +74,10 @@ fun HistoryRouteCard(
                             ).format(java.util.Date(route.completedAt))
                         }", style = MaterialTheme.typography.bodyMedium
                     )
+                } else {
+                    Text(
+                        text = "Not completed yet", style = MaterialTheme.typography.bodyMedium
+                    )
                 }
                 Text(text = "${route.stopsCount} locations", style = MaterialTheme.typography.bodyMedium)
             }

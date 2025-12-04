@@ -16,6 +16,7 @@ import com.example.mapapp.data.database.user.UserDao
 import com.example.mapapp.data.database.user.UserEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
         TemplateEntity::class,
         TemplateStopEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class KartoDatabase : RoomDatabase() {
@@ -55,19 +56,21 @@ abstract class KartoDatabase : RoomDatabase() {
 
                 INSTANCE = instance
 
-                // Insert a default user after DB initiation
+                // Insert a default user after DB initiation if it doesn't exist
                 ioScope.launch {
-                    instance.userDao().upsertUser(
-                        UserEntity(
-                            id = UserEntity.SINGLETON_ID,
-                            firstName = "",
-                            lastName = "",
-                            darkThemePreferred = false,
-                            currentRouteId = null
+                    val existingUser = instance.userDao().getUser().firstOrNull()
+                    if (existingUser == null) {
+                        instance.userDao().upsertUser(
+                            UserEntity(
+                                id = UserEntity.SINGLETON_ID,
+                                firstName = "",
+                                lastName = "",
+                                darkThemePreferred = false,
+                                currentRouteId = null
+                            )
                         )
-                    )
+                    }
                 }
-
                 instance
             }
         }

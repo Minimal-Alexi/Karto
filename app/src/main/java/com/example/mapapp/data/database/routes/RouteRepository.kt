@@ -41,7 +41,6 @@ class RouteRepository(
                 stop.copy(routeId = id)
             )
         }
-
         userDao.setCurrentRoute(id)
     }
 

@@ -232,7 +232,6 @@ fun ExploreScreenMap(
             }
 
             MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
-
         }
     }
     if (selectedPlace != null) {
