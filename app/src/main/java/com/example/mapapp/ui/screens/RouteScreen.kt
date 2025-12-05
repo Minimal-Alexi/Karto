@@ -51,9 +51,10 @@ import com.google.android.gms.maps.model.CameraPosition
 @Composable
 fun RouteScreen(
     navigateToLocationScreen: (String) -> Unit,
-    currentRouteViewModel: RouteViewModel = viewModel(),
     navigateToScreen: (String) -> Unit
 ) {
+    val currentRouteViewModel = viewModel<RouteViewModel>()
+
     val currentRouteFlow = remember { currentRouteViewModel.currentRoute }
     val currentRoute = currentRouteFlow.collectAsState().value
 
@@ -65,7 +66,8 @@ fun RouteScreen(
             navigateToLocationScreen = navigateToLocationScreen,
             navigateToScreen = navigateToScreen,
             currentRoute = currentRoute,
-            currentStops = currentStops
+            currentStops = currentStops,
+            viewModel = currentRouteViewModel
         )
     } else {
         EmptyRouteScreen()
@@ -93,9 +95,9 @@ fun CurrentRouteScreen(
     navigateToLocationScreen: (String) -> Unit,
     navigateToScreen: (String) -> Unit,
     currentRoute: RouteEntity,
-    currentStops: List<RouteStopEntity>?
+    currentStops: List<RouteStopEntity>?,
+    viewModel: RouteViewModel
 ) {
-    val viewModel = viewModel<RouteViewModel>()
     val mapInteraction = remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -112,7 +114,7 @@ fun CurrentRouteScreen(
             MapWrapper(viewModel, mapInteraction) { RouteScreenMap(viewModel) }
         }
         item {
-            OnRouteSection(navigateToLocationScreen)
+            OnRouteSection(navigateToLocationScreen, viewModel)
         }
         item {
             RouteProgressSection(currentStops)
@@ -191,22 +193,18 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
         /*
          * Show polyline in the screen
          */
-
         val polyline = routeViewModel.routePolyline.collectAsState()
 
         MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
-
     }
 }
 
 @Composable
 fun OnRouteSection(
     navigateToLocationScreen: (String) -> Unit,
+    viewModel: RouteViewModel
 ) {
-    val viewModel = viewModel<RouteViewModel>()
-
-    val currentRouteStopsFlow = remember { viewModel.currentStops }
-    val currentStops = currentRouteStopsFlow.collectAsState().value
+    val currentStops = viewModel.currentStops.collectAsState().value
 
     Column(
         modifier = Modifier.fillMaxWidth(),

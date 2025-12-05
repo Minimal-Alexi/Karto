@@ -89,7 +89,8 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
             currentRoute.value?.let { routeRepository.completeRoute(it.id) }
         }
     }
-    private fun checkDistanceToStops(userLatitude: Double,userLongitude: Double){
+
+    private fun checkDistanceToStops(userLatitude: Double, userLongitude: Double){
         if(currentStops.value!= null){
             for(stop in currentStops.value!!){
                 val distanceResult = FloatArray(1)
@@ -100,7 +101,7 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
                     stop.longitude,
                     distanceResult
                 )
-                if(distanceResult[0] <= _DistanceToRouteStop){
+                if(!stop.isVisited && distanceResult[0] <= _DistanceToRouteStop){
                     visitStop(stop.id)
 
                     // Add a arrival notification here
@@ -122,7 +123,6 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
     fun showNotification(title: String, message: String) {
         // call this function on a coroutine
         viewModelScope.launch {
-            // 发送简单通知
             notificationHelper.sendSimpleNotification(
                 title = title,
                 message = message,
