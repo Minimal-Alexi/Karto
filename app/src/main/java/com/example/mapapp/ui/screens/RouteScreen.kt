@@ -42,10 +42,13 @@ import com.example.mapapp.ui.components.map.MapPolyline
 import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
+import com.example.mapapp.utils.getDistanceLabel
+import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.getTotalDistanceLabel
 import com.example.mapapp.utils.getTotalTimeLabel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.MapEffect
 
 
 @Composable
@@ -159,7 +162,7 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
     /*
     Camera handling
     */
-    val cameraPositionState = rememberCameraPositionState {
+    /*val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             LatLng(60.1699, 24.9384), 12f
             // Default to Helsinki
@@ -173,7 +176,10 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
                 update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
-    }
+    }*/
+    val cameraPositionState = rememberCameraPositionState()
+    val isMapReady = remember { mutableStateOf(false) }
+    val target = userLocation.value
 
     GoogleMap(
         modifier = Modifier
@@ -181,6 +187,19 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
             .height(400.dp),
         cameraPositionState = cameraPositionState
     ) {
+        MapEffect(target) { map ->
+            if (!isMapReady.value) {
+                isMapReady.value = true
+
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        target ?: LatLng(60.1699, 24.9384),
+                        if (target != null) 15f else 12f
+                    )
+                )
+            }
+        }
+
         if (userLocation.value != null) {
             UserMarker(userLocation.value!!)
         }
@@ -228,12 +247,12 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (currentStops != null) {
-                    currentStops?.forEachIndexed { index, routeStop ->
+                if (!currentStops.isNullOrEmpty()) {
+                    currentStops.forEachIndexed { index, routeStop ->
                         RouteStopItem(
                             index = index,
                             location = routeStop,
-                            distance = "${routeStop.distanceTo}m" ?: "",
+                            distance = routeStop.distanceTo,
                             duration = routeStop.timeTo ?: "",
                             navigateToLocationScreen = navigateToLocationScreen,
                             onVisit = viewModel::visitStop,
@@ -253,7 +272,7 @@ fun OnRouteSection(
 fun RouteStopItem(
     index: Int,
     location: RouteStopEntity,
-    distance: String,
+    distance: Int?,
     duration: String,
     navigateToLocationScreen: (String) -> Unit,
     onVisit: (Int) -> Unit,
@@ -285,12 +304,12 @@ fun RouteStopItem(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = distance,
+                        text = getDistanceLabel(distance),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = duration,
+                        text = getTimeLabel(duration),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )

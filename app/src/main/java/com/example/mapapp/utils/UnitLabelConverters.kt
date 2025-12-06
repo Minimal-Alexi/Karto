@@ -53,12 +53,10 @@ fun getTotalDistanceLabel(stops: List<RouteStopEntity>?): String {
 
     val totalDistance = stops.sumOf { it.distanceTo ?: 0 } ?: 0
 
-    val km = totalDistance / 1000
-    val meters = totalDistance % 1000
-
-    return if (km > 0) {
-        "$km km $meters m"
+    return if (totalDistance >= 1000) {
+        val km = totalDistance / 1000.0
+        String.format("%.2f km", km)
     } else {
-        "$meters m"
+        "$totalDistance m"
     }
 }
