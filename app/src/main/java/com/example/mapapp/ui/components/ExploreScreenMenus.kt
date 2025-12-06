@@ -40,6 +40,7 @@ import com.example.mapapp.ui.screens.EditableHeading
 import com.example.mapapp.ui.screens.NearbyPlaceSelector
 import com.example.mapapp.ui.screens.RouteSummarySection
 import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
+import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
 
@@ -84,7 +85,8 @@ fun BottomMenu(
     exploreViewModelRouteUtil: ExploreViewModelRouteUtil = viewModel(),
     navigateToScreen: (String) -> Unit,
     openedRouteId: Int? = null,
-    onResetRoute: () -> Unit
+    onResetRoute: () -> Unit,
+    dialogDataState: MutableState<DialogData?>
 ) {
     val routeStopAmount = exploreViewModel.routeStops.collectAsState().value.size
 
@@ -184,12 +186,25 @@ fun BottomMenu(
                                 exploreViewModel.saveRoute()
                         }
 
+                        /** has to be here for composable scope :/ */
+                        val errorColor = MaterialTheme.colorScheme.error
+
                         PrimaryButton(
                             text = "Empty All Fields",
                             backgroundColor = MaterialTheme.colorScheme.error
                         ) {
-                            exploreViewModel.resetRoute()
-                            onResetRoute()
+                            dialogDataState.value = DialogData(
+                                title = "Reset all fields?",
+                                confirmLabel = "Reset",
+                                dismissLabel = "Go Back",
+                                onConfirm = {
+                                    exploreViewModel.resetRoute()
+                                    onResetRoute()
+                                },
+                                onDismiss = { },
+                                isShowing = mutableStateOf(true),
+                                confirmColor = errorColor
+                            )
                         }
 
                         Spacer(Modifier.height(8.dp))

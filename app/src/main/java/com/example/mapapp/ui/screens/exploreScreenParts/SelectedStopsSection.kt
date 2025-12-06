@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.data.model.Place
@@ -18,6 +19,7 @@ import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.utils.DialogData
 
 
 @Composable
@@ -28,6 +30,8 @@ fun SelectedStopsSection(
     exploreViewModel: ExploreViewModel,
     exploreViewModelRouteUtil: ExploreViewModelRouteUtil,
 ) {
+    val dialogDataState = exploreViewModel.dialogDataState
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -46,6 +50,8 @@ fun SelectedStopsSection(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    val errorColor = MaterialTheme.colorScheme.error
+
                     if (selectedRouteStops.isNotEmpty()) {
                         selectedRouteStops.forEachIndexed { index, place ->
                             SelectedStopItem(
@@ -59,7 +65,16 @@ fun SelectedStopsSection(
                                     // handle the selected stay time
                                     println("Stay time selected: $selectedTime")
                                 },
-                                deleteOnClick = { deleteOnClick(place) },
+                                deleteOnClick = {
+                                    dialogDataState.value = DialogData(
+                                        title = "Delete ${place.displayName.text} from your Route?",
+                                        confirmLabel = "Delete",
+                                        onConfirm = { deleteOnClick(place) },
+                                        confirmColor = errorColor,
+                                        dismissLabel = "Cancel",
+                                        isShowing = mutableStateOf(true)
+                                    )
+                                },
                                 isFirst = index == 0,
                                 isLast = index == selectedRouteStops.lastIndex,
                                 onMoveUp = { exploreViewModelRouteUtil.moveStopUp(index) },

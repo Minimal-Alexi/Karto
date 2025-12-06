@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
@@ -31,6 +32,7 @@ import com.example.mapapp.data.model.WayPoint
 import com.example.mapapp.data.network.RouteMatrixApi
 import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.data.network.RoutesApi
+import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.SecretsHolder
 import com.example.mapapp.utils.TravelRoute
 import com.google.android.gms.location.LocationServices
@@ -57,6 +59,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val routeRepository = (application as KartoApplication).routeRepository
     private val templateRepository = (application as KartoApplication).templateRepository
     var routeTitle = mutableStateOf("Default Title")
+
+    val dialogDataState = mutableStateOf<DialogData?>(null)
 
     /*
     Nearby Places & Filtering Variables
