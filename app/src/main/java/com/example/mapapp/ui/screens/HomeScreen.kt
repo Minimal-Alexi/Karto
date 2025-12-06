@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.debounce
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOfPlaces, Double, LatLng) -> Unit,
                navigateToLocationScreen: (String) -> Unit) {
-/*
+
     val greeting = homeViewModel.firstName.collectAsState().value
     val location = homeViewModel.greetingLocation.collectAsState().value
     val userCoordinates = homeViewModel.userLocation.collectAsState().value
@@ -100,7 +100,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOf
             customLocation?:userCoordinates?: LatLng(0.0,0.0))
         SuggestionsSection(suggestionCardNumbers,suggestionsIdMap,navigateToLocationScreen,location)
         Spacer(modifier = Modifier.height(0.dp))
-    }*/
+    }
 }
 
 @Composable
