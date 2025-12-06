@@ -162,14 +162,14 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
     /*
     Camera handling
     */
-    /*val cameraPositionState = rememberCameraPositionState {
+    val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             LatLng(60.1699, 24.9384), 12f
             // Default to Helsinki
         )
     }
 
-    LaunchedEffect(userLocation.value) {
+    /*LaunchedEffect(userLocation.value) {
         val loc = userLocation.value
         if (loc != null) {
             cameraPositionState.animate(
@@ -177,9 +177,6 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
             )
         }
     }*/
-    val cameraPositionState = rememberCameraPositionState()
-    val isMapReady = remember { mutableStateOf(false) }
-    val target = userLocation.value
 
     GoogleMap(
         modifier = Modifier
@@ -187,15 +184,11 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
             .height(400.dp),
         cameraPositionState = cameraPositionState
     ) {
-        MapEffect(target) { map ->
-            if (!isMapReady.value) {
-                isMapReady.value = true
-
-                map.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        target ?: LatLng(60.1699, 24.9384),
-                        if (target != null) 15f else 12f
-                    )
+        MapEffect(userLocation.value) { map ->
+            val loc = userLocation.value
+            if (loc != null) {
+                map.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(loc, 15f)
                 )
             }
         }
