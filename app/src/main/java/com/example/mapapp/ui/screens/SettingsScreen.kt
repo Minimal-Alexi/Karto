@@ -19,8 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapapp.ui.components.ConfirmationModal
 import com.example.mapapp.ui.components.HistoryRouteCard
 import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.utils.DialogData
 import com.example.mapapp.viewmodel.SettingsViewModel
 import com.example.mapapp.viewmodel.ThemeViewModel
 
@@ -117,13 +119,28 @@ fun RouteHistory() {
     val vm = viewModel<SettingsViewModel>()
     val routes = vm.completedRoutes.collectAsState().value
 
+    val dialogDataState = vm.dialogDataState
+
+    ConfirmationModal(dialogDataState.value)
+
     Text(
         "Route History", style = MaterialTheme.typography.titleLarge
     )
+
+    val errorColor = MaterialTheme.colorScheme.error
     if (routes.isNotEmpty()) {
         Column {
             for (route in routes) {
-                HistoryRouteCard(route, onDelete = { vm.deleteRouteById(route.id) })
+                HistoryRouteCard(route, onDelete = {
+                    dialogDataState.value = DialogData(
+                        title = "Delete this Route from your History?",
+                        text = "If you delete it, it's gone forever.",
+                        confirmLabel = "Delete",
+                        onConfirm = { vm.deleteRouteById(route.id) },
+                        confirmColor = errorColor,
+                        isShowing = mutableStateOf(true)
+                    )
+                })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
