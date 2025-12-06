@@ -42,18 +42,22 @@ import com.example.mapapp.ui.components.map.MapPolyline
 import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
+import com.example.mapapp.utils.getDistanceLabel
+import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.getTotalDistanceLabel
 import com.example.mapapp.utils.getTotalTimeLabel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.MapEffect
 
 
 @Composable
 fun RouteScreen(
     navigateToLocationScreen: (String) -> Unit,
-    currentRouteViewModel: RouteViewModel = viewModel(),
     navigateToScreen: (String) -> Unit
 ) {
+    val currentRouteViewModel = viewModel<RouteViewModel>()
+
     val currentRouteFlow = remember { currentRouteViewModel.currentRoute }
     val currentRoute = currentRouteFlow.collectAsState().value
 
@@ -65,7 +69,8 @@ fun RouteScreen(
             navigateToLocationScreen = navigateToLocationScreen,
             navigateToScreen = navigateToScreen,
             currentRoute = currentRoute,
-            currentStops = currentStops
+            currentStops = currentStops,
+            viewModel = currentRouteViewModel
         )
     } else {
         EmptyRouteScreen()
@@ -93,9 +98,9 @@ fun CurrentRouteScreen(
     navigateToLocationScreen: (String) -> Unit,
     navigateToScreen: (String) -> Unit,
     currentRoute: RouteEntity,
-    currentStops: List<RouteStopEntity>?
+    currentStops: List<RouteStopEntity>?,
+    viewModel: RouteViewModel
 ) {
-    val viewModel = viewModel<RouteViewModel>()
     val mapInteraction = remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -112,7 +117,7 @@ fun CurrentRouteScreen(
             MapWrapper(viewModel, mapInteraction) { RouteScreenMap(viewModel) }
         }
         item {
-            OnRouteSection(navigateToLocationScreen)
+            OnRouteSection(navigateToLocationScreen, viewModel)
         }
         item {
             RouteProgressSection(currentStops)
@@ -164,14 +169,14 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
         )
     }
 
-    LaunchedEffect(userLocation.value) {
+    /*LaunchedEffect(userLocation.value) {
         val loc = userLocation.value
         if (loc != null) {
             cameraPositionState.animate(
                 update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
-    }
+    }*/
 
     GoogleMap(
         modifier = Modifier
@@ -179,6 +184,15 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
             .height(400.dp),
         cameraPositionState = cameraPositionState
     ) {
+        MapEffect(userLocation.value) { map ->
+            val loc = userLocation.value
+            if (loc != null) {
+                map.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(loc, 15f)
+                )
+            }
+        }
+
         if (userLocation.value != null) {
             UserMarker(userLocation.value!!)
         }
@@ -191,22 +205,18 @@ fun RouteScreenMap(routeViewModel: RouteViewModel) {
         /*
          * Show polyline in the screen
          */
-
         val polyline = routeViewModel.routePolyline.collectAsState()
 
         MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
-
     }
 }
 
 @Composable
 fun OnRouteSection(
     navigateToLocationScreen: (String) -> Unit,
+    viewModel: RouteViewModel
 ) {
-    val viewModel = viewModel<RouteViewModel>()
-
-    val currentRouteStopsFlow = remember { viewModel.currentStops }
-    val currentStops = currentRouteStopsFlow.collectAsState().value
+    val currentStops = viewModel.currentStops.collectAsState().value
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -230,12 +240,12 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (currentStops != null) {
-                    currentStops?.forEachIndexed { index, routeStop ->
+                if (!currentStops.isNullOrEmpty()) {
+                    currentStops.forEachIndexed { index, routeStop ->
                         RouteStopItem(
                             index = index,
                             location = routeStop,
-                            distance = "${routeStop.distanceTo}m" ?: "",
+                            distance = routeStop.distanceTo,
                             duration = routeStop.timeTo ?: "",
                             navigateToLocationScreen = navigateToLocationScreen,
                             onVisit = viewModel::visitStop,
@@ -255,7 +265,7 @@ fun OnRouteSection(
 fun RouteStopItem(
     index: Int,
     location: RouteStopEntity,
-    distance: String,
+    distance: Int?,
     duration: String,
     navigateToLocationScreen: (String) -> Unit,
     onVisit: (Int) -> Unit,
@@ -287,12 +297,12 @@ fun RouteStopItem(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = distance,
+                        text = getDistanceLabel(distance),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = duration,
+                        text = getTimeLabel(duration),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
