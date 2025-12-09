@@ -63,3 +63,9 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
  - How to change the username – go to the “Setting” page, input the new names in the first name and last name file, then click “Update Name” 
  - You can check the nearby popular locations by checking the “Suggestions” under the home page. 
 
+
+## Technical Stack Overview
+| Module / Library  | Purpose  | Used Place  | Descriptions |
+|:----:|:----:|------| ------| 
+| Google Map Compose  | Map displacement  | ExploreScreen, RouteScreen  | |
+| Google route Api  | Fetch route info  | RouteApiService  | |
