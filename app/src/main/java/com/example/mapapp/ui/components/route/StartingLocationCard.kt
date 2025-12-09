@@ -22,11 +22,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun StartingLocationCard(
     customLocationText: StateFlow<String>
 ) {
+    val name =
+        if (customLocationText.collectAsState().value != "") customLocationText.collectAsState().value else "Your Current Location"
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -74,7 +78,7 @@ fun StartingLocationCard(
                     text = "Starting From"
                 )
                 Text(
-                    text = customLocationText.value,
+                    text = name,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
