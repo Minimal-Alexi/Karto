@@ -46,7 +46,8 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
 
 ## Key Features
  * Seach near by places
- * 
+<img src="./docs/Screenshot_20251208_190725.png" height="600" alt="img1">
+ * Add locations and manage routes
 
 ## How to use
 1. Choose the type of places you want to visit, then click “Start Route” 
