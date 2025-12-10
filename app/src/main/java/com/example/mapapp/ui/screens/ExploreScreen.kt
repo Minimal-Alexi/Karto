@@ -1,19 +1,24 @@
 package com.example.mapapp.ui.screens
 
 import android.R
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -21,33 +26,41 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.google.android.gms.maps.model.StrokeStyle
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import com.google.maps.android.SphericalUtil
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
-import com.example.mapapp.navigation.Constants.ROUTE_SCREEN_ROUTE
+import com.example.mapapp.ui.components.BottomMenu
 import com.example.mapapp.ui.components.DistanceSlider
-import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.PlaceTypeSelector
-import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
-import com.example.mapapp.ui.components.map.MapWrapper
+import com.example.mapapp.ui.components.TopMenu
 import com.example.mapapp.ui.components.buttons.PrimaryButton
+import com.example.mapapp.ui.components.map.MapPlaceInfoCard
+import com.example.mapapp.ui.components.map.MapPolyline
+import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.route.StartingLocationSelector
-import com.example.mapapp.ui.components.route.TravelModeSelector
-import com.example.mapapp.ui.screens.exploreScreenParts.SelectedStopsSection
-import com.example.mapapp.utils.route.RouteViewModel
+import com.example.mapapp.utils.getDistanceLabel
+import com.example.mapapp.utils.getTimeLabel
+import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.CustomCap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.StrokeStyle
 import com.google.android.gms.maps.model.StyleSpan
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
@@ -60,115 +73,94 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 fun ExploreScreen(
     navigateToLocationScreen: (String) -> Unit,
     exploreViewModel: ExploreViewModel = viewModel(),
-    routeViewModel: RouteViewModel = viewModel(),
+    exploreViewModelRouteUtil: ExploreViewModelRouteUtil = viewModel(),
     navigateToScreen: (String) -> Unit,
     openedRouteId: Int? = null,
-    onResetRoute: () -> Unit
+    onResetRoute: () -> Unit,
 ) {
+    val _top = remember { mutableStateOf(true) }
+    val _bottom = remember { mutableStateOf(false) }
+
+    val topShowing = remember {
+        object : MutableState<Boolean> by _top {
+            override var value: Boolean
+                get() = _top.value
+                set(newValue) {
+                    if (newValue) _bottom.value = false
+                    _top.value = newValue
+                }
+        }
+    }
+
+    val bottomShowing = remember {
+        object : MutableState<Boolean> by _bottom {
+            override var value: Boolean
+                get() = _bottom.value
+                set(newValue) {
+                    if (newValue) _top.value = false
+                    _bottom.value = newValue
+                }
+        }
+    }
 
     LaunchedEffect(openedRouteId) {
         if (openedRouteId != null) {
             exploreViewModel.loadTemplate(openedRouteId)
+            bottomShowing.value = true
         }
     }
 
-    val mapInteraction = remember { mutableStateOf(false) }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        userScrollEnabled = !mapInteraction.value
-    ) {
-        item {
-            OutlinedTextField(
-                value = exploreViewModel.routeTitle.value,
-                onValueChange = { exploreViewModel.routeTitle.value = it },
-                label = { Text("Route Title") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.zIndex(1f)) {
+            TopMenu(topShowing)
         }
 
-        item {
-            NearbyPlaceSelector(exploreViewModel)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .zIndex(0f)
+        ) {
+            ExploreScreenMap(exploreViewModel)
         }
-        item {
-            TravelModeSelector(
-                exploreViewModel.travelMode.collectAsState().value,
-                exploreViewModel::changeTravelMode
-            )
-        }
-        item { MapWrapper(exploreViewModel, mapInteraction) { ExploreScreenMap(exploreViewModel) } }
 
-        item {
-            SelectedStopsSection(
-                navigateToLocationScreen,
-                exploreViewModel::removeRouteStop,
-                exploreViewModel.routeStops.collectAsState().value,
+        Box(modifier = Modifier.zIndex(1f)) {
+            BottomMenu(
+                expanded = bottomShowing,
+                navigateToLocationScreen = navigateToLocationScreen,
                 exploreViewModel = exploreViewModel,
-                routeViewModel = routeViewModel
+                exploreViewModelRouteUtil = exploreViewModelRouteUtil,
+                navigateToScreen = navigateToScreen,
+                openedRouteId = openedRouteId,
+                onResetRoute = onResetRoute
             )
         }
-        item { RouteSummarySection(exploreViewModel) }
-        item {
-            PrimaryButton(
-                text = "Start This Route",
-                backgroundColor = MaterialTheme.colorScheme.secondary,
-                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-            ) {
-                exploreViewModel.startRoute()
-                navigateToScreen(ROUTE_SCREEN_ROUTE)
-            }
-        }
-        item {
-            PrimaryButton(
-                text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
-            ) {
-                if (openedRouteId != null) exploreViewModel.updateSavedRoute(openedRouteId)
-                else
-                    exploreViewModel.saveRoute()
-            }
-        }
-        item {
-            PrimaryButton(
-                text = "Reset This Route", backgroundColor = MaterialTheme.colorScheme.error
-            ) {
-                exploreViewModel.resetRoute()
-                onResetRoute()
-            }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
-    /*
+fun ExploreScreenMap(
+    exploreViewModel: ExploreViewModel,
+) {/*
     Selected place info card handler
     */
     val sheetState = rememberModalBottomSheetState()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
-    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }
-    /*
+    var selectedPlaceIsRouteStop by remember { mutableStateOf<Boolean>(false) }/*
     Map Logic Values
     */
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
-    val polyline = exploreViewModel.routePolyline.collectAsState()
+
     /*
     Camera position value handling
     */
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             LatLng(60.1699, 24.9384), 12f
-            // Default to Helsinki
         )
     }
     var mapReady by remember { mutableStateOf(false) }
@@ -180,20 +172,21 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
             )
         }
     }
+
     // GoogleMap Compose
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp),
+        modifier = Modifier.fillMaxSize()
     ) {
         GoogleMap(
-            modifier = Modifier.fillMaxSize(), cameraPositionState = cameraPositionState, onMapLoaded = { mapReady = true }) {
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            onMapLoaded = { mapReady = true }) {
             if (userLocation.value != null) {
                 Marker(
                     state = rememberUpdatedMarkerState(position = userLocation.value!!),
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
-                    title = "Your location",
-                    snippet = "Your current location"
+                    title = "Route Origin",
+                    snippet = "Your starting location"
                 )
             }
             if (nearbyLocations.value != null) {
@@ -213,8 +206,7 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
                                     place
                                 }
                                 true
-                            }
-                        )
+                            })
                     }
                 }
             }
@@ -231,51 +223,25 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
                             place
                         }
                         true
-                    }
-                )
+                    })
             }
 
-            if (polyline.value != null) {
-                val points = PolyUtil.decode(polyline.value)
-                Polyline(
-                    points = points,
-                    width = 10f,
-                    geodesic = true, // Follows the curvature of the earth for better directionality
-                    // Add a CustomCap to create an arrow at the end of the line
-                    endCap = CustomCap(
-                        BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
-                        // Note: Replace 'android.R.drawable.arrow_up_float' with your own
-                        // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
-                    ),
-                    spans = listOf(
-                        StyleSpan(
-                            StrokeStyle.gradientBuilder(
-                                MaterialTheme.colorScheme.primary.hashCode(),
-                                MaterialTheme.colorScheme.secondary.hashCode()
-                            ).build(),
-                            1.0 // Apply to 100% of the line
-                        )
-                    ),
+            MapPolyline(exploreViewModel, cameraPositionState.position.zoom)
 
-                )
-            }
         }
     }
     if (selectedPlace != null) {
         ModalBottomSheet(
-            onDismissRequest = { selectedPlace = null },
-            sheetState = sheetState
+            onDismissRequest = { selectedPlace = null }, sheetState = sheetState
         ) {
             Column(Modifier.padding(16.dp)) {
                 if (selectedPlaceIsRouteStop) MapRouteStopInfoCard(
-                    selectedPlace!!,
-                    {
+                    selectedPlace!!, {
                         exploreViewModel.removeRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
                 else MapPlaceInfoCard(
-                    selectedPlace!!,
-                    {
+                    selectedPlace!!, {
                         exploreViewModel.addRouteStop(selectedPlace!!)
                         selectedPlace = null
                     })
@@ -285,30 +251,59 @@ fun ExploreScreenMap(exploreViewModel: ExploreViewModel) {
 }
 
 @Composable
-fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
-    val routeInfo by exploreViewModel.routeInfo.collectAsState()
+fun EditableHeading(routeTitle: MutableState<String>) {
+    val beingEdited = remember { mutableStateOf(false) }
+    val textFieldValue = remember { mutableStateOf(routeTitle.value) }
 
-    Column(
-        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp, 16.dp, 16.dp, 0.dp)
     ) {
-        Text(
-            text = "Summary", style = MaterialTheme.typography.titleLarge
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+        if (beingEdited.value) {
+            OutlinedTextField(
+                value = textFieldValue.value,
+                onValueChange = { textFieldValue.value = it },
+                label = { Text("Route Title") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        routeTitle.value = textFieldValue.value
+                        beingEdited.value = false
+                    }
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(
+                onClick = {
+                    routeTitle.value = textFieldValue.value
+                    beingEdited.value = false
+                }
             ) {
-                Text(
-                    text = if (routeInfo != null) "$routeInfo" else "",
-                    style = MaterialTheme.typography.bodyMedium
+                Icon(
+                    imageVector = Icons.Rounded.Save,
+                    contentDescription = "Save Route Title",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else {
+            Text(
+                text = routeTitle.value,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f)
+            )
+
+            IconButton(
+                onClick = { beingEdited.value = true }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Edit,
+                    contentDescription = "Edit Route Title",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -316,11 +311,17 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
 }
 
 @Composable
-fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
+    val exploreViewModel: ExploreViewModel = viewModel()
 
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .padding(16.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp)
+    ) {
         PlaceTypeSelector(
             exploreViewModel.placeTypeSelector.collectAsState().value,
             exploreViewModel::changePlaceType
@@ -335,31 +336,30 @@ fun NearbyPlaceSelector(exploreViewModel: ExploreViewModel) {
 
         PrimaryButton(
             text = "Check nearby locations", backgroundColor = MaterialTheme.colorScheme.primary
-        ) { exploreViewModel.getNearbyPlaces() }
+        ) {
+            exploreViewModel.getNearbyPlaces()
+            expanded.value = false
+        }
     }
 }
 
-/*
-Moved some code to a separate file for readability
-
 @Composable
-fun SelectedStopsSection(
-    navigateToLocationScreen: (String) -> Unit,
-    deleteOnClick: (com.example.mapapp.data.model.Place) -> Unit,
-    selectedRouteStops: List<com.example.mapapp.data.model.Place>,
-    routeViewModel: RouteViewModel,
-) {
+fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
+    val routeTime by exploreViewModel.routeTime.collectAsState()
+    val routeDistance by exploreViewModel.routeDistance.collectAsState()
+
+    /** don't render an empty summary */
+    if (routeTime == null || routeDistance == null) {
+        return
+    }
+
     Column(
-        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Selected Route Stops", style = MaterialTheme.typography.titleLarge
+            text = "Summary", style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(0.dp, 16.dp)
         )
-        Button(
-            onClick = {
-                routeViewModel.runMatrixFlow()
-            }
-        ) { Text("Calculate route") }
 
         Box(
             modifier = Modifier
@@ -370,27 +370,22 @@ fun SelectedStopsSection(
                 .padding(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                selectedRouteStops.forEachIndexed { index, place ->
-                    SelectedStopItem(
-                        index = index,
-                        time = "12:05",
-                        locationName = place.displayName.text,
-                        distance = "2.7 km",
-                        duration = "30 min",
-                        placesId = place.id,
-                        navigateToLocationScreen = navigateToLocationScreen,
-                        onStayTimeChange = { selectedTime ->
-                            // handle the selected stay time
-                            println("Stay time selected: $selectedTime")
-                        },
-                        deleteOnClick = { deleteOnClick(place) })
-                    HorizontalDivider(color = Color(0xFFDDDDDD))
-                }
+                Text(
+                    text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = if (routeDistance != null) "Total Travel Distance: ${
+                        getDistanceLabel(
+                            routeDistance
+                        )
+                    }" else "",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
 }
 
- */

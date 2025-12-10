@@ -1,6 +1,5 @@
 package com.example.mapapp.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +68,17 @@ fun SelectedStopItem(
         ) {
             Row(verticalAlignment = Alignment.Top) {
                 Column {
+                    Text(
+                        text = distance,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = duration,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
                             .background(
@@ -86,16 +96,6 @@ fun SelectedStopItem(
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = distance,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = duration,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))
@@ -138,54 +138,6 @@ fun SelectedStopItem(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.widthIn(max = 210.dp)
                     )
-
-                    closingInfo?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    // Stay time selector
-                    Box {
-                        OutlinedTextField(
-                            value = selectedStayTime,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Stay time") },
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f),
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = "Select stay time"
-                                )
-                            }
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clickable { expanded = true }
-                        )
-
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            stayTimeOptions.forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(option) },
-                                    onClick = {
-                                        selectedStayTime = option
-                                        onStayTimeChange(option)
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
                 }
             }
             Column(
@@ -254,7 +206,7 @@ fun SelectedStopItemPreview() {
                 locationName = "The National Museum of Natural History",
                 distance = "12 km",
                 duration = "45 min",
-                closingInfo = "Closes in 30 mins",
+                closingInfo = "",
                 placesId = "place_2",
                 navigateToLocationScreen = {},
                 onStayTimeChange = {},

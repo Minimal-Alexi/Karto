@@ -2,7 +2,6 @@ package com.example.mapapp.utils.route
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.data.model.LatLngLiteral
@@ -23,9 +22,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RouteViewModel(application: Application) : AndroidViewModel(application) {
+class ExploreViewModelRouteUtil(application: Application) : AndroidViewModel(application) {
     private val _routePolyline = ExploreViewModelParameterRepository._routePolyline
-    private val _routeInfo = ExploreViewModelParameterRepository._routeInfo
+    private val _routeDistance = ExploreViewModelParameterRepository._routeDistance
+    private val _routeTime = ExploreViewModelParameterRepository._routeTime
     private val _routeStops = ExploreViewModelParameterRepository._routeStops
     private val _travelMode = ExploreViewModelParameterRepository._travelMode
     private val _userLocation = ExploreViewModelParameterRepository._userLocation
@@ -85,13 +85,14 @@ class RouteViewModel(application: Application) : AndroidViewModel(application) {
                     response.routes?.firstOrNull()?.duration ?: "No route found"
                 )
 
-            _routeInfo.value =
-                "Distance: ${routeInfoWalkOrDrive.first} meters \nTime: ${routeInfoWalkOrDrive.second} seconds"
+            _routeDistance.value = routeInfoWalkOrDrive.first
+            _routeTime.value = routeInfoWalkOrDrive.second
+
         } catch (e: Exception) {
             e.printStackTrace()
             _routePolyline.value = null
-            _routeInfo.value = "No route found"
-
+            _routeDistance.value = null
+            _routeTime.value = null
         }
 
     }
