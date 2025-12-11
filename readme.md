@@ -39,7 +39,10 @@ It helps users discover points of interest, plan routes, and explore efficiently
 
 Users can create, save, modify, and track routes, access reviews, mark visited locations, and get AI-powered descriptions for a richer travel experience.
 
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/e875c3ae-1fe5-4e83-add7-ee47c6357f4f" />
+
 ## Key Features
+
  * Interactive map with pins & route lines
 <img src="./docs/Screenshot_20251208_190725.png" height="500" alt="img1">
 
@@ -78,6 +81,10 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
 5. Your new API key will be displayed. Click “Close” to return to the Credentials list. You should see your key listed under “API Keys”.
 6. (Optional) Click “Edit API key” to set up restrictions. You can give it a name, choose which websites or IP addresses can use it, and set an expiration date. Recommended for production use.
 7. Copy your API key to use in your application code. Keep it private and never commit it to version control!
+### 3. If you are using an android device
+1. Go to (placeholder) this page to download the app.
+2. Install the app to yout phone
+3. Done, happy travelling! 
 
 ## Technical Stack Overview
 | Module / Library  | Purpose  | Used Place  | Descriptions |
