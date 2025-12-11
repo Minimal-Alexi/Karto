@@ -39,17 +39,19 @@ It helps users discover points of interest, plan routes, and explore efficiently
 
 Users can create, save, modify, and track routes, access reviews, mark visited locations, and get AI-powered descriptions for a richer travel experience.
 
-## How to setup
-1. Clone the git repository
-2. Add a google maps API key into the .properties.template file. Remove .template from the file name.
-3. Done, happy travelling!
-
 ## Key Features
- * Seach near by places
-<img src="./docs/Screenshot_20251208_190725.png" height="600" alt="img1">
- * Add locations and manage routes
+ * Interactive map with pins & route lines
+<img src="./docs/Screenshot_20251208_190725.png" height="500" alt="img1">
 
-## How to use
+ * Route creation by category & distance
+
+ * Route optimization (manual or auto)
+
+ * Travel process tracking and arrival notifications
+
+ * Save routes & view history
+
+## User Handbook
 1. Choose the type of places you want to visit, then click “Start Route” 
 2. In the route screen, you can see the locations you want to visit on the map. 
 3. Choose more places using the “select nearby locations” button, while changing the distance limit using the distance bar. 
@@ -61,11 +63,35 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
 9. When you arrive at a place, this app automatically sends a notification to your phone (if you turn on the notification on your phone’s setting) and marks the place as visited. 
 10. When the trip is over, click the “Complete Route” button to end your route. The completed routes are in the Route History on the setting page. 
  - How to change the username – go to the “Setting” page, input the new names in the first name and last name file, then click “Update Name” 
- - You can check the nearby popular locations by checking the “Suggestions” under the home page. 
+ - You can check the nearby popular locations by checking the “Suggestions” under the home page.
 
+## How to setup
+### 1. If you are using Android Studio
+1. Clone the git repository
+2. Add a google maps API key into the .properties.template file. Remove .template from the file name.
+3. Done, happy travelling!
+### 2. How to applu a Google map API key
+1. Go to the Google Cloud Console at https://console.cloud.google.com/. You may need to log in with your Google account if you‘re not already.
+2. Select or create a new Google Cloud project to associate your API key with. If creating a new project, give it a name and ID. Wait a few seconds for the project to be created.
+3. Make sure your new project is selected in the top dropdown menu, then open the navigation sidebar and go to “APIs & Services” > “Credentials”.
+4. On the Credentials page, click “+ Create Credentials” and choose “API key” from the dropdown.
+5. Your new API key will be displayed. Click “Close” to return to the Credentials list. You should see your key listed under “API Keys”.
+6. (Optional) Click “Edit API key” to set up restrictions. You can give it a name, choose which websites or IP addresses can use it, and set an expiration date. Recommended for production use.
+7. Copy your API key to use in your application code. Keep it private and never commit it to version control!
 
 ## Technical Stack Overview
 | Module / Library  | Purpose  | Used Place  | Descriptions |
 |:----:|:----:|------| ------| 
-| Google Map Compose  | Map displacement  | ExploreScreen, RouteScreen  | |
-| Google route Api  | Fetch route info  | RouteApiService  | |
+| Google Map Compose  | Map displacement  | ExploreScreen, RouteScreen  |  |
+| Google route Api  | Fetch route info  | RouteApiService  |  |
+| Google Map route matrix Api  |  |  |  |
+| Location and Context  |  |  |  |
+| Places  |  |  |  |
+| Retrofit  |  |  |  |
+| OkHttp3  |  |  |  |
+| Junit  |  |  |  |
+| Androidx room  |  |  |  |
+| Google geo coding  |  |  |  |
+
+## Project Architecture
+<img width="1001" height="642" alt="karto drawio" src="https://github.com/user-attachments/assets/c825d2df-f7c5-4c73-bc9e-f88d7655adb6" />
