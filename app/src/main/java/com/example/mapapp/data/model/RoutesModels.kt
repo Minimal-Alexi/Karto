@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class TravelModes(val mode: String, val icon: ImageVector){
     WALK("Walk", Icons.AutoMirrored.Filled.DirectionsWalk),
-    TRANSIT("Transit",Icons.Default.DirectionsTransit),
+    // TRANSIT("Transit",Icons.Default.DirectionsTransit),
     DRIVE("Drive",Icons.Default.DirectionsCar)
 }
 data class RoutesRequest (
@@ -38,13 +38,13 @@ data class RoutesResponse(
 
 data class Route(
     val polyline: Polyline?,
-    val distanceMeters: String?,
+    val distanceMeters: Int?,
     val duration: String?,
     val legs: List<Leg>?,
 )
 
 data class Leg(
-    val distanceMeters: String?,
+    val distanceMeters: Int?,
     val duration: String?,
 )
 

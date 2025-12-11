@@ -5,14 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -22,6 +25,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.ui.components.buttons.DeleteIconButton
@@ -42,7 +48,6 @@ import com.example.mapapp.ui.components.buttons.DeleteIconButton
 @Composable
 fun SelectedStopItem(
     index: Int,
-    time: String,
     locationName: String,
     distance: String,
     duration: String,
@@ -56,93 +61,84 @@ fun SelectedStopItem(
     onMoveUp: () -> Unit,     // New callback
     onMoveDown: () -> Unit,   // New callback
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val stayTimeOptions: List<String> = listOf("15 min", "30 min", "45 min", "1 h")
-    var selectedStayTime by remember { mutableStateOf(stayTimeOptions.first()) }
-
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.Top) {
-                Column {
+            /** track line test */
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(32.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .weight(1f)
+                        .background(color = MaterialTheme.colorScheme.primary)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        )
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = distance,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        text = "${index + 1}",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
-                    Text(
-                        text = duration,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 6.dp, vertical = 2.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                }
+
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .weight(1f)
+                        .background(color = if (isLast) Color.Transparent else MaterialTheme.colorScheme.primary)
+                )
+            }
+
+            /** duration and distance + location name */
+            Column(
+                modifier = Modifier
+                    .weight(0.7f)
+            ) {
+                Row {
+                    Column(modifier = Modifier.offset(y = (-36).dp)) {
                         Text(
-                            text = "${index + 1}",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.surface
+                            text = distance,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        )
+                        Text(
+                            text = duration,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
 
-                Spacer(modifier = Modifier.width(10.dp))
-
-                // REORDER BUTTONS COLUMN
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(
-                        onClick = onMoveUp,
-                        enabled = !isFirst,
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Move Up"
-                        )
-                    }
-                    IconButton(
-                        onClick = onMoveDown,
-                        enabled = !isLast,
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Move Down"
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
                     Text(
                         text = locationName,
-                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.widthIn(max = 210.dp)
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.offset(x = (if (distance == "") (0) else (-14)).dp)
                     )
                 }
             }
+
+            /** buttons */
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.2f)
             ) {
                 // "Read more about the route stop" button
                 IconButton(
@@ -165,8 +161,34 @@ fun SelectedStopItem(
                 )
             }
 
+            /** reorder buttons */
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(0.1f)
+            ) {
+                IconButton(
+                    onClick = onMoveUp,
+                    enabled = !isFirst,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowUp,
+                        contentDescription = "Move Up"
+                    )
+                }
+                IconButton(
+                    onClick = onMoveDown,
+                    enabled = !isLast,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Move Down"
+                    )
+                }
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -182,10 +204,9 @@ fun SelectedStopItemPreview() {
             // State 1: Normal
             SelectedStopItem(
                 index = 0,
-                time = "12:00 PM",
                 locationName = "Central Park",
                 distance = "2.5 km",
-                duration = "15 min",
+                duration = "15s",
                 closingInfo = null,
                 placesId = "place_1",
                 navigateToLocationScreen = {},
@@ -202,10 +223,9 @@ fun SelectedStopItemPreview() {
             // State 2: With Closing Info and Longer Text
             SelectedStopItem(
                 index = 1,
-                time = "02:30 PM",
                 locationName = "The National Museum of Natural History",
                 distance = "12 km",
-                duration = "45 min",
+                duration = "450s",
                 closingInfo = "",
                 placesId = "place_2",
                 navigateToLocationScreen = {},

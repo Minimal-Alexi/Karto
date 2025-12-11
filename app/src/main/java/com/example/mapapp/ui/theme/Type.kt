@@ -71,8 +71,8 @@ val Typography = Typography(
     labelMedium = TextStyle(
         fontFamily = pjs,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 20.sp,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
     ),
 
     labelSmall = TextStyle(

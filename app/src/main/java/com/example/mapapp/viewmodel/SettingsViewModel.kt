@@ -1,11 +1,13 @@
 package com.example.mapapp.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
 import com.example.mapapp.data.database.routes.RouteWithStopCount
 import com.example.mapapp.data.database.user.UserEntity
+import com.example.mapapp.utils.DialogData
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -14,6 +16,8 @@ import kotlinx.coroutines.launch
 
 
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
+    val dialogDataState = mutableStateOf<DialogData?>(null)
+
     private val userRepository = (app as KartoApplication).userRepository
     private val routeRepository = (app as KartoApplication).routeRepository
 

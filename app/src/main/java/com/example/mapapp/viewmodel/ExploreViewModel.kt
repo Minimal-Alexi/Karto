@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
@@ -31,6 +32,7 @@ import com.example.mapapp.data.model.WayPoint
 import com.example.mapapp.data.network.RouteMatrixApi
 import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.data.network.RoutesApi
+import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.SecretsHolder
 import com.example.mapapp.utils.TravelRoute
 import com.google.android.gms.location.LocationServices
@@ -39,11 +41,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.Collections.emptyList
+import kotlin.random.Random
 
 object ExploreViewModelParameterRepository {
     val _routeStops = MutableStateFlow<MutableList<Place>>(mutableStateListOf())
     val _routePolyline = MutableStateFlow<String?>(null)
-    val _routeDistance = MutableStateFlow<String?>(null)
+    val _routeDistance = MutableStateFlow<Int?>(null)
     val _routeTime = MutableStateFlow<String?>(null)
 
     val _travelMode = MutableStateFlow<TravelModes>(TravelModes.WALK)
@@ -56,6 +59,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val routeRepository = (application as KartoApplication).routeRepository
     private val templateRepository = (application as KartoApplication).templateRepository
     var routeTitle = mutableStateOf("Default Title")
+
+    val dialogDataState = mutableStateOf<DialogData?>(null)
 
     /*
     Nearby Places & Filtering Variables
@@ -96,7 +101,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     val routePolyline: StateFlow<String?> = _routePolyline
 
     private val _routeDistance = ExploreViewModelParameterRepository._routeDistance
-    val routeDistance: StateFlow<String?> = _routeDistance
+    val routeDistance: StateFlow<Int?> = _routeDistance
 
     private val _routeTime = ExploreViewModelParameterRepository._routeTime
     val routeTime: StateFlow<String?> = _routeTime
@@ -147,6 +152,28 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
             )
             _customLocationText.value =
                 "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
+        }
+    }
+
+    fun generateItineraryForUser(placeType: TypesOfPlaces,range : Double, location: LatLng){
+        viewModelScope.launch {
+            resetRoute()
+            Log.d(null,"Generating itinerary for: $placeType,$range,$location")
+            _travelMode.value = TravelModes.WALK
+            _distanceToPlaces.value = range
+            _placeTypeSelection.value = placeType
+            setOriginLocation(location)
+            val places = getNearbyPlacesSuspend()
+            val numberOfStops = Random.nextInt(4) + 1
+            val selectedPlaces = places.take(numberOfStops)
+            Log.d(null,"Selected places $selectedPlaces")
+            if(!selectedPlaces.isEmpty()){
+                selectedPlaces.forEach { it -> addRouteStop(it)}
+                Log.d(null, "Route was generated: $selectedPlaces")
+            }
+            else{
+                // TODO: Throw warning.
+            }
         }
     }
 
@@ -225,7 +252,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
                 val routeInfoWalkOrDrive =
                     Pair(
-                        response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                        response.routes?.firstOrNull()?.distanceMeters,
                         response.routes?.firstOrNull()?.duration ?: "No route found"
                     )
 
@@ -329,7 +356,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _generatedRoute.value = generateRouteGreedy
     }
 
-
     fun runMatrixFlow() {
         viewModelScope.launch {
             if (_userLocation.value == null) {
@@ -373,7 +399,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
 
                 fetchRoute(origin, destination, intermediate)
             }
-
         }
     }
 
@@ -381,7 +406,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     /**
      * Code of route polyline is above
      */
-
     fun getNearbyPlaces() {
         viewModelScope.launch {
             try {
@@ -487,7 +511,9 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                     longitude = stop.location.longitude,
                     stayMinutes = 30,
                     position = index,
-                    typeOfPlace = stop.typeOfPlace?.name
+                    typeOfPlace = stop.typeOfPlace?.name,
+                    distanceTo = stop.travelDistance,
+                    timeTo = stop.travelDuration
                 )
             }
 
@@ -495,8 +521,34 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    suspend fun getNearbyPlacesSuspend(): List<Place> {
+        return try {
+            val userLoc = _userLocation.value ?: return emptyList()
+
+            val placeRequest = PlacesRequest(
+                includedTypes = _placeTypeSelection.value.places,
+                locationRestriction = LocationRestriction(
+                    Circle(userLoc, _distanceToPlaces.value)
+                )
+            )
+
+            val apiKey = SecretsHolder.apiKey ?: return emptyList()
+            val response = PlacesApi.service.getNearbyPlaces(
+                placeRequest,
+                apiKey,
+                "places.displayName,places.location,places.id"
+            )
+
+            response.places.forEach { it.typeOfPlace = _placeTypeSelection.value }
+            response.places
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
     fun resetRoute() {
-        routeTitle.value = ""
+        routeTitle.value = "Default Title"
         _routeStops.value = emptyList()
         _travelMode.value = TravelModes.WALK
         _distanceToPlaces.value = 1000.0 // default distance

@@ -1,5 +1,6 @@
 package com.example.mapapp.viewmodel
 
+import NotificationHelper
 import android.app.Application
 import android.location.Location.distanceBetween
 import android.util.Log
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class RouteScreenViewModel(application: Application) : AndroidViewModel(application) {
+class RouteViewModel(application: Application) : AndroidViewModel(application) {
     private val routeRepository = (application as KartoApplication).routeRepository
     private val routeStopRepository = (application as KartoApplication).routeStopRepository
 
@@ -88,7 +89,8 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
             currentRoute.value?.let { routeRepository.completeRoute(it.id) }
         }
     }
-    private fun checkDistanceToStops(userLatitude: Double,userLongitude: Double){
+
+    private fun checkDistanceToStops(userLatitude: Double, userLongitude: Double){
         if(currentStops.value!= null){
             for(stop in currentStops.value!!){
                 val distanceResult = FloatArray(1)
@@ -99,10 +101,41 @@ class RouteScreenViewModel(application: Application) : AndroidViewModel(applicat
                     stop.longitude,
                     distanceResult
                 )
-                if(distanceResult[0] <= _DistanceToRouteStop){
+                if(!stop.isVisited && distanceResult[0] <= _DistanceToRouteStop){
                     visitStop(stop.id)
+
+                    // Add a arrival notification here
+                    Log.d("RouteScreenViewModel", "Visited stop: ${stop.name}")
+                    showNotification("Arrival Notification", "You have arrived at ${stop.name}")
                 }
             }
         }
+    }
+
+    /**
+     * Code of Notifications
+     */
+    private val notificationHelper = NotificationHelper(application)
+
+    /**
+     * call this function to send a notification
+     */
+    fun showNotification(title: String, message: String) {
+        // call this function on a coroutine
+        viewModelScope.launch {
+            notificationHelper.sendSimpleNotification(
+                title = title,
+                message = message,
+                // Option: Specify the Activity to open when the notification is clicked
+                // targetActivityClass = DetailActivity::class.java
+            )
+        }
+    }
+
+    /**
+     * call this function to cancel a notification
+     */
+    fun hideNotification() {
+        notificationHelper.cancelNotification()
     }
 }

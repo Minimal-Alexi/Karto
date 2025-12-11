@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
@@ -15,14 +16,14 @@ interface RouteStopDao {
     suspend fun updateRouteStop(routeStop: RouteStopEntity)
 
     @Query("SELECT * FROM route_stops WHERE route_id = :routeId")
-    suspend fun getStopsForRoute(routeId: Int): List<RouteStopEntity>
+    fun getStopsForRoute(routeId: Int): Flow<List<RouteStopEntity>>
 
     @Query("DELETE FROM route_stops WHERE route_id = :routeId")
     suspend fun deleteStopsByRoute(routeId: Int)
 
-    @Query("UPDATE route_stops SET isVisited = 1 WHERE id = :stopId")
+    @Query("UPDATE route_stops SET is_visited = 1 WHERE id = :stopId")
     suspend fun markVisited(stopId: Int)
 
-    @Query("UPDATE route_stops SET isVisited = 0 WHERE id = :stopId")
+    @Query("UPDATE route_stops SET is_visited = 0 WHERE id = :stopId")
     suspend fun markUnvisited(stopId: Int)
 }

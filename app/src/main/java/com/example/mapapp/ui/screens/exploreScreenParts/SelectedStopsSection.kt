@@ -1,7 +1,6 @@
 package com.example.mapapp.ui.screens.exploreScreenParts
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.data.model.Place
@@ -18,6 +18,9 @@ import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
+import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.utils.DialogData
+
 
 @Composable
 fun SelectedStopsSection(
@@ -27,6 +30,8 @@ fun SelectedStopsSection(
     exploreViewModel: ExploreViewModel,
     exploreViewModelRouteUtil: ExploreViewModelRouteUtil,
 ) {
+    val dialogDataState = exploreViewModel.dialogDataState
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -43,28 +48,41 @@ fun SelectedStopsSection(
                     exploreViewModel.customLocationText
                 )
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    selectedRouteStops.forEachIndexed { index, place ->
-                        SelectedStopItem(
-                            index = index,
-                            time = "12:05",
-                            locationName = place.displayName.text,
-                            distance = getDistanceLabel(place.travelDistance),
-                            duration = getTimeLabel(place.travelDuration),
-                            placesId = place.id,
-                            navigateToLocationScreen = navigateToLocationScreen,
-                            onStayTimeChange = { selectedTime ->
-                                // handle the selected stay time
-                                println("Stay time selected: $selectedTime")
-                            },
-                            deleteOnClick = { deleteOnClick(place) },
-                            isFirst = index == 0,
-                            isLast = index == selectedRouteStops.lastIndex,
-                            onMoveUp = { exploreViewModelRouteUtil.moveStopUp(index) },
-                            onMoveDown = { exploreViewModelRouteUtil.moveStopDown(index) }
-                        )
+                    val errorColor = MaterialTheme.colorScheme.error
+
+                    if (selectedRouteStops.isNotEmpty()) {
+                        selectedRouteStops.forEachIndexed { index, place ->
+                            SelectedStopItem(
+                                index = index,
+                                locationName = place.displayName.text,
+                                distance = getDistanceLabel(place.travelDistance),
+                                duration = getTimeLabel(place.travelDuration),
+                                placesId = place.id,
+                                navigateToLocationScreen = navigateToLocationScreen,
+                                onStayTimeChange = { selectedTime ->
+                                    // handle the selected stay time
+                                    println("Stay time selected: $selectedTime")
+                                },
+                                deleteOnClick = {
+                                    dialogDataState.value = DialogData(
+                                        title = "Delete ${place.displayName.text} from your Route?",
+                                        confirmLabel = "Delete",
+                                        onConfirm = { deleteOnClick(place) },
+                                        confirmColor = errorColor,
+                                        dismissLabel = "Cancel",
+                                        isShowing = mutableStateOf(true)
+                                    )
+                                },
+                                isFirst = index == 0,
+                                isLast = index == selectedRouteStops.lastIndex,
+                                onMoveUp = { exploreViewModelRouteUtil.moveStopUp(index) },
+                                onMoveDown = { exploreViewModelRouteUtil.moveStopDown(index) }
+                            )
+                        }
+                    } else {
+                        Placeholder(text = "Your route does not have stops yet. Add stops from the map to build your route.")
                     }
                 }
             }

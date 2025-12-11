@@ -55,6 +55,17 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     ))
     val suggestionCardNumber: StateFlow<HashMap<TypesOfPlaces,Int>> = _suggestionCardNumbers
 
+    private val _suggestionRecommendations = MutableStateFlow<HashMap<TypesOfPlaces,String>>(hashMapOf(
+        TypesOfPlaces.BEACHES to "",
+        TypesOfPlaces.NATURAL_FEATURES to "",
+        TypesOfPlaces.RESTAURANTS to ""
+    ))
+    val suggestionRecommendations: StateFlow<HashMap<TypesOfPlaces,String>> = _suggestionRecommendations
+
+    private val _customLocation = MutableStateFlow<LatLng?>(null)
+    val customLocation: StateFlow<LatLng?> = _customLocation
+    val _customLocationText = MutableStateFlow<String>("")
+
     private val locationClient: LocationClient =
         DefaultLocationClient(
             application,
@@ -77,11 +88,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         if(newValue >= 500 || newValue <= 10000) _distanceToPlaces.value = newValue
     }
 
-    fun getName(){
+    fun getName() {
         viewModelScope.launch {
-            repository.getUser().collectLatest{ user ->
-                if(user?.firstName !=null){
-                    _firstName.value = "Hello, ${user.firstName}"
+            repository.getUser().collectLatest { user ->
+                val name = user?.firstName
+                if (name != null && name.isNotEmpty()) {
+                    _firstName.value = "Hello, $name"
+                } else {
+                    _firstName.value = "Welcome to Karto!"
                 }
             }
         }
@@ -109,6 +123,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                         _suggestionCardNumbers.value.toMutableMap().apply {
                             this[typeOfPlaceToFetch] = response.places.size
                         } as HashMap<TypesOfPlaces, Int>
+                    val takeRandomId = response.places.shuffled().first().id
+                    _suggestionRecommendations.value = _suggestionRecommendations.value.toMutableMap().apply {
+                        this[typeOfPlaceToFetch] = takeRandomId
+                    } as HashMap<TypesOfPlaces,String>
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -145,5 +163,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
         _greetingLocation.value = stringBuilder.toString()
         Log.d(null,_greetingLocation.value)
+    }
+    fun nullCustomLocation(){
+        _customLocation.value = null
+        _customLocationText.value = "Your Current Location"
+    }
+    fun setCustomLocationText(customLocationText: String) {
+        _customLocationText.value = customLocationText
+    }
+    fun setOriginLocation(location: LatLng) {
+        _customLocation.value = location
     }
 }

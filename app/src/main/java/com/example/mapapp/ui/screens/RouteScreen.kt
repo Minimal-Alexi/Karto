@@ -1,6 +1,5 @@
 package com.example.mapapp.ui.screens
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,41 +31,46 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mapapp.navigation.Constants.EXPLORE_SCREEN_ROUTE
 import com.example.mapapp.ui.components.buttons.PrimaryButton
-import com.example.mapapp.ui.components.buttons.SecondaryButton
-import com.example.mapapp.viewmodel.RouteScreenViewModel
+import com.example.mapapp.viewmodel.RouteViewModel
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.text.style.TextAlign
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.routes.RouteEntity
 import com.example.mapapp.navigation.Constants.SETTINGS_SCREEN_ROUTE
+import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.ui.components.map.MapPolyline
 import com.example.mapapp.ui.components.map.MapWrapper
 import com.example.mapapp.ui.components.map.PlaceMarker
 import com.example.mapapp.ui.components.map.UserMarker
+import com.example.mapapp.utils.getDistanceLabel
+import com.example.mapapp.utils.getTimeLabel
+import com.example.mapapp.utils.getTotalDistanceLabel
+import com.example.mapapp.utils.getTotalTimeLabel
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.CustomCap
-import com.google.android.gms.maps.model.StrokeStyle
-import com.google.android.gms.maps.model.StyleSpan
-import com.google.maps.android.PolyUtil
-import com.google.maps.android.compose.Polyline
+import com.google.maps.android.compose.MapEffect
+
 
 @Composable
 fun RouteScreen(
     navigateToLocationScreen: (String) -> Unit,
-    currentRouteViewModel: RouteScreenViewModel = viewModel(),
-    navigateToScreen: (String) -> Unit,
+    navigateToScreen: (String) -> Unit
 ) {
+    val currentRouteViewModel = viewModel<RouteViewModel>()
+
     val currentRouteFlow = remember { currentRouteViewModel.currentRoute }
     val currentRoute = currentRouteFlow.collectAsState().value
+
+    val currentStopsFlow = remember { currentRouteViewModel.currentStops }
+    val currentStops = currentStopsFlow.collectAsState().value
 
     if (currentRoute != null) {
         CurrentRouteScreen(
             navigateToLocationScreen = navigateToLocationScreen,
             navigateToScreen = navigateToScreen,
-            currentRoute = currentRoute
+            currentRoute = currentRoute,
+            currentStops = currentStops,
+            viewModel = currentRouteViewModel
         )
     } else {
         EmptyRouteScreen()
@@ -80,17 +85,10 @@ fun EmptyRouteScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "You are not on a Route currently!",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = "When you make a Route in the Route-screen and Start it, it will appear here.",
-                textAlign = TextAlign.Center
-            )
+            Placeholder(text = "You are not on a route currently.")
+            Placeholder(text = "When you start a route in the explore tab, it will appear here.")
         }
     }
 }
@@ -100,8 +98,9 @@ fun CurrentRouteScreen(
     navigateToLocationScreen: (String) -> Unit,
     navigateToScreen: (String) -> Unit,
     currentRoute: RouteEntity,
+    currentStops: List<RouteStopEntity>?,
+    viewModel: RouteViewModel
 ) {
-    val viewModel = viewModel<RouteScreenViewModel>()
     val mapInteraction = remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -118,10 +117,10 @@ fun CurrentRouteScreen(
             MapWrapper(viewModel, mapInteraction) { RouteScreenMap(viewModel) }
         }
         item {
-            OnRouteSection(navigateToLocationScreen)
+            OnRouteSection(navigateToLocationScreen, viewModel)
         }
         item {
-            RouteProgressSection()
+            RouteProgressSection(currentStops)
         }
         item {
             PrimaryButton(
@@ -156,9 +155,9 @@ fun RouteTitleSection(title: String) {
 }
 
 @Composable
-fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
-    val userLocation = routeScreenViewModel.userLocation.collectAsState()
-    val routeStops = routeScreenViewModel.currentStops.collectAsState()
+fun RouteScreenMap(routeViewModel: RouteViewModel) {
+    val userLocation = routeViewModel.userLocation.collectAsState()
+    val routeStops = routeViewModel.currentStops.collectAsState()
 
     /*
     Camera handling
@@ -170,14 +169,14 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
         )
     }
 
-    LaunchedEffect(userLocation.value) {
+    /*LaunchedEffect(userLocation.value) {
         val loc = userLocation.value
         if (loc != null) {
             cameraPositionState.animate(
                 update = CameraUpdateFactory.newLatLngZoom(loc, 15f)
             )
         }
-    }
+    }*/
 
     GoogleMap(
         modifier = Modifier
@@ -185,6 +184,15 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
             .height(400.dp),
         cameraPositionState = cameraPositionState
     ) {
+        MapEffect(userLocation.value) { map ->
+            val loc = userLocation.value
+            if (loc != null) {
+                map.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(loc, 15f)
+                )
+            }
+        }
+
         if (userLocation.value != null) {
             UserMarker(userLocation.value!!)
         }
@@ -194,45 +202,21 @@ fun RouteScreenMap(routeScreenViewModel: RouteScreenViewModel) {
             }
         }
 
-        /**
+        /*
          * Show polyline in the screen
          */
+        val polyline = routeViewModel.routePolyline.collectAsState()
 
-        val polyline = routeScreenViewModel.routePolyline.collectAsState()
-
-        if (polyline.value != null) {
-            val points = PolyUtil.decode(polyline.value)
-            Polyline(
-                points = points,
-                width = 10f,
-                geodesic = true, // Follows the curvature of the earth for better directionality
-                // Add a CustomCap to create an arrow at the end of the line
-                endCap = CustomCap(
-                    BitmapDescriptorFactory.fromResource(R.drawable.arrow_up_float)
-                    // Note: Replace 'android.R.drawable.arrow_up_float' with your own
-                    // drawable (e.g., R.drawable.ic_arrow_head) for the best look.
-                ),
-                spans = listOf(
-                    StyleSpan(
-                        StrokeStyle.gradientBuilder(
-                            MaterialTheme.colorScheme.primary.hashCode(),
-                            MaterialTheme.colorScheme.secondary.hashCode()
-                        ).build(),
-                        1.0 // Apply to 100% of the line
-                    )
-                ),)
-        }
+        MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
     }
 }
 
 @Composable
 fun OnRouteSection(
     navigateToLocationScreen: (String) -> Unit,
+    viewModel: RouteViewModel
 ) {
-    val viewModel = viewModel<RouteScreenViewModel>()
-
-    val currentRouteStopsFlow = remember { viewModel.currentStops }
-    val currentStops = currentRouteStopsFlow.collectAsState().value
+    val currentStops = viewModel.currentStops.collectAsState().value
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -256,13 +240,13 @@ fun OnRouteSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                if (currentStops != null) {
-                    currentStops?.forEachIndexed { index, routeStop ->
+                if (!currentStops.isNullOrEmpty()) {
+                    currentStops.forEachIndexed { index, routeStop ->
                         RouteStopItem(
                             index = index,
                             location = routeStop,
-                            distance = "2.7 km",
-                            duration = "30 min",
+                            distance = routeStop.distanceTo,
+                            duration = routeStop.timeTo ?: "",
                             navigateToLocationScreen = navigateToLocationScreen,
                             onVisit = viewModel::visitStop,
                             onUnvisit = viewModel::unvisitStop
@@ -281,7 +265,7 @@ fun OnRouteSection(
 fun RouteStopItem(
     index: Int,
     location: RouteStopEntity,
-    distance: String,
+    distance: Int?,
     duration: String,
     navigateToLocationScreen: (String) -> Unit,
     onVisit: (Int) -> Unit,
@@ -313,12 +297,12 @@ fun RouteStopItem(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = distance,
+                        text = getDistanceLabel(distance),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = duration,
+                        text = getTimeLabel(duration),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -402,7 +386,7 @@ fun RouteStopItem(
 }
 
 @Composable
-fun RouteProgressSection() {
+fun RouteProgressSection(currentStops: List<RouteStopEntity>?) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -426,15 +410,15 @@ fun RouteProgressSection() {
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "1 / 4 locations visited",
+                    text = "${currentStops?.count { it.isVisited } ?: 0} / ${currentStops?.size} locations visited",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "1.2 / 5.4 km walked",
+                    text = "Travel Distance: ${getTotalDistanceLabel(currentStops)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "10 minutes 24 seconds spent on route",
+                    text = "Travel Time: ${getTotalTimeLabel(currentStops)}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

@@ -1,6 +1,5 @@
 package com.example.mapapp.ui.screens
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,22 +34,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import com.google.maps.android.SphericalUtil
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.data.model.Place
 import com.example.mapapp.ui.components.BottomMenu
+import com.example.mapapp.ui.components.ConfirmationModal
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
+import com.example.mapapp.ui.components.Placeholder
+import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.TopMenu
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.map.MapPolyline
-import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.route.StartingLocationSelector
+import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
@@ -58,14 +58,9 @@ import com.example.mapapp.viewmodel.ExploreViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.CustomCap
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.StrokeStyle
-import com.google.android.gms.maps.model.StyleSpan
-import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 
@@ -78,6 +73,10 @@ fun ExploreScreen(
     openedRouteId: Int? = null,
     onResetRoute: () -> Unit,
 ) {
+    val dialogDataState = exploreViewModel.dialogDataState
+
+    ConfirmationModal(dialogDataState.value)
+
     val _top = remember { mutableStateOf(true) }
     val _bottom = remember { mutableStateOf(false) }
 
@@ -132,7 +131,8 @@ fun ExploreScreen(
                 exploreViewModelRouteUtil = exploreViewModelRouteUtil,
                 navigateToScreen = navigateToScreen,
                 openedRouteId = openedRouteId,
-                onResetRoute = onResetRoute
+                onResetRoute = onResetRoute,
+                dialogDataState = dialogDataState
             )
         }
     }
@@ -153,6 +153,8 @@ fun ExploreScreenMap(
     val userLocation = exploreViewModel.userLocation.collectAsState()
     val routeStops = exploreViewModel.routeStops.collectAsState()
     val nearbyLocations = exploreViewModel.nearbyPlaces.collectAsState()
+
+    val polyline = exploreViewModel.routePolyline.collectAsState()
 
     /*
     Camera position value handling
@@ -226,8 +228,7 @@ fun ExploreScreenMap(
                     })
             }
 
-            MapPolyline(exploreViewModel, cameraPositionState.position.zoom)
-
+            MapPolyline(polyline as MutableState<String?>, cameraPositionState.position.zoom)
         }
     }
     if (selectedPlace != null) {
@@ -327,7 +328,10 @@ fun NearbyPlaceSelector(expanded: MutableState<Boolean>) {
             exploreViewModel::changePlaceType
         )
 
-        StartingLocationSelector()
+        StartingLocationSelector(
+            exploreViewModel::nullCustomLocation,
+            exploreViewModel::setOriginLocation, exploreViewModel::setCustomLocationText
+        )
 
         DistanceSlider(
             exploreViewModel.distanceToPlaces.collectAsState().value,
@@ -348,42 +352,40 @@ fun RouteSummarySection(exploreViewModel: ExploreViewModel) {
     val routeTime by exploreViewModel.routeTime.collectAsState()
     val routeDistance by exploreViewModel.routeDistance.collectAsState()
 
-    /** don't render an empty summary */
-    if (routeTime == null || routeDistance == null) {
-        return
-    }
-
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Summary", style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(0.dp, 16.dp)
+            text = "Summary", style = MaterialTheme.typography.titleLarge
         )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
-                )
-                .padding(16.dp),
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
+        if (routeTime == null || routeDistance == null) {
+            Placeholder(text = "No route information yet. Add stops and click the 'Calculate Route' button to get the summary.")
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp)
             ) {
-                Text(
-                    text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = if (routeDistance != null) "Total Travel Distance: ${
-                        getDistanceLabel(
-                            routeDistance
-                        )
-                    }" else "",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = if (routeTime != null) "Total Travel Time: ${getTimeLabel(routeTime)}" else "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = if (routeDistance != null) "Total Travel Distance: ${
+                            getDistanceLabel(
+                                routeDistance
+                            )
+                        }" else "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }

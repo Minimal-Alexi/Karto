@@ -40,13 +40,12 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 
 @Composable
-fun StartingLocationSelector() {
+fun StartingLocationSelector(nullifyCustomLocation: () -> Unit,
+                             setOriginLocation:(LatLng) -> Unit,
+                             setCustomLocationText:(String) -> Unit
+                             ) {
     val predictionViewModel = viewModel<PredictionViewModel>()
-
-    val exploreViewModel = viewModel<ExploreViewModel>()
-
     var locationFieldText by remember { mutableStateOf("") }
-    val locationText by exploreViewModel.customLocationText.collectAsState()
 
     val predictions by predictionViewModel.originPredictions.collectAsState()
 
@@ -65,7 +64,7 @@ fun StartingLocationSelector() {
                 if (it.length > 2) {
                     predictionViewModel.searchPlacesForOrigin(it)
                 } else {
-                    exploreViewModel.nullCustomLocation()
+                    nullifyCustomLocation()
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -112,8 +111,8 @@ fun StartingLocationSelector() {
                                     .clickable {
                                         predictionViewModel.fetchPlace(
                                             prediction.placeId,
-                                            exploreViewModel::setOriginLocation,
-                                            exploreViewModel::setCustomLocationText,
+                                            setOriginLocation,
+                                            setCustomLocationText,
                                             ::setLocationFieldText
                                         )
                                     }

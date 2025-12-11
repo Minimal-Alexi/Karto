@@ -66,7 +66,7 @@ class ExploreViewModelRouteUtil(application: Application) : AndroidViewModel(app
                 if (i < updatedStops.size) {
                     val currentItem = updatedStops[i]
                     val updatedItem = currentItem.copy(
-                        travelDistance = _routeStopsInfo.value[i].distanceMeters.toString(),
+                        travelDistance = _routeStopsInfo.value[i].distanceMeters,
                         travelDuration = _routeStopsInfo.value[i].duration.toString()
                     )
                     updatedStops[i] = updatedItem
@@ -81,7 +81,7 @@ class ExploreViewModelRouteUtil(application: Application) : AndroidViewModel(app
 
             val routeInfoWalkOrDrive =
                 Pair(
-                    response.routes?.firstOrNull()?.distanceMeters ?: "No route found",
+                    response.routes?.firstOrNull()?.distanceMeters,
                     response.routes?.firstOrNull()?.duration ?: "No route found"
                 )
 
@@ -99,21 +99,6 @@ class ExploreViewModelRouteUtil(application: Application) : AndroidViewModel(app
 
     suspend fun getWayPoints(): List<WayPoint> {
         val waypoints = mutableListOf<WayPoint>()
-        for (place in _routeStops.value) {
-            waypoints.add(
-                WayPoint(
-                    RouteLocation(
-                        location = LatLngLiteral(
-                            latLng = RouteLatLng(
-                                place.location.latitude,
-                                place.location.longitude
-                            )
-                        )
-                    )
-                )
-            )
-        }
-
         // Get the user location safely to avoid null pointer exception
         val currentLocation = _userLocation.value
         if (currentLocation != null) {
@@ -131,6 +116,21 @@ class ExploreViewModelRouteUtil(application: Application) : AndroidViewModel(app
             )
         } else {
             Log.e("ExploreViewModel", "User location is NULL! Route Matrix will likely fail.")
+        }
+
+        for (place in _routeStops.value) {
+            waypoints.add(
+                WayPoint(
+                    RouteLocation(
+                        location = LatLngLiteral(
+                            latLng = RouteLatLng(
+                                place.location.latitude,
+                                place.location.longitude
+                            )
+                        )
+                    )
+                )
+            )
         }
         return waypoints
     }

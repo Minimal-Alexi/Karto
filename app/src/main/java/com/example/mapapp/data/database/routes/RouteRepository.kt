@@ -4,7 +4,8 @@ import com.example.mapapp.data.database.route_stops.RouteStopDao
 import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.user.UserDao
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 
 
 class RouteRepository(
@@ -22,9 +23,9 @@ class RouteRepository(
 
     fun getCurrentRoute(): Flow<RouteEntity?> = routeDao.getCurrentRoute()
 
-    fun getCurrentRouteStops(): Flow<List<RouteStopEntity>?> =
-        routeDao.getCurrentRoute().map { route ->
-            if (route == null) null
+    fun getCurrentRouteStops(): Flow<List<RouteStopEntity>> =
+        routeDao.getCurrentRoute().flatMapLatest { route ->
+            if (route == null) flowOf(emptyList())
             else routeStopDao.getStopsForRoute(route.id)
         }
 
@@ -41,7 +42,6 @@ class RouteRepository(
                 stop.copy(routeId = id)
             )
         }
-
         userDao.setCurrentRoute(id)
     }
 
@@ -57,7 +57,7 @@ class RouteRepository(
 
 data class RouteWithStops(
     val route: RouteEntity,
-    val stops: List<RouteStopEntity> = emptyList()
+    val stops: Flow<List<RouteStopEntity>> = flowOf(emptyList())
 )
 
 data class RouteWithStopCount(
