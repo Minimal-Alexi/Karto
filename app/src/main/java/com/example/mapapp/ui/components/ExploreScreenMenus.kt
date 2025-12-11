@@ -171,19 +171,37 @@ fun BottomMenu(
                             backgroundColor = MaterialTheme.colorScheme.secondary,
                             enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
                         ) {
-                            exploreViewModel.startRoute()
-                            navigateToScreen(ROUTE_SCREEN_ROUTE)
+                            dialogDataState.value = DialogData(
+                                title = "Start this route?",
+                                text = "If another route is ongoing, it will be overridden.",
+                                confirmLabel = "Start",
+                                onConfirm = {
+                                    exploreViewModel.startRoute()
+                                    navigateToScreen(ROUTE_SCREEN_ROUTE)
+                                },
+                                dismissLabel = "Cancel",
+                                isShowing = mutableStateOf(true)
+                            )
                         }
                         PrimaryButton(
                             text = if (openedRouteId != null) "Update This Saved Route" else "Save This Route For Later",
                             backgroundColor = MaterialTheme.colorScheme.primary,
                             enabled = (exploreViewModel.routeStops.collectAsState().value.isNotEmpty() && exploreViewModel.userLocation.collectAsState().value != null)
                         ) {
-                            if (openedRouteId != null) exploreViewModel.updateSavedRoute(
-                                openedRouteId
+                            dialogDataState.value = DialogData(
+                                title = "Save this route?",
+                                text = "You'll find it on the Saved -screen.",
+                                confirmLabel = "Save",
+                                onConfirm = {
+                                    if (openedRouteId != null) exploreViewModel.updateSavedRoute(
+                                        openedRouteId
+                                    )
+                                    else
+                                        exploreViewModel.saveRoute()
+                                },
+                                dismissLabel = "Cancel",
+                                isShowing = mutableStateOf(true)
                             )
-                            else
-                                exploreViewModel.saveRoute()
                         }
 
                         /** has to be here for composable scope :/ */

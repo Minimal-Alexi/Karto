@@ -150,8 +150,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 routeWithStops.route.startingLatitude,
                 routeWithStops.route.startingLongitude
             )
-            _customLocationText.value =
-                "(placeholder) ${routeWithStops.route.startingLatitude} ${routeWithStops.route.startingLongitude}"
+            _customLocationText.value = "Your Starting Location"
         }
     }
 
