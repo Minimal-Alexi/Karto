@@ -27,16 +27,16 @@ class UnitLabelConvertersUnitTest {
 
     @Test
     fun distanceLabelLessThanKm() {
-        assertEquals("100 m", getDistanceLabel("100"))
-        assertEquals("280 m", getDistanceLabel("280"))
-        assertEquals("1 m", getDistanceLabel("1"))
+        assertEquals("100 m", getDistanceLabel(100))
+        assertEquals("280 m", getDistanceLabel(280))
+        assertEquals("1 m", getDistanceLabel(1))
     }
 
     @Test
     fun distanceLabelMoreThanKm() {
-        assertEquals("1.1 km", getDistanceLabel("1099"))
-        assertEquals("7.2 km", getDistanceLabel("7200"))
-        assertEquals("3.2 km", getDistanceLabel("3150"))
-        assertEquals("3.1 km", getDistanceLabel("3149"))
+        assertEquals("1.1 km", getDistanceLabel(1099))
+        assertEquals("7.2 km", getDistanceLabel(7200))
+        assertEquals("3.2 km", getDistanceLabel(3150))
+        assertEquals("3.1 km", getDistanceLabel(3149))
     }
 }
