@@ -44,15 +44,20 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
 ## Key Features
 
  * Interactive map with pins & route lines
-<img src="./docs/Screenshot_20251208_190725.png" height="500" alt="img1">
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/0fae5403-12ab-463a-a2f4-5aa5ad50b4c7" />
 
  * Route creation by category & distance
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/abe54705-3743-4119-970f-6fda9ee4393c" />
 
  * Route optimization (manual or auto)
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/d62da9bd-1942-45be-8319-bc7edbb12a37" />
 
  * Travel process tracking and arrival notifications
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/98f33cc5-e911-4cfc-b286-d12c44b500cb" />
 
  * Save routes & view history
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/31709c65-4d3d-4372-b024-90a5ce326965" />
+<img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/c0f88877-e885-4c5e-a657-a15bc03ff516" />
 
 ## User Handbook
 1. Choose the type of places you want to visit, then click “Start Route” 
