@@ -13,12 +13,13 @@
     <img src="https://img.shields.io/badge/Kotlin-2.0.20-green.svg"
          alt="Kotlin">
   </a>
-  <a href="https://img.shields.io/badge/Compose-1.7.0-green.svg"><img src="https://img.shields.io/badge/Compose-1.7.0-green.svg"></a>
-  <a href="https://saythanks.io/to/bullredeyes@gmail.com">
-      <img src="https://img.shields.io/badge/SayThanks.io-%E2%98%BC-1EAEDB.svg">
+  <a href="https://img.shields.io/badge/Compose-1.7.0-green.svg">
+    <img src="https://img.shields.io/badge/Compose-1.7.0-green.svg"
+      alt="Compose" 
   </a>
-  <a href="https://www.paypal.me/AmitMerchant">
-    <img src="https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&amp;style=flat">
+  <a href="https://img.shields.io/badge/GoogleMap-green.svg">
+    <img src="https://img.shields.io/badge/GoogleMap-green.svg"
+      alt="Compose" 
   </a>
 </p>
 
