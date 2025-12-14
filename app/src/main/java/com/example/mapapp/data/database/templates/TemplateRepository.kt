@@ -44,6 +44,10 @@ class TemplateRepository(
             templateStopDao.insert(stop.copy(templateId = template.id))
         }
     }
+
+    suspend fun templateExists(templateId: Int): Boolean {
+        return templateDao.getTemplateById(templateId) != null
+    }
 }
 
 data class TemplateWithStops(

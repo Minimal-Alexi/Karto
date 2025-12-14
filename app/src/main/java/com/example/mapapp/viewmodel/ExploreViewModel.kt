@@ -560,4 +560,8 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         _routeTime.value = null
         _routeDistance.value = null
     }
+
+    suspend fun templateExists(templateId: Int): Boolean {
+        return templateRepository.templateExists(templateId)
+    }
 }
