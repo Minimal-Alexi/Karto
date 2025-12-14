@@ -104,8 +104,14 @@ fun ExploreScreen(
 
     LaunchedEffect(openedRouteId) {
         if (openedRouteId != null) {
-            exploreViewModel.loadTemplate(openedRouteId)
-            bottomShowing.value = true
+            val exists = exploreViewModel.templateExists(openedRouteId)
+            if (exists) {
+                exploreViewModel.loadTemplate(openedRouteId)
+                bottomShowing.value = true
+            } else {
+                onResetRoute()
+                exploreViewModel.resetRoute()
+            }
         }
     }
 
