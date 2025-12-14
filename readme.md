@@ -24,23 +24,31 @@
 </p>
 
 <p align="center">
+  <a href="#about">About</a> •
   <a href="#key-features">Key Features</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#download">Download</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#related">Related</a> •
-  <a href="#license">License</a>
+  <a href="#user-handbook">User Handbook</a> •
+  <a href="#how-to-setup">How to setup</a> •
+  <a href="#technical-stack">Technical Stack</a> •
+  <a href="#project-architecture">Project Architecture</a> •
+  <a href="./LICENSE">License</a>
 </p>
 
 
-# Karto
-Karto is a personal travel guide app designed for travelers exploring a location, whether near or abroad.
+## About
 
-It helps users discover points of interest, plan routes, and explore efficiently based on travel time, distance, and category preferences.
+Karto is an Android mobile application built with Kotlin that helps users plan and manage trips in an intuitive and practical way.
+
+The app is designed for travelers exploring new places or familiar cities, allowing them to discover points of interest, plan routes, and explore efficiently based on travel time, distance, and category preferences.
 
 Users can create, save, modify, and track routes, access reviews, mark visited locations, and get AI-powered descriptions for a richer travel experience.
 
 <img height="500" alt="Copilot_20251211_144208" src="https://github.com/user-attachments/assets/e875c3ae-1fe5-4e83-add7-ee47c6357f4f" />
+
+### Authors
+- [Minimal-Alexi](https://github.com/Minimal-Alexi)
+- [Viktoriia-code](https://github.com/Viktoriia-code)
+- [RunzhouZHu](https://github.com/RunzhouZHu)
+- [santten](https://github.com/santten)
 
 ## Key Features
 
@@ -92,7 +100,7 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
 2. Install the app to yout phone
 3. Done, happy travelling! 
 
-## Technical Stack Overview
+## Technical Stack
 | Module / Library  | Purpose  | Used Place  | Descriptions |
 |:----:|:----:|------| ------| 
 | Google Map Compose  | Map displacement  | ExploreScreen, RouteScreen  |  |
