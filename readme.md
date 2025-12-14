@@ -97,14 +97,19 @@ Users can create, save, modify, and track routes, access reviews, mark visited l
 |:----:|:----:|------| ------| 
 | Google Map Compose  | Map displacement  | ExploreScreen, RouteScreen  |  |
 | Google route Api  | Fetch route info  | RouteApiService  |  |
-| Google Map route matrix Api  |  |  |  |
-| Location and Context  |  |  |  |
-| Places  |  |  |  |
-| Retrofit  |  |  |  |
-| OkHttp3  |  |  |  |
-| Junit  |  |  |  |
-| Androidx room  |  |  |  |
-| Google geo coding  |  |  |  |
+| Google Map route matrix Api  | Fetch route matrix | RouteMatrixService  | Get route info between multiple places  |
+| Location and Context  | Get the User location from GPS | DefaultLocationClient  |  |
+| Places  | Get place info | PlaceApiService  |  |
+| Retrofit  | Handle http calls | NetworkService  |  |
+| OkHttp3  | Handle http calls | NetworkService  |  |
+| Junit  | Unit test | AndroidTest  |  |
+| Androidx room  | Database management | KartoDatabase  |  |
+| Google geo coding  | Place info conversion | GeocodingApi  | Convert address and latitude longitude coordinates |
 
 ## Project Architecture
+### 1. Structure Disgram
 <img width="1001" height="642" alt="karto drawio" src="https://github.com/user-attachments/assets/c825d2df-f7c5-4c73-bc9e-f88d7655adb6" />
+
+### 2. Database Architecture
+The app uses Room entities and repositories to manage single-user data and multiple route and template records. Data is accessed reactively through Flow, with suspend functions for reading and writing. Additional data classes were created to structure combined or computed results for easier database responses.
+<img width="885" height="657" alt="1dec75d6ea927cb6c96aaa5bb8cab8b1" src="https://github.com/user-attachments/assets/ae2c3165-647a-4bf3-bb40-2e6e6a876544" />
