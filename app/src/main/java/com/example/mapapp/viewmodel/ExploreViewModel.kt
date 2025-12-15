@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mapapp.KartoApplication
@@ -26,15 +25,10 @@ import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
 import com.example.mapapp.data.network.PlacesApi
-import com.example.mapapp.data.model.RouteMatrixRequest
-import com.example.mapapp.data.model.RouteMatrixResponse
 import com.example.mapapp.data.model.WayPoint
-import com.example.mapapp.data.network.RouteMatrixApi
-import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.SecretsHolder
-import com.example.mapapp.utils.TravelRoute
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
