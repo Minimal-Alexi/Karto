@@ -44,13 +44,12 @@ import com.example.mapapp.ui.components.ConfirmationModal
 import com.example.mapapp.ui.components.DistanceSlider
 import com.example.mapapp.ui.components.PlaceTypeSelector
 import com.example.mapapp.ui.components.Placeholder
-import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.TopMenu
 import com.example.mapapp.ui.components.buttons.PrimaryButton
 import com.example.mapapp.ui.components.map.MapPlaceInfoCard
 import com.example.mapapp.ui.components.map.MapPolyline
+import com.example.mapapp.ui.components.map.MapRouteStopInfoCard
 import com.example.mapapp.ui.components.route.StartingLocationSelector
-import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil

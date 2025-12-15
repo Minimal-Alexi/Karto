@@ -4,7 +4,6 @@ package com.example.mapapp.data.model
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class TravelModes(val mode: String, val icon: ImageVector){

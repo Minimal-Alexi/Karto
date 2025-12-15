@@ -13,8 +13,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mapapp.ui.components.BottomBar
-import com.example.mapapp.ui.screens.HomeScreen
 import com.example.mapapp.ui.screens.ExploreScreen
+import com.example.mapapp.ui.screens.HomeScreen
 import com.example.mapapp.ui.screens.LocationScreen
 import com.example.mapapp.ui.screens.RouteScreen
 import com.example.mapapp.ui.screens.SavedScreen

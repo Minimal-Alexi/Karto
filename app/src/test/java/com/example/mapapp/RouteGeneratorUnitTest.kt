@@ -2,9 +2,10 @@ package com.example.mapapp
 
 import com.example.mapapp.utils.RouteGenerator
 import com.example.mapapp.utils.TravelRoute
-
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).

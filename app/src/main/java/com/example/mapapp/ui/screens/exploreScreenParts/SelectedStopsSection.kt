@@ -12,14 +12,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.data.model.Place
+import com.example.mapapp.ui.components.Placeholder
 import com.example.mapapp.ui.components.SelectedStopItem
 import com.example.mapapp.ui.components.route.StartingLocationCard
+import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.getDistanceLabel
 import com.example.mapapp.utils.getTimeLabel
 import com.example.mapapp.utils.route.ExploreViewModelRouteUtil
 import com.example.mapapp.viewmodel.ExploreViewModel
-import com.example.mapapp.ui.components.Placeholder
-import com.example.mapapp.utils.DialogData
 
 
 @Composable

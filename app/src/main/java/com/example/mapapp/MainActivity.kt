@@ -15,8 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapapp.navigation.NavGraph
 import com.example.mapapp.ui.theme.MapAppTheme
 import com.example.mapapp.utils.SecretsHolder
-import com.google.android.libraries.places.api.Places
 import com.example.mapapp.viewmodel.ThemeViewModel
+import com.google.android.libraries.places.api.Places
 
 class MainActivity : ComponentActivity() {
 

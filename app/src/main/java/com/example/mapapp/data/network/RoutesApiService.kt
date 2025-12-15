@@ -1,9 +1,8 @@
 package com.example.mapapp.data.network
 
-import com.example.mapapp.BuildConfig
-import com.example.mapapp.data.model.*
+import com.example.mapapp.data.model.RoutesRequest
+import com.example.mapapp.data.model.RoutesResponse
 import com.example.mapapp.utils.SecretsHolder
-
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.Headers

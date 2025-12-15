@@ -1,7 +1,6 @@
 package com.example.mapapp.utils
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 
 data class DialogData(

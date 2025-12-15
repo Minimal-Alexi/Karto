@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mapapp.R
-import com.example.mapapp.ui.components.buttons.SecondaryButton
 import com.example.mapapp.data.database.templates.TemplateWithStopCount
+import com.example.mapapp.ui.components.buttons.SecondaryButton
 
 @Composable
 fun SavedRouteCard(

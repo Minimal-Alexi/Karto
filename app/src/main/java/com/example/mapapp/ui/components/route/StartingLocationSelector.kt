@@ -33,11 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mapapp.viewmodel.ExploreViewModel
 import com.example.mapapp.viewmodel.PredictionViewModel
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
 
 @Composable
 fun StartingLocationSelector(nullifyCustomLocation: () -> Unit,

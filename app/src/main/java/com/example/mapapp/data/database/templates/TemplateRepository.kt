@@ -1,6 +1,5 @@
 package com.example.mapapp.data.database.templates
 
-import com.example.mapapp.data.database.route_stops.RouteStopEntity
 import com.example.mapapp.data.database.template_stops.TemplateStopDao
 import com.example.mapapp.data.database.template_stops.TemplateStopEntity
 import kotlinx.coroutines.flow.Flow

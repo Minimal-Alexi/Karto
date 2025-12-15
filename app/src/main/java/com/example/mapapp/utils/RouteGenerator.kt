@@ -1,7 +1,5 @@
 package com.example.mapapp.utils
 
-import java.lang.Exception
-
 class UnreachableNodeException(message:String) : Exception(message)
 
 data class TravelRoute(

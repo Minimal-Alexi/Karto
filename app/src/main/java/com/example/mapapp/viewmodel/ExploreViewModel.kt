@@ -24,8 +24,8 @@ import com.example.mapapp.data.model.RouteLocation
 import com.example.mapapp.data.model.RoutesRequest
 import com.example.mapapp.data.model.TravelModes
 import com.example.mapapp.data.model.TypesOfPlaces
-import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.data.model.WayPoint
+import com.example.mapapp.data.network.PlacesApi
 import com.example.mapapp.data.network.RoutesApi
 import com.example.mapapp.utils.DialogData
 import com.example.mapapp.utils.SecretsHolder

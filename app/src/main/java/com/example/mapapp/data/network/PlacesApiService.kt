@@ -1,7 +1,8 @@
 package com.example.mapapp.data.network
 
-import androidx.room.Query
-import com.example.mapapp.data.model.*
+import com.example.mapapp.data.model.PlaceDetailsResponse
+import com.example.mapapp.data.model.PlacesRequest
+import com.example.mapapp.data.model.PlacesResponse
 import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
