@@ -305,40 +305,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
         return waypoints
     }
 
-    private val _routeMatrixResponse = MutableStateFlow<RouteMatrixResponse?>(null)
-    val routeMatrixResponse: StateFlow<RouteMatrixResponse?> = _routeMatrixResponse
-
-    suspend fun fetchRouteMatrix() {
-        Log.d("AAA", "Fetching route matrix...")
-
-        try {
-            val request = RouteMatrixRequest(
-                origins = getWayPoints(),
-                destinations = getWayPoints(),
-                travelMode = _travelMode.value.mode
-            )
-
-            Log.d("AAA", "Route matrix request: $request")
-
-            val responseList = RouteMatrixApi.service.computeRouteMatrix(
-                request,
-                fieldMask = "originIndex,destinationIndex,duration,distanceMeters,status,condition"
-            )
-
-            Log.d("AAA", "Route matrix response: $responseList")
-
-            _routeMatrixResponse.value = RouteMatrixResponse(element = responseList)
-
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-
-    private val _generatedRoute = MutableStateFlow<TravelRoute?>(null)
-    val generatedRoute: StateFlow<TravelRoute?> = _generatedRoute
-
     /**
      * Code of route polyline is above
      */
