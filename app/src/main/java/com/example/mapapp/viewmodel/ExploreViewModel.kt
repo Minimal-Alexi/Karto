@@ -171,7 +171,7 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
                 Log.d(null, "Route was generated: $selectedPlaces")
             }
             else{
-                // TODO: Throw warning.
+                Log.d(null,"Route could not be generated.")
             }
         }
     }
