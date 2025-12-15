@@ -96,7 +96,6 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel(),generateRoute:(TypesOf
             homeViewModel::setCustomLocationText,
             generateRoute,
             typeOfPlaceToVisit,
-            /* TODO:Extremely unsafe if the user clicks the button before initialization. But this will do.*/
             customLocation?:userCoordinates?: LatLng(0.0,0.0))
         SuggestionsSection(suggestionCardNumbers,suggestionsIdMap,navigateToLocationScreen,location)
         Spacer(modifier = Modifier.height(0.dp))
