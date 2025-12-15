@@ -34,7 +34,6 @@ class RouteRepository(
     }
 
     suspend fun startRoute(route: RouteEntity, stops: List<RouteStopEntity>) {
-        // TODO: put this behavior behind a disclaimer window
         val id = routeDao.insertRoute(route.copy()).toInt()
 
         stops.forEach { stop ->
