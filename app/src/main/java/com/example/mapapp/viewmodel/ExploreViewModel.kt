@@ -339,69 +339,6 @@ class ExploreViewModel(application: Application) : AndroidViewModel(application)
     private val _generatedRoute = MutableStateFlow<TravelRoute?>(null)
     val generatedRoute: StateFlow<TravelRoute?> = _generatedRoute
 
-    fun getTravelCostMatrix(routeMatrixResponse: MutableStateFlow<RouteMatrixResponse?>) {
-        val index = 1 + _routeStops.value.size
-        val matrix: Array<Array<Int>> = Array(index) { Array(index) { 0 } }
-
-        for (item in routeMatrixResponse.value!!.element) {
-            matrix[item.originIndex][item.destinationIndex] = item.distanceMeters
-        }
-
-        for (item in matrix) {
-            Log.d("AAA", item.contentToString())
-        }
-        val routeGenerator = RouteGenerator()
-        val generateRouteGreedy = routeGenerator.generateRoute(matrix)
-        _generatedRoute.value = generateRouteGreedy
-    }
-
-    fun runMatrixFlow() {
-        viewModelScope.launch {
-            if (_userLocation.value == null) {
-                Log.e("AAA", "Aborting: User location is null. Please wait for GPS.")
-            } else if (_routeStops.value.isEmpty()) {
-                Log.w(
-                    "AAA",
-                    "Warning: No stops added, calculating matrix only for current location?"
-                )
-
-                _routePolyline.value = ""
-            } else {
-                fetchRouteMatrix()
-                Log.d("AAA", "Matrix fetch success!")
-                getTravelCostMatrix(_routeMatrixResponse)
-
-                // Get polyline
-                val origin: RouteLatLng =
-                    _userLocation.value!!.let { RouteLatLng(it.latitude, it.longitude) }
-
-                val sortedRouteStops: MutableList<Place> = mutableListOf()
-
-                for (i in _generatedRoute.value!!.travelPath.drop(1)) {
-                    sortedRouteStops.add(_routeStops.value[i - 1])
-                }
-                _routeStops.value = sortedRouteStops
-
-                val destinationPlace = _routeStops.value.last()
-
-                val destination: RouteLatLng =
-                    RouteLatLng(
-                        destinationPlace.location.latitude,
-                        destinationPlace.location.longitude
-                    )
-
-                val intermediate: MutableList<RouteLatLng> = mutableListOf()
-
-                for (place in _routeStops.value) {
-                    intermediate.add(RouteLatLng(place.location.latitude, place.location.longitude))
-                }
-
-                fetchRoute(origin, destination, intermediate)
-            }
-        }
-    }
-
-
     /**
      * Code of route polyline is above
      */
